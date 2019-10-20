@@ -6,21 +6,24 @@ import (
 
 	. "github.com/getsumio/getsum/internal/algorithm"
 	. "github.com/getsumio/getsum/internal/algorithm/supplier"
+	parser "github.com/getsumio/getsum/internal/config"
 	"github.com/getsumio/getsum/internal/logger"
 	. "github.com/getsumio/getsum/internal/providers"
 )
 
 func main() {
-	logger.Debug("test")
-	logger.Level = logger.LevelError
-	logger.Debug("test2")
-	logger.Level = logger.LevelTrace
-	logger.Trace("Application started")
-	logger.Debug("Fetching configuration file")
-	logger.Info("Configuration content: asdsad")
-	logger.Warn("There are unrecognized settings on config ignoring")
-	logger.Error("Config supplier is required!!!")
+	//logger.Debug("test")
+	//logger.Level = logger.LevelError
+	//logger.Debug("test2")
+	//logger.Level = logger.LevelTrace
+	//logger.Trace("Application started")
+	//logger.Debug("Fetching configuration file")
+	//logger.Info("Configuration content: asdsad")
+	//logger.Warn("There are unrecognized settings on config ignoring")
+	//logger.Error("Config supplier is required!!!")
 
+	config := parser.ParseConfig()
+	logger.Info("%s", *config.LocalOnly)
 	list := []Provider{}
 	for i := 0; i < 5; i++ {
 		l := new(LocalProvider)
@@ -29,11 +32,6 @@ func main() {
 		l.Supplier = s
 		l.Name = fmt.Sprintf("local-pc%d", i)
 		list = append(list, l)
-	}
-
-	for _, i := range list {
-
-		logger.Info(i.Data().Name)
 	}
 
 	logger.Header(list)

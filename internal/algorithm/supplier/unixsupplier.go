@@ -17,10 +17,10 @@ func (s *UnixSupplier) Run() error {
 		for {
 			select {
 			case <-t:
-				s.status = &Status{"TIMEOUT", fmt.Sprintf("%d%%", i)}
+				s.status = &Status{"FINISH", fmt.Sprintf("%d%%", i)}
 				return
 			default:
-				i++
+				i += 5
 				val := fmt.Sprintf("%d%%", i)
 				s.status = &Status{"RUNNING", val}
 				time.Sleep(time.Second)
