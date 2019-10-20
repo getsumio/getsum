@@ -53,7 +53,7 @@ func Header(providers []Provider) {
 	var second string
 	for _, p := range providers {
 		first = fmt.Sprintf("%s%s%s%s", first, PADDING, color.Bold(color.BgMagenta(color.Yellow(p.Data().Name))), PADDING)
-		second = fmt.Sprintf("%s\t%s\t%s\t", second, "Status", "Value")
+		second = fmt.Sprintf("%s%s\t\t%s\t", second, "Status", "Value")
 	}
 	fmt.Printf("%s\n", first)
 	fmt.Printf("%s\n", second)
