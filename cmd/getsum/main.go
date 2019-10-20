@@ -3,7 +3,6 @@ package main
 
 import (
 	"fmt"
-	"time"
 
 	. "github.com/getsumio/getsum/internal/algorithm"
 	. "github.com/getsumio/getsum/internal/algorithm/supplier"
@@ -39,14 +38,34 @@ func main() {
 
 	logger.Header(list)
 
-	for i := 0; i < 10; i++ {
-		for _, p := range list {
-			p.Data().Value = fmt.Sprintf("%d%%", i*10)
-			p.Run()
-			//logger.Inplace("Processing %d %s", i, sum)
+	quit := make(chan bool)
+	wait := make(chan bool)
+	chans := []<-chan *Status{}
+	for _, p := range list {
+		chans = append(chans, p.Run(quit, wait))
+	}
+	var anyRunner bool = true
+	for anyRunner {
+		anyRunner = false
+		stats := []*Status{}
+		for _, c := range chans {
+			if c == nil {
+				logger.Error("channel is nil!")
+			}
+			s := <-c
+			if s.Status == "RUNNING" || s.Status == "STARTED" {
+				anyRunner = true
+			}
+
+			stats = append(stats, s)
+
 		}
-		logger.Status(list)
-		time.Sleep(time.Second)
+		if anyRunner {
+			wait <- true
+		} else {
+			quit <- true
+		}
+		logger.Status(stats)
 	}
 
 }

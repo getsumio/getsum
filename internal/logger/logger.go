@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	. "github.com/getsumio/getsum/internal/algorithm/supplier"
 	. "github.com/getsumio/getsum/internal/providers"
 
 	color "github.com/logrusorgru/aurora"
@@ -53,7 +54,7 @@ func Header(providers []Provider) {
 	var second string
 	for _, p := range providers {
 		first = fmt.Sprintf("%s%s%s%s", first, PADDING, color.Bold(color.BgMagenta(color.Yellow(p.Data().Name))), PADDING)
-		second = fmt.Sprintf("%s%s\t\t%s\t", second, "Status", "Value")
+		second = fmt.Sprintf("%s%s\t\t%s|\t", second, "Status", "Value")
 	}
 	fmt.Printf("%s\n", first)
 	fmt.Printf("%s\n", second)
@@ -69,10 +70,10 @@ func Info(msg string, params ...interface{}) {
 	}
 }
 
-func Status(providers []Provider) {
+func Status(stats []*Status) {
 	var msg string
-	for _, p := range providers {
-		msg = fmt.Sprintf("%s%s\t%s\t", msg, p.Data().Status, p.Data().Value)
+	for _, s := range stats {
+		msg = fmt.Sprintf("%s%s\t\t%s\t", msg, s.Status, s.Value)
 	}
 	fmt.Printf("%s\r", msg)
 }

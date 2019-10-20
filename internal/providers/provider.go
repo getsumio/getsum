@@ -7,7 +7,7 @@ import (
 type Provider interface {
 	Close()
 	Data() *BaseProvider
-	Run() (string, error)
+	Run(quit <-chan bool, wait <-chan bool) <-chan *Status
 }
 
 type BaseProvider struct {
