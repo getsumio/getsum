@@ -9,10 +9,10 @@ import (
 	parser "github.com/getsumio/getsum/internal/config"
 	"github.com/getsumio/getsum/internal/logger"
 	. "github.com/getsumio/getsum/internal/providers"
+	validator "github.com/getsumio/getsum/internal/validation"
 )
 
 func main() {
-	//logger.Debug("test")
 	//logger.Level = logger.LevelError
 	//logger.Debug("test2")
 	//logger.Level = logger.LevelTrace
@@ -23,9 +23,9 @@ func main() {
 	//logger.Error("Config supplier is required!!!")
 
 	config := parser.ParseConfig()
-	logger.Info("%s", *config.LocalOnly)
+	validator.ValidateConfig(config)
 	list := []Provider{}
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 1; i++ {
 		l := new(LocalProvider)
 		s := new(UnixSupplier)
 		s.Algorithm = SHA3
