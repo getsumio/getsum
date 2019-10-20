@@ -13,19 +13,10 @@ import (
 )
 
 func main() {
-	//logger.Level = logger.LevelError
-	//logger.Debug("test2")
-	//logger.Level = logger.LevelTrace
-	//logger.Trace("Application started")
-	//logger.Debug("Fetching configuration file")
-	//logger.Info("Configuration content: asdsad")
-	//logger.Warn("There are unrecognized settings on config ignoring")
-	//logger.Error("Config supplier is required!!!")
-
 	config := parser.ParseConfig()
 	validator.ValidateConfig(config)
 	list := []Provider{}
-	for i := 0; i < 1; i++ {
+	for i := 0; i < 6; i++ {
 		l := new(LocalProvider)
 		s := new(UnixSupplier)
 		s.Algorithm = SHA3
