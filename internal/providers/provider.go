@@ -11,12 +11,10 @@ type Provider interface {
 }
 
 type BaseProvider struct {
-	Status   string
-	Value    string
 	Name     string
-	Address  string
-	Zone     string
-	Proxy    string
+	Address  *string
+	Zone     *string
+	Proxy    *string
 	Type     ProviderType
 	Supplier Supplier
 }

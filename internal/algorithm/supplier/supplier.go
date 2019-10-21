@@ -7,7 +7,7 @@ type Supplier interface {
 }
 
 type BaseSupplier struct {
-	Algorithm int
+	Algorithm string
 	status    *Status
 }
 

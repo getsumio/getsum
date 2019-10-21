@@ -17,7 +17,7 @@ func (s *UnixSupplier) Run() error {
 		for {
 			select {
 			case <-t:
-				s.status = &Status{"FINISHED", fmt.Sprintf("%d%%", i)}
+				s.status = &Status{"COMPLETED", fmt.Sprintf("%d%%", i)}
 				return
 			default:
 				i += 5

@@ -11,7 +11,6 @@ type LocalProvider struct {
 }
 
 func (l *LocalProvider) Run(quit <-chan bool, wait <-chan bool) <-chan *Status {
-	l.Status = "STARTED"
 	defer complete(l)
 	statusChannel := make(chan *Status)
 	l.Supplier.Run()
@@ -42,5 +41,4 @@ func (l *LocalProvider) Close() {
 }
 
 func complete(l *LocalProvider) {
-	l.Status = "COMPLETED"
 }

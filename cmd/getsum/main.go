@@ -2,9 +2,6 @@
 package main
 
 import (
-	"fmt"
-
-	. "github.com/getsumio/getsum/internal/algorithm"
 	. "github.com/getsumio/getsum/internal/algorithm/supplier"
 	parser "github.com/getsumio/getsum/internal/config"
 	"github.com/getsumio/getsum/internal/logger"
@@ -15,22 +12,15 @@ import (
 func main() {
 	config := parser.ParseConfig()
 	validator.ValidateConfig(config)
-	list := []Provider{}
-	for i := 0; i < 6; i++ {
-		l := new(LocalProvider)
-		s := new(UnixSupplier)
-		s.Algorithm = SHA3
-		l.Supplier = s
-		l.Name = fmt.Sprintf("local-pc%d", i)
-		list = append(list, l)
-	}
+	var factory IProviderFactory = new(ProviderFactory)
+	var providers []Provider = factory.GetProviders(config)
 
-	logger.Header(list)
+	logger.Header(providers)
 
 	quit := make(chan bool)
 	wait := make(chan bool)
 	chans := []<-chan *Status{}
-	for _, p := range list {
+	for _, p := range providers {
 		chans = append(chans, p.Run(quit, wait))
 	}
 	var anyRunner bool = true

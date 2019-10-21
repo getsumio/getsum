@@ -1,4 +1,4 @@
-package algorithm
+package supplier
 
 type Algorithm int
 
