@@ -23,6 +23,7 @@ func (p *ProviderFactory) GetProviders(config *Config) []Provider {
 		l.Supplier = supplier
 		l.Name = fmt.Sprintf("local-pc%d", i)
 		l.Proxy = config.Proxy
+		l.File = config.File
 		l.Type = Local
 		list = append(list, l)
 	}

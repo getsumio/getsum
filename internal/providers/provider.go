@@ -15,6 +15,7 @@ type BaseProvider struct {
 	Address  *string
 	Zone     *string
 	Proxy    *string
+	File     *string
 	Type     ProviderType
 	Supplier Supplier
 }
