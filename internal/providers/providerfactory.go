@@ -15,12 +15,11 @@ type ProviderFactory struct {
 }
 
 func (p *ProviderFactory) GetProviders(config *Config) []Provider {
-	factory := new(SupplierFactory)
-	supplier := factory.GetSupplier(config)
+	var factory ISupplierFactory = new(SupplierFactory)
 	list := []Provider{}
 	for i := 0; i < 6; i++ {
 		l := &LocalProvider{}
-		l.Supplier = supplier
+		l.Supplier = factory.GetSupplier(config)
 		l.Name = fmt.Sprintf("local-pc%d", i)
 		l.Proxy = config.Proxy
 		l.File = config.File

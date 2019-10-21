@@ -13,7 +13,7 @@ type LocalProvider struct {
 func (l *LocalProvider) Run(quit <-chan bool, wait <-chan bool) <-chan *Status {
 	defer complete(l)
 	statusChannel := make(chan *Status)
-	l.Supplier.Run()
+	go l.Supplier.Run()
 	go func() {
 		for {
 			select {
@@ -23,7 +23,8 @@ func (l *LocalProvider) Run(quit <-chan bool, wait <-chan bool) <-chan *Status {
 				complete(l)
 				return
 			default:
-				statusChannel <- l.Supplier.Status()
+				stat := l.Supplier.Status()
+				statusChannel <- stat
 				time.Sleep(500 * time.Millisecond)
 
 			}

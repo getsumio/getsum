@@ -15,6 +15,9 @@ func (factory *SupplierFactory) GetSupplier(config *Config) Supplier {
 
 	s := &UnixSupplier{}
 	s.Algorithm = *config.Algorithm
+	s.File = *config.File
+	s.TimeOut = *config.Timeout
+	s.status = &Status{"PREPARED", "", ""}
 	return s
 
 }

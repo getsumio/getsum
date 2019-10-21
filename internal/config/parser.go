@@ -19,7 +19,15 @@ func ParseConfig() *Config {
 	c.Validate = flag.Bool("v", true, "Cross validates each calculated checksums, if any of checksum not matches doesnt download file with error output")
 	c.Download = flag.Bool("download", true, "If all checksums are matches download file into current path, set false if you just want to retrieve file, if local allowed file still be downloaded")
 	c.Download = flag.Bool("d", true, "If all checksums are matches download file into current path, set false if you just want to retrieve file, if local allowed file still be downloaded")
-
+	c.Timeout = flag.Int("timeout", 60, "Timeout in secounds for each running calculation")
+	c.Timeout = flag.Int("t", 60, "Timeout in secounds for each running calculation")
+	c.File = flag.String("file", "", "File to calculate checksum supported protocols file http https ftp")
+	c.File = flag.String("f", "", "File to calculate checksum supported protocols file http https ftp")
 	flag.Parse()
+	args := flag.Args()
+	if args != nil || len(args) > 0 || args[0] != "" {
+		c.File = &args[0]
+	}
+
 	return c
 }

@@ -9,9 +9,12 @@ type Supplier interface {
 type BaseSupplier struct {
 	Algorithm string
 	status    *Status
+	File      string
+	TimeOut   int
 }
 
 type Status struct {
-	Status string
-	Value  string
+	Status   string
+	Value    string
+	Checksum string
 }

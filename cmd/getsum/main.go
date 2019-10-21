@@ -44,5 +44,6 @@ func main() {
 		}
 		logger.Status(stats)
 	}
+	logger.Logsum(providers, stats)
 
 }

@@ -12,4 +12,5 @@ type Config struct {
 	LogLevel     *string
 	Validate     *bool
 	Download     *bool
+	Timeout      *int
 }
