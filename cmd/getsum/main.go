@@ -19,24 +19,22 @@ func main() {
 
 	quit := make(chan bool)
 	wait := make(chan bool)
-	chans := []<-chan *Status{}
-	for _, p := range providers {
-		chans = append(chans, p.Run(quit, wait))
+	length := len(providers)
+	chans := make([]<-chan *Status, length)
+	for i := 0; i < length; i++ {
+		chans[i] = providers[i].Run(quit, wait)
 	}
 	var anyRunner bool = true
+	stats := make([]*Status, length)
 	for anyRunner {
 		anyRunner = false
-		stats := []*Status{}
-		for _, c := range chans {
-			if c == nil {
-				logger.Error("channel is nil!")
-			}
-			s := <-c
+		for i := 0; i < length; i++ {
+			s := <-chans[i]
 			if s.Status == "RUNNING" || s.Status == "STARTED" {
 				anyRunner = true
 			}
 
-			stats = append(stats, s)
+			stats[i] = s
 
 		}
 		if anyRunner {
