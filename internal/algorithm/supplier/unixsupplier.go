@@ -36,8 +36,7 @@ var quit chan bool
 func (s *UnixSupplier) Run() error {
 
 	tStart := time.Now()
-	stat := &Status{"STARTED", "", ""}
-	s.status = stat
+	s.status.Status = "STARTED"
 	t := time.After(time.Duration(s.TimeOut) * time.Second)
 	quit = make(chan bool)
 	status := make(chan string)
@@ -47,25 +46,22 @@ func (s *UnixSupplier) Run() error {
 		case <-t:
 			tEnd := time.Now()
 			took := tEnd.Sub(tStart)
-			stat.Status = "TIMEDOUT"
-			stat.Value = fmt.Sprintf("%dms", took.Milliseconds())
-			s.status = stat
+			s.status.Status = "TIMEDOUT"
+			s.status.Value = fmt.Sprintf("%dms", took.Milliseconds())
 			quit <- true
 			return nil
 		case val := <-status:
 			tEnd := time.Now()
 			took := tEnd.Sub(tStart)
-			stat.Status = "COMPLETED"
-			stat.Value = fmt.Sprintf("%dms", took.Milliseconds())
-			stat.Checksum = val
-			s.status = stat
+			s.status.Status = "COMPLETED"
+			s.status.Value = fmt.Sprintf("%dms", took.Milliseconds())
+			s.status.Checksum = val
 			return nil
 		default:
 			tEnd := time.Now()
 			took := tEnd.Sub(tStart)
-			stat.Status = "RUNNING"
-			stat.Value = fmt.Sprintf("%dms", took.Milliseconds())
-			s.status = stat
+			s.status.Status = "RUNNING"
+			s.status.Value = fmt.Sprintf("%dms", took.Milliseconds())
 			time.Sleep(15 * time.Millisecond)
 		}
 	}
