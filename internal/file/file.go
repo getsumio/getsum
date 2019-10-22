@@ -9,12 +9,13 @@ import (
 	"path"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type IFile interface {
 	Path() string
 	Data() ([]byte, error)
-	Fetch() error
+	Fetch(timeout int) error
 	IsRemote() bool
 }
 
@@ -48,7 +49,7 @@ func (f *File) Data() ([]byte, error) {
 
 }
 
-func (f *File) Fetch() error {
+func (f *File) Fetch(timeout int) error {
 	err := validateUrl(f)
 	if err != nil {
 		return err
@@ -57,14 +58,14 @@ func (f *File) Fetch() error {
 	if !isRemote {
 		return fetchLocal(f)
 	} else {
-		return fetchRemote(f)
+		return fetchRemote(f, timeout)
 	}
 	f.Status = "FETCHED"
 
 	return nil
 }
 
-func fetchRemote(f *File) error {
+func fetchRemote(f *File, timeout int) error {
 
 	err := validateRemote(f)
 	if err != nil {
@@ -93,7 +94,11 @@ func fetchRemote(f *File) error {
 	quit := make(chan bool)
 	go downloadFile(quit, f)
 
-	resp, err := http.Get(f.Url)
+	client := http.Client{
+		Timeout: time.Duration(timeout) * time.Second,
+	}
+
+	resp, err := client.Get(f.Url)
 	if err != nil {
 		return err
 	}
