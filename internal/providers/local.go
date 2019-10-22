@@ -25,7 +25,7 @@ func (l *LocalProvider) Run(quit <-chan bool, wait <-chan bool) <-chan *Status {
 			default:
 				stat := l.Supplier.Status()
 				statusChannel <- stat
-				time.Sleep(500 * time.Millisecond)
+				time.Sleep(50 * time.Millisecond)
 
 			}
 		}

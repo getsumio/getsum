@@ -54,7 +54,7 @@ func Header(providers []Provider) {
 	var second string
 	for _, p := range providers {
 		first = fmt.Sprintf("%s%s%s%s", first, PADDING, color.Bold(color.Italic(color.BrightCyan(color.Underline(p.Data().Name)))), PADDING)
-		second = fmt.Sprintf("%s%10s\t%5s |\t", second, "Status", "Value")
+		second = fmt.Sprintf("%s%10s\t%6s | ", second, "Status", "Value")
 	}
 	fmt.Printf("%s\n", first)
 	fmt.Printf("%s\n", second)
@@ -72,7 +72,17 @@ func Info(msg string, params ...interface{}) {
 func Logsum(providers []Provider, stats []*Status) {
 	fmt.Println("\n\n")
 	for i, s := range stats {
-		fmt.Printf("\t%s %s %s", color.Bold(color.BrightYellow("\u2713")), color.Bold(color.Blue(providers[i].Data().Name)), s.Checksum)
+		var c color.Value
+		var val string
+
+		if s.Status == "COMPLETED" {
+			c = color.Bold(color.BrightYellow("\u2713"))
+			val = s.Checksum
+		} else {
+			c = color.Bold(color.Red("x"))
+			val = fmt.Sprintf("%s - %s\n", s.Status, s.Value)
+		}
+		fmt.Printf("\t%s %s %s", c, color.Bold(color.Blue(providers[i].Data().Name)), val)
 	}
 }
 
@@ -80,8 +90,12 @@ func Status(stats []*Status) {
 	var msg string
 	for _, s := range stats {
 		var v color.Value
+		var val string
 		switch s.Status {
-		case "TERMINATED", "TIMEDOUT", "ERROR":
+		case "TERMINATED", "TIMEDOUT":
+			v = color.Red(s.Status)
+			val = s.Value
+		case "ERROR":
 			v = color.Red(s.Status)
 		case "PREPARED":
 			v = color.Cyan(s.Status)
@@ -89,8 +103,9 @@ func Status(stats []*Status) {
 			v = color.Blink(s.Status)
 		default:
 			v = color.Green(s.Status)
+			val = s.Value
 		}
-		msg = fmt.Sprintf("%s%10s\t%5s |\t", msg, color.Bold(v), color.Bold(color.Yellow(s.Value)))
+		msg = fmt.Sprintf("%s%10s\t%6s | ", msg, color.Bold(v), color.Bold(color.Yellow(val)))
 	}
 	fmt.Printf("%s\r", msg)
 }

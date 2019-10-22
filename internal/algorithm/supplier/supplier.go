@@ -1,15 +1,19 @@
 package supplier
 
+import (
+	"github.com/getsumio/getsum/internal/file"
+)
+
 type Supplier interface {
-	Run() error
+	Run()
 	Status() *Status
-	Terminate() error
+	Terminate()
 }
 
 type BaseSupplier struct {
 	Algorithm string
 	status    *Status
-	File      string
+	File      *file.File
 	TimeOut   int
 }
 
