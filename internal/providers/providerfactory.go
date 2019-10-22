@@ -17,7 +17,7 @@ type ProviderFactory struct {
 func (p *ProviderFactory) GetProviders(config *Config) []Provider {
 	var factory ISupplierFactory = new(SupplierFactory)
 	list := []Provider{}
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 1; i++ {
 		l := &LocalProvider{}
 		l.Supplier = factory.GetSupplier(config)
 		l.Name = fmt.Sprintf("local-pc%d", i)

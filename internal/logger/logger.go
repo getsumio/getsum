@@ -90,8 +90,12 @@ func Status(stats []*Status) {
 	var msg string
 	for _, s := range stats {
 		var v color.Value
+		var val string
 		switch s.Status {
-		case "TERMINATED", "TIMEDOUT", "ERROR":
+		case "TERMINATED", "TIMEDOUT":
+			v = color.Red(s.Status)
+			val = s.Value
+		case "ERROR":
 			v = color.Red(s.Status)
 		case "PREPARED":
 			v = color.Cyan(s.Status)
@@ -99,8 +103,9 @@ func Status(stats []*Status) {
 			v = color.Blink(s.Status)
 		default:
 			v = color.Green(s.Status)
+			val = s.Value
 		}
-		msg = fmt.Sprintf("%s%10s\t%6s | ", msg, color.Bold(v), color.Bold(color.Yellow(s.Value)))
+		msg = fmt.Sprintf("%s%10s\t%6s | ", msg, color.Bold(v), color.Bold(color.Yellow(val)))
 	}
 	fmt.Printf("%s\r", msg)
 }
