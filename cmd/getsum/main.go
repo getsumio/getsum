@@ -30,7 +30,7 @@ func main() {
 		anyRunner = false
 		for i := 0; i < length; i++ {
 			s := <-chans[i]
-			if s.Status == "PREPARED" || s.Status == "RUNNING" || s.Status == "STARTED" || s.Status == "DOWNLOADING" {
+			if s.Status == "PREPARED" || s.Status == "RUNNING" || s.Status == "STARTED" || s.Status == "DOWNLOAD" {
 				anyRunner = true
 			}
 

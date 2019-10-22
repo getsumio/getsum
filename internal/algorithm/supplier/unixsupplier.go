@@ -35,7 +35,7 @@ var quit chan bool
 
 func (s *UnixSupplier) Run() {
 
-	sVal := "DOWNLOADING"
+	sVal := "DOWNLOAD"
 	s.File.Status = sVal
 	s.status.Status = sVal
 	s.status.Value = "0%"
