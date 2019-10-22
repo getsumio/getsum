@@ -99,6 +99,10 @@ func fetchRemote(f *File) error {
 	}
 	defer resp.Body.Close()
 
+	resp.Header.Set("Connection", "Keep-Alive")
+	resp.Header.Set("Accept-Language", "en-US")
+	resp.Header.Set("User-Agent", "Mozilla/5.0")
+
 	_, err = io.Copy(out, resp.Body)
 	quit <- true
 
