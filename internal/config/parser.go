@@ -29,10 +29,10 @@ func ParseConfig() *Config {
 	flag.Parse()
 	args := flag.Args()
 	if args != nil {
-		if len(args) > 0 || args[0] != "" {
+		if len(args) > 0 && args[0] != "" {
 			c.File = &args[0]
 		}
-		if len(args) > 1 || args[1] != "" {
+		if len(args) > 1 && args[1] != "" {
 			c.Cheksum = &args[1]
 		}
 
