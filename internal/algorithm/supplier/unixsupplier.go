@@ -48,8 +48,8 @@ func (s *UnixSupplier) Run() {
 	}()
 	err := s.File.Fetch(s.TimeOut)
 	if err != nil {
-		s.status.Status = "ERROR"
 		s.status.Value = err.Error()
+		s.status.Status = "ERROR"
 		return
 	}
 

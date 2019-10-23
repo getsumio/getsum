@@ -60,7 +60,6 @@ func (f *File) Fetch(timeout int) error {
 	} else {
 		return fetchRemote(f, timeout)
 	}
-	f.Status = "FETCHED"
 
 	return nil
 }
@@ -86,6 +85,7 @@ func fetchRemote(f *File, timeout int) error {
 	defer header.Body.Close()
 	size, err := strconv.Atoi(header.Header.Get("Content-Length"))
 	if err != nil {
+		f.Status = "ERROR"
 		return err
 	}
 	f.Size = int64(size)
@@ -100,6 +100,7 @@ func fetchRemote(f *File, timeout int) error {
 
 	resp, err := client.Get(f.Url)
 	if err != nil {
+		f.Status = "ERROR"
 		return err
 	}
 	defer resp.Body.Close()
@@ -111,6 +112,7 @@ func fetchRemote(f *File, timeout int) error {
 	_, err = io.Copy(out, resp.Body)
 	quit <- true
 
+	f.Status = "FETCHED"
 	return err
 }
 
@@ -118,9 +120,11 @@ func fetchLocal(f *File) error {
 
 	err := validateLocal(f)
 	if err != nil {
+		f.Status = "ERROR"
 		return err
 	}
 	f.path = f.Url
+	f.Status = "FETCHED"
 	return nil
 
 }
