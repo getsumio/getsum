@@ -73,7 +73,7 @@ func (s *UnixSupplier) Run() {
 			took := tEnd.Sub(tStart)
 			s.status.Status = "COMPLETED"
 			s.status.Value = fmt.Sprintf("%dms", took.Milliseconds())
-			s.status.Checksum = val
+			s.status.Checksum = strings.Fields(val)[0]
 			return
 		default:
 			tEnd := time.Now()

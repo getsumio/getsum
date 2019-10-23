@@ -32,6 +32,7 @@ func main() {
 	var anyRunner bool = true
 	stats := make([]*Status, length)
 	logger.Trace("Starting to watch running processes")
+	hasValidation := *config.Cheksum != ""
 	for anyRunner {
 		anyRunner = false
 		for i := 0; i < length; i++ {
@@ -39,6 +40,11 @@ func main() {
 			logger.Debug("Update value %v from provider", *s)
 			if s.Status == "PREPARED" || s.Status == "RUNNING" || s.Status == "STARTED" || s.Status == "DOWNLOAD" {
 				anyRunner = true
+			} else if hasValidation && s.Status == "COMPLETED" {
+				if s.Checksum != *config.Cheksum {
+					s.Status = "MISMATCH"
+				}
+
 			}
 
 			stats[i] = s

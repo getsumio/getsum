@@ -92,14 +92,20 @@ func Logsum(providers []Provider, stats []*Status) {
 		var c color.Value
 		var val string
 
-		if s.Status == "COMPLETED" {
+		switch s.Status {
+		case "COMPLETED":
 			c = color.Bold(color.BrightYellow("\u2713"))
 			val = s.Checksum
-		} else {
-			c = color.Bold(color.Red("x"))
-			val = fmt.Sprintf("%s - %s\n", s.Status, s.Value)
+		case "MISMATCH":
+			c = color.Bold(color.Red("\u24e7"))
+			val = s.Checksum
+		default:
+			c = color.Bold(color.Red("\u24e7"))
+			val = fmt.Sprintf("%s - %s", s.Status, s.Value)
+
 		}
-		fmt.Printf("\t%s %s %s", c, color.Bold(color.Blue(providers[i].Data().Name)), val)
+
+		fmt.Printf("\t%s %s %s\n", c, color.Bold(color.Blue(providers[i].Data().Name)), val)
 	}
 }
 
@@ -112,7 +118,7 @@ func Status(stats []*Status) {
 		case "TERMINATED", "TIMEDOUT":
 			v = color.Red(s.Status)
 			val = s.Value
-		case "ERROR":
+		case "ERROR", "MISMATCH":
 			v = color.Red(s.Status)
 		case "PREPARED":
 			v = color.Cyan(s.Status)

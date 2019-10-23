@@ -21,13 +21,21 @@ func ParseConfig() *Config {
 	c.Download = flag.Bool("d", true, "If all checksums are matches download file into current path, set false if you just want to retrieve file, if local allowed file still be downloaded")
 	c.Timeout = flag.Int("timeout", 60, "Timeout in secounds for each running calculation")
 	c.Timeout = flag.Int("t", 60, "Timeout in secounds for each running calculation")
-	c.File = flag.String("file", "", "File to calculate checksum supported protocols file http https ftp")
-	c.File = flag.String("f", "", "File to calculate checksum supported protocols file http https ftp")
 	c.All = flag.Bool("all", false, "Run all algorithms (MD5,SHA1 , SHA256 ...) for each running client")
+	var empty string = ""
+	c.File = &empty
+	c.Cheksum = &empty
+
 	flag.Parse()
 	args := flag.Args()
-	if args != nil || len(args) > 0 || args[0] != "" {
-		c.File = &args[0]
+	if args != nil {
+		if len(args) > 0 || args[0] != "" {
+			c.File = &args[0]
+		}
+		if len(args) > 1 || args[1] != "" {
+			c.Cheksum = &args[1]
+		}
+
 	}
 
 	return c
