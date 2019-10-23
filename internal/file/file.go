@@ -66,12 +66,16 @@ func (f *File) Fetch(timeout int) error {
 
 func fetchRemote(f *File, timeout int) error {
 
-	err := validateRemote(f)
+	filename := path.Base(f.Url)
+	_, err := os.Stat(filename)
+	if os.IsExist(err) {
+		return fetchLocal(f)
+	}
+	err = validateRemote(f)
 	if err != nil {
 		return err
 	}
 
-	filename := path.Base(f.Url)
 	out, err := os.Create(filename)
 	if err != nil {
 		return err
@@ -100,6 +104,7 @@ func fetchRemote(f *File, timeout int) error {
 
 	resp, err := client.Get(f.Url)
 	if err != nil {
+		quit <- true
 		f.Status = "ERROR"
 		return err
 	}
