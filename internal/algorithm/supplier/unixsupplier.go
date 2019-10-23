@@ -95,7 +95,7 @@ func (s *UnixSupplier) Terminate() {
 }
 
 func getCommand(s *UnixSupplier) *exec.Cmd {
-	algo := strings.ToLower(s.Algorithm)
+	algo := strings.ToLower(s.Algorithm.Name())
 	strs := []string{algo, "sum"}
 	cmd := strings.Join(strs, "")
 	return exec.Command(cmd, s.File.Path())

@@ -23,6 +23,7 @@ func ParseConfig() *Config {
 	c.Timeout = flag.Int("t", 60, "Timeout in secounds for each running calculation")
 	c.File = flag.String("file", "", "File to calculate checksum supported protocols file http https ftp")
 	c.File = flag.String("f", "", "File to calculate checksum supported protocols file http https ftp")
+	c.All = flag.Bool("all", false, "Run all algorithms (MD5,SHA1 , SHA256 ...) for each running client")
 	flag.Parse()
 	args := flag.Args()
 	if args != nil || len(args) > 0 || args[0] != "" {

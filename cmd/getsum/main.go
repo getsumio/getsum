@@ -12,8 +12,12 @@ import (
 func main() {
 	config := parser.ParseConfig()
 	validator.ValidateConfig(config)
+	logger.SetLevel(*config.LogLevel)
+	logger.Debug("Application  started, using config %v", *config)
+	logger.Trace("Collecting providers")
 	var factory IProviderFactory = new(ProviderFactory)
 	var providers []Provider = factory.GetProviders(config)
+	logger.Debug("providers: %v", providers)
 
 	logger.Header(providers)
 
@@ -21,15 +25,18 @@ func main() {
 	wait := make(chan bool)
 	length := len(providers)
 	chans := make([]<-chan *Status, length)
+	logger.Debug("Running providers, total length: %d", length)
 	for i := 0; i < length; i++ {
 		chans[i] = providers[i].Run(quit, wait)
 	}
 	var anyRunner bool = true
 	stats := make([]*Status, length)
+	logger.Trace("Starting to watch running processes")
 	for anyRunner {
 		anyRunner = false
 		for i := 0; i < length; i++ {
 			s := <-chans[i]
+			logger.Debug("Update value %v from provider", *s)
 			if s.Status == "PREPARED" || s.Status == "RUNNING" || s.Status == "STARTED" || s.Status == "DOWNLOAD" {
 				anyRunner = true
 			}
@@ -45,5 +52,6 @@ func main() {
 		logger.Status(stats)
 	}
 	logger.Logsum(providers, stats)
+	logger.Debug("Application finish")
 
 }

@@ -13,4 +13,5 @@ type Config struct {
 	Validate     *bool
 	Download     *bool
 	Timeout      *int
+	All          *bool
 }

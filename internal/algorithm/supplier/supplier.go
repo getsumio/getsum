@@ -11,7 +11,7 @@ type Supplier interface {
 }
 
 type BaseSupplier struct {
-	Algorithm string
+	Algorithm Algorithm
 	status    *Status
 	File      *file.File
 	TimeOut   int

@@ -31,6 +31,23 @@ const (
 var Level = LevelTrace
 var pending string
 
+func SetLevel(level string) {
+	switch level {
+	case trace:
+		Level = LevelTrace
+	case debug:
+		Level = LevelDebug
+	case info:
+		Level = LevelInfo
+	case warn:
+		Level = LevelWarn
+	case err:
+		Level = LevelError
+	default:
+		log.Fatal("Given log level not understood!")
+	}
+}
+
 func Debug(msg string, params ...interface{}) {
 	if params != nil {
 		msg = fmt.Sprintf(msg, params)
