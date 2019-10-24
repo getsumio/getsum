@@ -69,7 +69,10 @@ func Trace(msg string, params ...interface{}) {
 func Header(providers []Provider) {
 	var first string
 	var second string
-	for _, p := range providers {
+	for i, p := range providers {
+		if i > 6 {
+			break
+		}
 		first = fmt.Sprintf("%s%s%s%s", first, PADDING, color.Bold(color.Italic(color.BrightCyan(color.Underline(p.Data().Name)))), PADDING)
 		second = fmt.Sprintf("%s%10s\t%6s | ", second, "Status", "Value")
 	}
@@ -111,7 +114,12 @@ func Logsum(providers []Provider, stats []*status.Status) {
 
 func Status(stats []*status.Status) {
 	var msg string
-	for _, s := range stats {
+	for i, s := range stats {
+		if i > 6 {
+			diff := len(stats) - 5
+			msg = fmt.Sprintf("%s ...%d more running", msg, diff)
+			break
+		}
 		var v color.Value
 		var val string
 		switch s.Type {
