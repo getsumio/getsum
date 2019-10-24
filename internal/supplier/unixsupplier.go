@@ -30,6 +30,7 @@ func kill(cmd *exec.Cmd) {
 }
 
 var cmd *exec.Cmd
+var quit bool
 
 func (s *UnixSupplier) Run() {
 

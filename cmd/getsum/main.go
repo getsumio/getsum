@@ -2,6 +2,10 @@
 package main
 
 import (
+	"os"
+	"os/signal"
+	"time"
+
 	parser "github.com/getsumio/getsum/internal/config"
 	"github.com/getsumio/getsum/internal/logger"
 	. "github.com/getsumio/getsum/internal/provider"
@@ -20,6 +24,9 @@ func main() {
 	var providers []Provider = factory.GetProviders(config)
 	logger.Debug("providers: %v", providers)
 
+	sign := make(chan os.Signal, 1)
+	signal.Notify(sign, os.Interrupt)
+
 	logger.Header(providers)
 
 	quit := make(chan bool)
@@ -34,6 +41,13 @@ func main() {
 	stats := make([]*status.Status, length)
 	logger.Trace("Starting to watch running processes")
 	hasValidation := *config.Cheksum != ""
+	go func() {
+		<-sign
+		quit <- true
+		time.Sleep(time.Second)
+		logger.Warn("\n\nTerminate requested by user")
+		os.Exit(1)
+	}()
 	for anyRunner {
 		anyRunner = false
 		for i := 0; i < length; i++ {
