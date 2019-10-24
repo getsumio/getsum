@@ -38,7 +38,7 @@ func main() {
 		anyRunner = false
 		for i := 0; i < length; i++ {
 			s := <-chans[i]
-			logger.Debug("Update value %v from provider", *s)
+			logger.Trace("Update value %v from provider", *s)
 			if s.Type == status.PREPARED || s.Type == status.RUNNING || s.Type == status.STARTED || s.Type == status.DOWNLOAD {
 				anyRunner = true
 			} else if hasValidation && s.Type == status.COMPLETED {

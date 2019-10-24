@@ -13,17 +13,7 @@ type UnixSupplier struct {
 	BaseSupplier
 }
 
-func execute(cmd *exec.Cmd, quit <-chan bool, status chan string) {
-	go func() {
-		for {
-			select {
-			case <-quit:
-				if cmd.Process != nil {
-					cmd.Process.Kill()
-				}
-			}
-		}
-	}()
+func execute(cmd *exec.Cmd, status chan string) {
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		status <- err.Error()
@@ -33,7 +23,13 @@ func execute(cmd *exec.Cmd, quit <-chan bool, status chan string) {
 	}
 }
 
-var quit chan bool
+func kill(cmd *exec.Cmd) {
+	if cmd != nil && cmd.Process != nil {
+		cmd.Process.Kill()
+	}
+}
+
+var cmd *exec.Cmd
 
 func (s *UnixSupplier) Run() {
 
@@ -47,17 +43,17 @@ func (s *UnixSupplier) Run() {
 	tStart := time.Now()
 	s.status.Type = status.STARTED
 	t := time.After(time.Duration(s.TimeOut) * time.Second)
-	quit = make(chan bool)
 	stat := make(chan string)
-	go execute(getCommand(s), quit, stat)
+	cmd = getCommand(s)
+	go execute(cmd, stat)
 	for {
 		select {
 		case <-t:
+			kill(cmd)
 			tEnd := time.Now()
 			took := tEnd.Sub(tStart)
 			s.status.Type = status.TIMEDOUT
 			s.status.Value = fmt.Sprintf("%dms", took.Milliseconds())
-			quit <- true
 			return
 		case val := <-stat:
 			tEnd := time.Now()
@@ -81,8 +77,7 @@ func (s *UnixSupplier) Status() *status.Status {
 }
 
 func (s *UnixSupplier) Terminate() {
-	s.status = &status.Status{status.TERMINATED, "", ""}
-	quit <- true
+	kill(cmd)
 }
 
 func getCommand(s *UnixSupplier) *exec.Cmd {

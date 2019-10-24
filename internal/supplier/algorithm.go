@@ -1,9 +1,5 @@
 package supplier
 
-import (
-	"errors"
-)
-
 type Algorithm uint8
 
 const (
@@ -36,12 +32,12 @@ func (a Algorithm) Ordinal() uint8 {
 	return uint8(a)
 }
 
-func ValueOf(val *string) (Algorithm, error) {
+func ValueOf(val *string) Algorithm {
 	for i, s := range algoStr {
 		if s == *val {
-			return Algorithm(i), nil
+			return Algorithm(i)
 		}
 	}
 
-	return 127, errors.New("Algorithm not found")
+	return 127
 }

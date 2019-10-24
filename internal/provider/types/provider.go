@@ -9,6 +9,7 @@ type Provider interface {
 	Close()
 	Data() *BaseProvider
 	Run(quit <-chan bool, wait <-chan bool) <-chan *status.Status
+	Region() string
 }
 
 type BaseProvider struct {
@@ -24,10 +25,23 @@ type BaseProvider struct {
 type ProviderType int
 
 const (
-	Aws = iota
-	Google
-	Oracle
-	Azure
-	IBM
-	Local
+	Aws    ProviderType = iota
+	Google ProviderType = iota
+	Oracle ProviderType = iota
+	Azure  ProviderType = iota
+	IBM    ProviderType = iota
+	Local  ProviderType = iota
 )
+
+var typStr = []string{
+	"AWS",
+	"GOOGLE",
+	"ORACLE",
+	"AZURE",
+	"IBM",
+	"LOCAL",
+}
+
+func (p ProviderType) Name() string {
+	return typStr[p]
+}

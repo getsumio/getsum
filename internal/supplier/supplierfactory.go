@@ -16,7 +16,7 @@ type SupplierFactory struct {
 
 func (factory *SupplierFactory) GetSupplier(config *Config) Supplier {
 
-	algorithm, _ := ValueOf(config.Algorithm)
+	algorithm := ValueOf(config.Algorithm)
 
 	return factory.GetSupplierByAlgo(config, &algorithm)
 

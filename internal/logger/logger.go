@@ -130,7 +130,11 @@ func Status(stats []*status.Status) {
 		}
 		msg = fmt.Sprintf("%s%10s\t%6s | ", msg, color.Bold(v), color.Bold(color.Yellow(val)))
 	}
-	fmt.Printf("%s\r", msg)
+	if Level < LevelWarn {
+		fmt.Printf("%s\n", msg)
+	} else {
+		fmt.Printf("%s\r", msg)
+	}
 }
 
 func Inplace(msg string, params ...interface{}) {
