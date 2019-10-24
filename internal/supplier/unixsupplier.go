@@ -78,6 +78,9 @@ func (s *UnixSupplier) Status() *status.Status {
 
 func (s *UnixSupplier) Terminate() {
 	kill(cmd)
+	if s.status.Type == status.RUNNING {
+		s.status.Type = status.TERMINATED
+	}
 }
 
 func getCommand(s *UnixSupplier) *exec.Cmd {
