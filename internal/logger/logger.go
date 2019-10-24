@@ -6,7 +6,7 @@ import (
 	"log"
 
 	. "github.com/getsumio/getsum/internal/file"
-	. "github.com/getsumio/getsum/internal/providers"
+	. "github.com/getsumio/getsum/internal/provider/types"
 
 	color "github.com/logrusorgru/aurora"
 )

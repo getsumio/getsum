@@ -1,8 +1,8 @@
 package providers
 
 import (
-	. "github.com/getsumio/getsum/internal/algorithm/supplier"
 	. "github.com/getsumio/getsum/internal/file"
+	. "github.com/getsumio/getsum/internal/supplier"
 )
 
 type Provider interface {

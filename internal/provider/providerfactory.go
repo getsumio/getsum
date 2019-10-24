@@ -3,8 +3,9 @@ package providers
 import (
 	"fmt"
 
-	. "github.com/getsumio/getsum/internal/algorithm/supplier"
 	. "github.com/getsumio/getsum/internal/config"
+	. "github.com/getsumio/getsum/internal/provider/types"
+	. "github.com/getsumio/getsum/internal/supplier"
 )
 
 //Factory interface to init providers

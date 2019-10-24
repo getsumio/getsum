@@ -4,6 +4,7 @@ import (
 	"time"
 
 	. "github.com/getsumio/getsum/internal/file"
+	. "github.com/getsumio/getsum/internal/provider/types"
 )
 
 type LocalProvider struct {
