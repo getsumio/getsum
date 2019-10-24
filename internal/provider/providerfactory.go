@@ -1,7 +1,6 @@
 package providers
 
 import (
-	"errors"
 	"fmt"
 
 	. "github.com/getsumio/getsum/internal/config"
@@ -73,7 +72,9 @@ func getLocalProviders(config *Config, factory ISupplierFactory) ([]Provider, er
 				}
 			}
 			if !supports {
-				return nil, errors.New(fmt.Sprintf("Algorithm %s not supported for local provider using %s libraries", a.Name(), *config.Supplier))
+				logger.Warn(fmt.Sprintf("Algorithm %s not supported for local provider using %s libraries", a.Name(), *config.Supplier))
+				continue
+				//turn nil, errors.New(fmt.Sprintf("Algorithm %s not supported for local provider using %s libraries", a.Name(), *config.Supplier))
 			}
 			l := getProvider(Local, supplier, config, a)
 			logger.Debug("Generated provider: %v", l)
