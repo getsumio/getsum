@@ -2,6 +2,7 @@ package supplier
 
 import (
 	"github.com/getsumio/getsum/internal/file"
+	. "github.com/getsumio/getsum/internal/file"
 )
 
 type Supplier interface {
@@ -15,10 +16,4 @@ type BaseSupplier struct {
 	status    *Status
 	File      *file.File
 	TimeOut   int
-}
-
-type Status struct {
-	Status   string
-	Value    string
-	Checksum string
 }

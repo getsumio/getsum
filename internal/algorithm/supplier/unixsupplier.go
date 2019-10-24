@@ -5,6 +5,8 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+
+	. "github.com/getsumio/getsum/internal/file"
 )
 
 type UnixSupplier struct {
@@ -35,17 +37,6 @@ var quit chan bool
 
 func (s *UnixSupplier) Run() {
 
-	sVal := "DOWNLOAD"
-	s.File.Status = sVal
-	s.status.Status = sVal
-	s.status.Value = "0%"
-	go func() {
-		for s.File.Status == sVal {
-			s.status.Value = s.File.StatusValue
-			time.Sleep(time.Second)
-		}
-
-	}()
 	err := s.File.Fetch(s.TimeOut)
 	if err != nil {
 		s.status.Value = err.Error()

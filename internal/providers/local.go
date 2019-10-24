@@ -3,7 +3,7 @@ package providers
 import (
 	"time"
 
-	. "github.com/getsumio/getsum/internal/algorithm/supplier"
+	. "github.com/getsumio/getsum/internal/file"
 )
 
 type LocalProvider struct {

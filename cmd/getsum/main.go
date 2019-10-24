@@ -2,8 +2,8 @@
 package main
 
 import (
-	. "github.com/getsumio/getsum/internal/algorithm/supplier"
 	parser "github.com/getsumio/getsum/internal/config"
+	. "github.com/getsumio/getsum/internal/file"
 	"github.com/getsumio/getsum/internal/logger"
 	. "github.com/getsumio/getsum/internal/providers"
 	validator "github.com/getsumio/getsum/internal/validation"

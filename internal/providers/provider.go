@@ -2,6 +2,7 @@ package providers
 
 import (
 	. "github.com/getsumio/getsum/internal/algorithm/supplier"
+	. "github.com/getsumio/getsum/internal/file"
 )
 
 type Provider interface {

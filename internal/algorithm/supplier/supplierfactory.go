@@ -2,7 +2,7 @@ package supplier
 
 import (
 	. "github.com/getsumio/getsum/internal/config"
-	"github.com/getsumio/getsum/internal/file"
+	. "github.com/getsumio/getsum/internal/file"
 )
 
 type ISupplierFactory interface {
@@ -23,11 +23,12 @@ func (factory *SupplierFactory) GetSupplier(config *Config) Supplier {
 
 func (factory *SupplierFactory) GetSupplierByAlgo(config *Config, algorithm *Algorithm) Supplier {
 
+	stat := &Status{"PREPARED", "", ""}
 	s := &UnixSupplier{}
 	s.Algorithm = *algorithm
-	s.File = &file.File{Url: *config.File}
+	s.File = &File{Url: *config.File, Status: stat}
 	s.TimeOut = *config.Timeout
-	s.status = &Status{"PREPARED", "", ""}
+	s.status = stat
 	return s
 
 }

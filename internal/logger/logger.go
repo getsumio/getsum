@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	. "github.com/getsumio/getsum/internal/algorithm/supplier"
+	. "github.com/getsumio/getsum/internal/file"
 	. "github.com/getsumio/getsum/internal/providers"
 
 	color "github.com/logrusorgru/aurora"
