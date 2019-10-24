@@ -28,7 +28,26 @@ type GoSupplier struct {
 }
 
 func (s *GoSupplier) Supports() []Algorithm {
-	return Algorithms
+	return []Algorithm{
+		MD4,
+		MD5,
+		SHA1,
+		SHA224,
+		SHA256,
+		SHA384,
+		SHA512,
+		RMD160,
+		SHA3_224,
+		SHA3_256,
+		SHA3_384,
+		SHA3_512,
+		SHA512_224,
+		SHA512_256,
+		BLAKE2s256,
+		BLAKE2b256,
+		BLAKE2b384,
+		BLAKE2b512,
+	}
 }
 
 func (s *GoSupplier) Run() {
@@ -111,7 +130,7 @@ func getHash(algo Algorithm, key string) (hash.Hash, error) {
 		return sha512.New384(), nil
 	case SHA512:
 		return sha512.New(), nil
-	case RIPEMD160:
+	case RMD160:
 		return ripemd160.New(), nil
 	case SHA3_224:
 		return sha3.New224(), nil
@@ -125,13 +144,13 @@ func getHash(algo Algorithm, key string) (hash.Hash, error) {
 		return sha512.New512_224(), nil
 	case SHA512_256:
 		return sha512.New512_256(), nil
-	case BLAKE2s_256:
+	case BLAKE2s256:
 		return blake2s.New256([]byte(key))
-	case BLAKE2b_256:
+	case BLAKE2b256:
 		return blake2b.New256([]byte(key))
-	case BLAKE2b_384:
+	case BLAKE2b384:
 		return blake2b.New384([]byte(key))
-	case BLAKE2b_512:
+	case BLAKE2b512:
 		return blake2b.New512([]byte(key))
 	default:
 		return nil, errors.New(fmt.Sprintf("Algorithm %s not supported", algo.Name()))

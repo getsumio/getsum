@@ -17,7 +17,7 @@ func (s *UnixSupplier) Supports() []Algorithm {
 	return []Algorithm{MD5, SHA1, SHA224, SHA256, SHA384, SHA512}
 }
 
-func execute(cmd *exec.Cmd, status chan string) {
+func executeSSL(cmd *exec.Cmd, status chan string) {
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		status <- err.Error()
@@ -27,13 +27,13 @@ func execute(cmd *exec.Cmd, status chan string) {
 	}
 }
 
-func kill(cmd *exec.Cmd) {
+func killSSL(cmd *exec.Cmd) {
 	if cmd != nil && cmd.Process != nil {
 		cmd.Process.Kill()
 	}
 }
 
-var cmd *exec.Cmd
+var cmdSSL *exec.Cmd
 
 func (s *UnixSupplier) Run() {
 
@@ -48,12 +48,12 @@ func (s *UnixSupplier) Run() {
 	s.status.Type = status.STARTED
 	t := time.After(time.Duration(s.TimeOut) * time.Second)
 	stat := make(chan string)
-	cmd = getCommand(s)
-	go execute(cmd, stat)
+	cmdSSL = getCommand(s)
+	go executeSSL(cmdSSL, stat)
 	for {
 		select {
 		case <-t:
-			kill(cmd)
+			killSSL(cmdSSL)
 			tEnd := time.Now()
 			took := tEnd.Sub(tStart)
 			s.status.Type = status.TIMEDOUT
@@ -81,7 +81,7 @@ func (s *UnixSupplier) Status() *status.Status {
 }
 
 func (s *UnixSupplier) Terminate() {
-	kill(cmd)
+	killSSL(cmdSSL)
 	if s.status.Type == status.RUNNING {
 		s.status.Type = status.TERMINATED
 	}

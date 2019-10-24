@@ -31,6 +31,15 @@ func getSupplierInstance(config *Config, algo *Algorithm) Supplier {
 		s.TimeOut = *config.Timeout
 		s.status = stat
 		return s
+	} else if *config.Supplier == "openssl" {
+		s := &OpenSSLSupplier{}
+		s.Algorithm = *algo
+		s.Key = *config.Key
+		s.File = &File{Url: *config.File, Status: stat}
+		s.TimeOut = *config.Timeout
+		s.status = stat
+		return s
+
 	}
 	switch runtime.GOOS {
 	case "linux":
