@@ -13,6 +13,10 @@ type UnixSupplier struct {
 	BaseSupplier
 }
 
+func (s *UnixSupplier) Supports() []Algorithm {
+	return []Algorithm{MD5, SHA1, SHA224, SHA256, SHA384, SHA512}
+}
+
 func execute(cmd *exec.Cmd, status chan string) {
 	out, err := cmd.CombinedOutput()
 	if err != nil {

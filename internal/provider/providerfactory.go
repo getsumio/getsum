@@ -1,6 +1,7 @@
 package providers
 
 import (
+	"errors"
 	"fmt"
 
 	. "github.com/getsumio/getsum/internal/config"
@@ -11,7 +12,7 @@ import (
 
 //Factory interface to init providers
 type IProviderFactory interface {
-	GetProviders(config *Config) []Provider
+	GetProviders(config *Config) ([]Provider, error)
 }
 
 //provider factory
@@ -22,14 +23,19 @@ type ProviderFactory struct {
 //according to params initializes list of providers
 //if present remote ones are AWS,GCE,IBM,ORCL,Azure
 //local provider is Local
-func (p *ProviderFactory) GetProviders(config *Config) []Provider {
+func (p *ProviderFactory) GetProviders(config *Config) ([]Provider, error) {
 	logger.Debug("Providers requested for config %v", *config)
 	var factory ISupplierFactory = new(SupplierFactory)
 	list := []Provider{}
-	list = append(list, getLocalProviders(config, factory)...)
+	localProviders, err := getLocalProviders(config, factory)
+	if err != nil {
+		return nil, err
+	}
+
+	list = append(list, localProviders...)
 	logger.Debug("Generated providers: %v", list)
 
-	return list
+	return list, nil
 }
 
 func getProvider(pType ProviderType, supplier Supplier, config *Config, a Algorithm) Provider {
@@ -43,7 +49,7 @@ func getProvider(pType ProviderType, supplier Supplier, config *Config, a Algori
 
 }
 
-func getLocalProviders(config *Config, factory ISupplierFactory) []Provider {
+func getLocalProviders(config *Config, factory ISupplierFactory) ([]Provider, error) {
 	logger.Debug("Instantiating local providers")
 	locals := []Provider{}
 	if !*config.RemoteOnly {
@@ -60,11 +66,20 @@ func getLocalProviders(config *Config, factory ISupplierFactory) []Provider {
 		for _, a := range algos {
 			logger.Debug("Creating local provider for algorithm %s", a.Name())
 			supplier := factory.GetSupplierByAlgo(config, &a)
+			supports := false
+			for _, supportedAlgo := range supplier.Supports() {
+				if supportedAlgo == a {
+					supports = true
+				}
+			}
+			if !supports {
+				return nil, errors.New(fmt.Sprintf("Algorithm %s not supported for local provider using %s libraries", a.Name(), *config.Supplier))
+			}
 			l := getProvider(Local, supplier, config, a)
 			logger.Debug("Generated provider: %v", l)
 			locals = append(locals, l)
 		}
 	}
 
-	return locals
+	return locals, nil
 }

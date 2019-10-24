@@ -27,6 +27,10 @@ type GoSupplier struct {
 	BaseSupplier
 }
 
+func (s *GoSupplier) Supports() []Algorithm {
+	return Algorithms
+}
+
 func (s *GoSupplier) Run() {
 	err := s.File.Fetch(s.TimeOut)
 	if err != nil {

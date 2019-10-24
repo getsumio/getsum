@@ -9,7 +9,6 @@ import (
 	parser "github.com/getsumio/getsum/internal/config"
 	"github.com/getsumio/getsum/internal/logger"
 	. "github.com/getsumio/getsum/internal/provider"
-	. "github.com/getsumio/getsum/internal/provider/types"
 	"github.com/getsumio/getsum/internal/status"
 	validator "github.com/getsumio/getsum/internal/validation"
 )
@@ -21,7 +20,12 @@ func main() {
 	logger.Debug("Application  started, using config %v", *config)
 	logger.Trace("Collecting providers")
 	var factory IProviderFactory = new(ProviderFactory)
-	var providers []Provider = factory.GetProviders(config)
+	providers, err := factory.GetProviders(config)
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+
 	logger.Debug("providers: %v", providers)
 
 	sign := make(chan os.Signal, 1)

@@ -9,6 +9,7 @@ type Supplier interface {
 	Run()
 	Status() *status.Status
 	Terminate()
+	Supports() []Algorithm
 }
 
 type BaseSupplier struct {
