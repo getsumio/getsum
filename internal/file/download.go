@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"os"
 	"time"
+
+	"github.com/getsumio/getsum/internal/status"
 )
 
 func downloadFile(quit <-chan bool, f *File) {
-	f.Status.Status = "DOWNLOAD"
+	f.Status.Type = status.DOWNLOAD
 	for {
 		select {
 		case <-quit:

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	. "github.com/getsumio/getsum/internal/file"
 	. "github.com/getsumio/getsum/internal/provider/types"
+	"github.com/getsumio/getsum/internal/status"
 
 	color "github.com/logrusorgru/aurora"
 )
@@ -86,22 +86,22 @@ func Info(msg string, params ...interface{}) {
 		log.Printf("%s%s%s\n", color.Bold(color.Cyan(info)), PADDING, msg)
 	}
 }
-func Logsum(providers []Provider, stats []*Status) {
+func Logsum(providers []Provider, stats []*status.Status) {
 	fmt.Println("\n\n")
 	for i, s := range stats {
 		var c color.Value
 		var val string
 
-		switch s.Status {
-		case "COMPLETED":
+		switch s.Type {
+		case status.COMPLETED:
 			c = color.Bold(color.BrightYellow("\u2713"))
 			val = s.Checksum
-		case "MISMATCH":
+		case status.MISMATCH:
 			c = color.Bold(color.Red("\u24e7"))
 			val = s.Checksum
 		default:
 			c = color.Bold(color.Red("\u24e7"))
-			val = fmt.Sprintf("%s - %s", s.Status, s.Value)
+			val = fmt.Sprintf("%s - %s", s.Type.Name(), s.Value)
 
 		}
 
@@ -109,23 +109,23 @@ func Logsum(providers []Provider, stats []*Status) {
 	}
 }
 
-func Status(stats []*Status) {
+func Status(stats []*status.Status) {
 	var msg string
 	for _, s := range stats {
 		var v color.Value
 		var val string
-		switch s.Status {
-		case "TERMINATED", "TIMEDOUT":
-			v = color.Red(s.Status)
+		switch s.Type {
+		case status.TERMINATED, status.TIMEDOUT:
+			v = color.Red(s.Type.Name())
 			val = s.Value
-		case "ERROR", "MISMATCH":
-			v = color.Red(s.Status)
-		case "PREPARED":
-			v = color.Cyan(s.Status)
-		case "STARTED":
-			v = color.Blink(s.Status)
+		case status.ERROR, status.MISMATCH:
+			v = color.Red(s.Type.Name())
+		case status.PREPARED:
+			v = color.Cyan(s.Type.Name())
+		case status.STARTED:
+			v = color.Blink(s.Type.Name())
 		default:
-			v = color.Green(s.Status)
+			v = color.Green(s.Type.Name())
 			val = s.Value
 		}
 		msg = fmt.Sprintf("%s%10s\t%6s | ", msg, color.Bold(v), color.Bold(color.Yellow(val)))

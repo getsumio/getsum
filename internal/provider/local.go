@@ -3,17 +3,17 @@ package providers
 import (
 	"time"
 
-	. "github.com/getsumio/getsum/internal/file"
 	. "github.com/getsumio/getsum/internal/provider/types"
+	"github.com/getsumio/getsum/internal/status"
 )
 
 type LocalProvider struct {
 	BaseProvider
 }
 
-func (l *LocalProvider) Run(quit <-chan bool, wait <-chan bool) <-chan *Status {
+func (l *LocalProvider) Run(quit <-chan bool, wait <-chan bool) <-chan *status.Status {
 	defer complete(l)
-	statusChannel := make(chan *Status)
+	statusChannel := make(chan *status.Status)
 	go l.Supplier.Run()
 	go func() {
 		for {

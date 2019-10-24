@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/getsumio/getsum/internal/status"
 )
 
 type IFile interface {
@@ -23,14 +25,8 @@ type File struct {
 	path   string
 	data   []byte
 	Url    string
-	Status *Status
+	Status *status.Status
 	Size   int64
-}
-
-type Status struct {
-	Status   string
-	Value    string
-	Checksum string
 }
 
 func (f *File) Path() string {
@@ -49,7 +45,7 @@ func (f *File) Data() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	f.Status.Status = "ALLOCATED"
+	f.Status.Type = status.ALLOCATED
 	return bytes, nil
 
 }
@@ -94,7 +90,7 @@ func fetchRemote(f *File, timeout int) error {
 	defer header.Body.Close()
 	size, err := strconv.Atoi(header.Header.Get("Content-Length"))
 	if err != nil {
-		f.Status.Status = "ERROR"
+		f.Status.Type = status.ERROR
 		return err
 	}
 	f.Size = int64(size)
@@ -110,7 +106,7 @@ func fetchRemote(f *File, timeout int) error {
 	resp, err := client.Get(f.Url)
 	if err != nil {
 		quit <- true
-		f.Status.Status = "ERROR"
+		f.Status.Type = status.ERROR
 		return err
 	}
 	defer resp.Body.Close()
@@ -122,7 +118,7 @@ func fetchRemote(f *File, timeout int) error {
 	_, err = io.Copy(out, resp.Body)
 	quit <- true
 
-	f.Status.Status = "FETCHED"
+	f.Status.Type = status.FETCHED
 	return err
 }
 
@@ -130,11 +126,11 @@ func fetchLocal(f *File) error {
 
 	err := validateLocal(f)
 	if err != nil {
-		f.Status.Status = "ERROR"
+		f.Status.Type = status.ERROR
 		return err
 	}
 	f.path = f.Url
-	f.Status.Status = "FETCHED"
+	f.Status.Type = status.FETCHED
 	return nil
 
 }
