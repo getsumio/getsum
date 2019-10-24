@@ -2,14 +2,16 @@ package config
 
 import (
 	"flag"
+	"strings"
 )
 
 func ParseConfig() *Config {
 	c := new(Config)
+	var algo *string
 	c.LocalOnly = flag.Bool("localOnly", false, "Only calculate checksum locally if remote servers present in config it will use those servers also local resources as well")
 	c.LocalOnly = flag.Bool("l", false, "Only calculate checksum locally, if remote servers present in config it will use those servers also local resources as well")
-	c.Algorithm = flag.String("algo", "SHA512", "Checksum algorithm, supported: {MD5,SHA-0,SHA-1,SHA256,SHA384,SHA512,SHA-3}")
-	c.Algorithm = flag.String("a", "SHA512", "Checksum algorithm, supported: {MD5,SHA-0,SHA-1,SHA256,SHA384,SHA512,SHA-3}")
+	algo = flag.String("algo", "SHA512", "Checksum algorithm, supported: {MD5,SHA-0,SHA-1,SHA256,SHA384,SHA512,SHA-3}")
+	algo = flag.String("a", "SHA512", "Checksum algorithm, supported: {MD5,SHA-0,SHA-1,SHA256,SHA384,SHA512,SHA-3}")
 	c.LogLevel = flag.String("logLevel", "WARNING", "log level, supported: {TRACE,DEBUG,INFO,WARNING,ERROR}")
 	c.Proxy = flag.String("proxy", "", "Proxy address to reach file or servers")
 	c.Proxy = flag.String("p", "", "Proxy address to reach file or servers")
@@ -22,11 +24,16 @@ func ParseConfig() *Config {
 	c.Timeout = flag.Int("timeout", 60, "Timeout in secounds for each running calculation")
 	c.Timeout = flag.Int("t", 60, "Timeout in secounds for each running calculation")
 	c.All = flag.Bool("all", false, "Run all algorithms (MD5,SHA1 , SHA256 ...) for each running client")
+	c.Key = flag.String("key", "", "Key for blake2 hashing")
+	c.Key = flag.String("k", "", "Key for blake2 hashing")
+	c.Supplier = flag.String("supplier", "go", "Algorithm supplier default app (GO) libraries used, if you want to use unix, win, mac default apps set to OS, cloud providers support may vary")
+	c.Supplier = flag.String("s", "go", "Algorithm supplier default app (GO) libraries used, if you want to use unix, win, mac default apps set to OS, cloud providers support may vary")
 	var empty string = ""
 	c.File = &empty
 	c.Cheksum = &empty
 
 	flag.Parse()
+	c.Algorithm = strings.Split(*algo, ",")
 	args := flag.Args()
 	if args != nil {
 		if len(args) > 0 && args[0] != "" {

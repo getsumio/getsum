@@ -48,23 +48,21 @@ func getLocalProviders(config *Config, factory ISupplierFactory) []Provider {
 	locals := []Provider{}
 	if !*config.RemoteOnly {
 		logger.Debug("Config is remote only")
+		var algos []Algorithm
 		if *config.All {
-			logger.Debug("User requests all algos to be runned")
-			for _, a := range Algorithms {
-				logger.Debug("Creating local provider for algorithm %s", a.Name())
-				supplier := factory.GetSupplierByAlgo(config, &a)
-				l := getProvider(Local, supplier, config, a)
-				logger.Debug("Generated provider: %v", l)
-				locals = append(locals, l)
-			}
-
+			algos = Algorithms
 		} else {
-			logger.Debug("Generating single local provider")
-			supplier := factory.GetSupplier(config)
-			l := getProvider(Local, supplier, config, ValueOf(config.Algorithm))
-			logger.Debug("Provider instantiated: %v", l)
+			for _, s := range config.Algorithm {
+				algos = append(algos, ValueOf(&s))
+			}
+		}
+		logger.Debug("User requests all algos to be runned")
+		for _, a := range algos {
+			logger.Debug("Creating local provider for algorithm %s", a.Name())
+			supplier := factory.GetSupplierByAlgo(config, &a)
+			l := getProvider(Local, supplier, config, a)
+			logger.Debug("Generated provider: %v", l)
 			locals = append(locals, l)
-
 		}
 	}
 

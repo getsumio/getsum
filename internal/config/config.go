@@ -5,7 +5,7 @@ type Config struct {
 	Remote       *bool
 	LocalOnly    *bool
 	Proxy        *string
-	Algorithm    *string
+	Algorithm    []string
 	Cheksum      *string
 	RemoteOnly   *bool
 	OnlyChecksum *bool
@@ -14,4 +14,6 @@ type Config struct {
 	Download     *bool
 	Timeout      *int
 	All          *bool
+	Key          *string
+	Supplier     *string
 }

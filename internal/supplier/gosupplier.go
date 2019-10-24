@@ -1,13 +1,26 @@
 package supplier
 
 import (
+	"crypto/md5"
+	"crypto/sha1"
 	"crypto/sha256"
+	"crypto/sha512"
+	"encoding/hex"
+	"errors"
 	"fmt"
+	"hash"
+	"io"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/getsumio/getsum/internal/file"
 	"github.com/getsumio/getsum/internal/status"
+	"golang.org/x/crypto/blake2b"
+	"golang.org/x/crypto/blake2s"
+	"golang.org/x/crypto/md4"
+	"golang.org/x/crypto/ripemd160"
+	"golang.org/x/crypto/sha3"
 )
 
 type GoSupplier struct {
@@ -26,7 +39,13 @@ func (s *GoSupplier) Run() {
 	s.status.Type = status.STARTED
 	t := time.After(time.Duration(s.TimeOut) * time.Second)
 	stat := make(chan string)
-	go calculate(s.Algorithm, stat, s.File)
+	hash, err := getHash(s.Algorithm, s.Key)
+	if err != nil {
+		s.status.Value = err.Error()
+		s.status.Type = status.ERROR
+	}
+
+	go calculate(hash, stat, s.File)
 	for {
 		select {
 		case <-t:
@@ -64,7 +83,53 @@ func (s *GoSupplier) Terminate() {
 
 }
 
-func calculate(algo Algorithm, status chan string, file *file.File) {
-	sha256.New()
+func calculate(hash hash.Hash, status chan string, file *file.File) {
+	f, _ := os.Open(file.Path())
+	defer f.Close()
+	if _, err := io.Copy(hash, f); err != nil {
+	}
+	status <- hex.EncodeToString(hash.Sum(nil))
+}
 
+func getHash(algo Algorithm, key string) (hash.Hash, error) {
+	switch algo {
+	case MD4:
+		return md4.New(), nil
+	case MD5:
+		return md5.New(), nil
+	case SHA1:
+		return sha1.New(), nil
+	case SHA224:
+		return sha256.New224(), nil
+	case SHA256:
+		return sha256.New(), nil
+	case SHA384:
+		return sha512.New384(), nil
+	case SHA512:
+		return sha512.New(), nil
+	case RIPEMD160:
+		return ripemd160.New(), nil
+	case SHA3_224:
+		return sha3.New224(), nil
+	case SHA3_256:
+		return sha3.New256(), nil
+	case SHA3_384:
+		return sha3.New384(), nil
+	case SHA3_512:
+		return sha3.New512(), nil
+	case SHA512_224:
+		return sha512.New512_224(), nil
+	case SHA512_256:
+		return sha512.New512_256(), nil
+	case BLAKE2s_256:
+		return blake2s.New256([]byte(key))
+	case BLAKE2b_256:
+		return blake2b.New256([]byte(key))
+	case BLAKE2b_384:
+		return blake2b.New384([]byte(key))
+	case BLAKE2b_512:
+		return blake2b.New512([]byte(key))
+	default:
+		return nil, errors.New(fmt.Sprintf("Algorithm %s not supported", algo.Name()))
+	}
 }

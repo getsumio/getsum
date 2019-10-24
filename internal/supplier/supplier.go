@@ -16,4 +16,5 @@ type BaseSupplier struct {
 	status    *status.Status
 	File      *file.File
 	TimeOut   int
+	Key       string
 }
