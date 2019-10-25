@@ -31,8 +31,6 @@ func main() {
 	sign := make(chan os.Signal, 1)
 	signal.Notify(sign, os.Interrupt)
 
-	logger.Header(providers)
-
 	quit := make(chan bool)
 	wait := make(chan bool)
 	length := len(providers)
@@ -52,6 +50,8 @@ func main() {
 		logger.Warn("\n\nTerminate requested by user")
 		os.Exit(1)
 	}()
+	logger.Header(providers)
+	hasMisMatch := false
 	for anyRunner {
 		anyRunner = false
 		for i := 0; i < length; i++ {
@@ -61,6 +61,7 @@ func main() {
 				anyRunner = true
 			} else if hasValidation && s.Type == status.COMPLETED {
 				if s.Checksum != *config.Cheksum {
+					hasMisMatch = true
 					s.Type = status.MISMATCH
 				}
 
@@ -78,5 +79,8 @@ func main() {
 	}
 	logger.Logsum(providers, stats)
 	logger.Debug("Application finish")
+	if hasMisMatch {
+		os.Exit(1)
+	}
 
 }
