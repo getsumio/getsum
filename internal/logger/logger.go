@@ -123,10 +123,10 @@ func Status(stats []*status.Status) {
 		var v color.Value
 		var val string
 		switch s.Type {
-		case status.TERMINATED, status.TIMEDOUT:
+		case status.TERMINATED, status.TIMEDOUT, status.MISMATCH:
 			v = color.Red(s.Type.Name())
 			val = s.Value
-		case status.ERROR, status.MISMATCH:
+		case status.ERROR:
 			v = color.Red(s.Type.Name())
 		case status.PREPARED:
 			v = color.Cyan(s.Type.Name())
