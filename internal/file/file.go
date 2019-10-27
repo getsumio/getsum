@@ -9,6 +9,7 @@ import (
 	"path"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/getsumio/getsum/internal/status"
@@ -65,14 +66,21 @@ func (f *File) Fetch(timeout int) error {
 	return nil
 }
 
+var mux sync.Mutex
+var fetchedSize int64 = -1
+
 func fetchRemote(f *File, timeout int) error {
 
+	mux.Lock()
+	defer mux.Unlock()
 	filename := path.Base(f.Url)
-	_, err := os.Stat(filename)
-	if os.IsExist(err) {
-		return fetchLocal(f)
+	if fetchedSize > 0 { //another process already fetched
+		f.Size = fetchedSize
+		f.path = filename
+		f.Status.Type = status.FETCHED
+		return nil
 	}
-	err = validateRemote(f)
+	err := validateRemote(f)
 	if err != nil {
 		return err
 	}
@@ -119,6 +127,7 @@ func fetchRemote(f *File, timeout int) error {
 	quit <- true
 
 	f.Status.Type = status.FETCHED
+	fetchedSize = f.Size
 	return err
 }
 
