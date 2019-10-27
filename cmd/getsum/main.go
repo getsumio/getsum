@@ -21,8 +21,12 @@ func main() {
 	logger.Trace("Collecting providers")
 	var factory IProviderFactory = new(ProviderFactory)
 	providers, err := factory.GetProviders(config)
+	length := len(providers)
 	if err != nil {
 		logger.Error(err.Error())
+		os.Exit(1)
+	} else if length < 1 {
+		logger.Error("There is no other supported algorithm asked to run, terminating")
 		os.Exit(1)
 	}
 
@@ -31,7 +35,6 @@ func main() {
 	quit, wait := make(chan bool), make(chan bool)
 	handleExit(quit)
 
-	length := len(providers)
 	chans := make([]<-chan *status.Status, length)
 	logger.Debug("Running providers, total length: %d", length)
 	for i := 0; i < length; i++ {

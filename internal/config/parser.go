@@ -35,10 +35,11 @@ func ParseConfig() *Config {
 	c.File = &empty
 	c.Cheksum = &empty
 
+	upper := strings.ToUpper(*algo)
 	flag.Parse()
 	lower := strings.ToLower(*c.Supplier)
 	c.Supplier = &lower
-	c.Algorithm = strings.Split(*algo, ",")
+	c.Algorithm = strings.Split(upper, ",")
 	args := flag.Args()
 	if args != nil {
 		if len(args) > 0 && args[0] != "" {
