@@ -15,7 +15,7 @@ type Provider interface {
 type BaseProvider struct {
 	Name     string
 	Address  *string
-	Zone     *string
+	Zone     string
 	Proxy    *string
 	File     *string
 	Type     ProviderType

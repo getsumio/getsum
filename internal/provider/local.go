@@ -47,5 +47,5 @@ func (l *LocalProvider) Close() {
 }
 
 func (l *LocalProvider) Region() string {
-	return *l.Zone
+	return l.Zone
 }

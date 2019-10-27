@@ -70,23 +70,20 @@ func (s *GoSupplier) Run() {
 
 	go calculate(hash, stat, s.File)
 	for {
+		tEnd := time.Now()
+		took := tEnd.Sub(tStart)
+
 		select {
 		case <-t:
-			tEnd := time.Now()
-			took := tEnd.Sub(tStart)
 			s.status.Type = status.TIMEDOUT
 			s.status.Value = fmt.Sprintf("%dms", took.Milliseconds())
 			return
 		case val := <-stat:
-			tEnd := time.Now()
-			took := tEnd.Sub(tStart)
 			s.status.Type = status.COMPLETED
 			s.status.Value = fmt.Sprintf("%dms", took.Milliseconds())
 			s.status.Checksum = strings.Fields(val)[0]
 			return
 		default:
-			tEnd := time.Now()
-			took := tEnd.Sub(tStart)
 			s.status.Type = status.RUNNING
 			s.status.Value = fmt.Sprintf("%dms", took.Milliseconds())
 			time.Sleep(15 * time.Millisecond)

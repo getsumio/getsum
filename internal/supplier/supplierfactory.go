@@ -22,33 +22,24 @@ func (factory *SupplierFactory) GetSupplierByAlgo(config *Config, algorithm *Alg
 }
 
 func getSupplierInstance(config *Config, algo *Algorithm) Supplier {
-	stat := &status.Status{status.PREPARED, "", ""}
 	if *config.Supplier == "go" {
 		s := &GoSupplier{}
-		s.Algorithm = *algo
-		s.Key = *config.Key
-		s.File = &File{Url: *config.File, Status: stat}
-		s.TimeOut = *config.Timeout
-		s.status = stat
+		setFields(&s.BaseSupplier, *algo, config)
 		return s
 	} else if *config.Supplier == "openssl" {
-		s := &OpenSSLSupplier{}
-		s.Algorithm = *algo
-		s.Key = *config.Key
-		s.File = &File{Url: *config.File, Status: stat}
-		s.TimeOut = *config.Timeout
-		s.status = stat
+		s := &CommandSupplier{Type: OPENSSL}
+		setFields(&s.BaseSupplier, *algo, config)
 		return s
 
 	}
 	switch runtime.GOOS {
-	case "linux":
-		s := &UnixSupplier{}
-		s.Algorithm = *algo
-		s.Key = *config.Key
-		s.File = &File{Url: *config.File, Status: stat}
-		s.TimeOut = *config.Timeout
-		s.status = stat
+	case "linux", "mac":
+		s := &CommandSupplier{Type: UNIX}
+		setFields(&s.BaseSupplier, *algo, config)
+		return s
+	case "windows":
+		s := &CommandSupplier{Type: WINDOWS}
+		setFields(&s.BaseSupplier, *algo, config)
 		return s
 	default:
 		return nil
