@@ -16,4 +16,5 @@ type Config struct {
 	All          *bool
 	Key          *string
 	Supplier     *string
+	OnFailure    *string
 }
