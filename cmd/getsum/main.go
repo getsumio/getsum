@@ -28,47 +28,36 @@ func main() {
 
 	logger.Debug("providers: %v", providers)
 
-	sign := make(chan os.Signal, 1)
-	signal.Notify(sign, os.Interrupt)
+	quit, wait := make(chan bool), make(chan bool)
+	handleExit(quit)
 
-	quit := make(chan bool)
-	wait := make(chan bool)
 	length := len(providers)
 	chans := make([]<-chan *status.Status, length)
 	logger.Debug("Running providers, total length: %d", length)
 	for i := 0; i < length; i++ {
 		chans[i] = providers[i].Run(quit, wait)
 	}
-	var anyRunner bool = true
 	stats := make([]*status.Status, length)
 	logger.Trace("Starting to watch running processes")
-	hasValidation := *config.Cheksum != ""
-	go func() {
-		<-sign
-		quit <- true
-		time.Sleep(time.Second)
-		logger.Warn("\n\nTerminate requested by user")
-		os.Exit(1)
-	}()
+	anyRunner, hasValidation, hasError := true, *config.Cheksum != "", false
 	logger.Header(providers)
-	hasMisMatch := false
 	for anyRunner {
 		anyRunner = false
 		for i := 0; i < length; i++ {
 			s := <-chans[i]
 			logger.Trace("Update value %v from provider", *s)
-			if s.Type == status.PREPARED || s.Type == status.RUNNING || s.Type == status.STARTED || s.Type == status.DOWNLOAD {
+			if s.Type < status.COMPLETED {
 				anyRunner = true
-			} else if hasValidation && s.Type == status.COMPLETED {
-				if s.Checksum != *config.Cheksum {
-					hasMisMatch = true
+			} else if s.Type > status.COMPLETED {
+				hasError = true
+			} else {
+				if hasValidation && s.Checksum != *config.Cheksum {
+					logger.Debug("Checksum mismatch: asked: %s, found %s", *config.Cheksum, s.Checksum)
 					s.Type = status.MISMATCH
+					hasError = true
 				}
-
 			}
-
 			stats[i] = s
-
 		}
 		if anyRunner {
 			wait <- true
@@ -79,8 +68,23 @@ func main() {
 	}
 	logger.Logsum(providers, stats)
 	logger.Debug("Application finish")
-	if hasMisMatch {
+
+	if hasError {
 		os.Exit(1)
 	}
+
+}
+
+func handleExit(quit chan bool) {
+	sign := make(chan os.Signal, 1)
+	signal.Notify(sign, os.Interrupt)
+
+	go func() {
+		<-sign
+		quit <- true
+		time.Sleep(time.Second)
+		logger.Warn("\n\nTerminate requested by user")
+		os.Exit(1)
+	}()
 
 }

@@ -9,30 +9,30 @@ type Status struct {
 }
 
 const (
-	PREPARED   StatusType = iota
-	ALLOCATED  StatusType = iota
-	MISMATCH   StatusType = iota
-	ERROR      StatusType = iota
-	FETCHED    StatusType = iota
-	DOWNLOAD   StatusType = iota
-	STARTED    StatusType = iota
-	TIMEDOUT   StatusType = iota
-	COMPLETED  StatusType = iota
-	RUNNING    StatusType = iota
-	TERMINATED StatusType = iota
+	PREPARED StatusType = iota
+	ALLOCATED
+	DOWNLOAD
+	FETCHED
+	STARTED
+	RUNNING
+	COMPLETED
+	ERROR
+	TIMEDOUT
+	MISMATCH
+	TERMINATED
 )
 
 var statusStr = []string{
 	"PREPARED",
 	"ALLOCATED",
-	"MISMATCH",
-	"ERROR",
-	"FETCHED",
 	"DOWNLOAD",
+	"FETCHED",
 	"STARTED",
-	"TIMEDOUT",
-	"COMPLETED",
 	"RUNNING",
+	"COMPLETED",
+	"ERROR",
+	"TIMEDOUT",
+	"MISMATCH",
 	"TERMINATED",
 }
 
