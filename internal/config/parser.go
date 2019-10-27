@@ -13,7 +13,7 @@ func ParseConfig() *Config {
 	var algo *string
 	c.LocalOnly = flag.Bool("localOnly", false, "Only calculate checksum locally \nif remote servers present in config app will ignore those servers")
 	c.LocalOnly = flag.Bool("l", false, "Only calculate checksum locally \nif remote servers present in config app will ignore those servers")
-	algo = flag.String("algo", "SHA512", fmt.Sprintf("Checksum algorithm, you can choose multiple by using MD5,SHA512... \nsupported algos: %s", supportedAlgs))
+	algo = flag.String("algorithm", "SHA512", fmt.Sprintf("Checksum algorithm, you can choose multiple by using MD5,SHA512... \nsupported algos: %s", supportedAlgs))
 	algo = flag.String("a", "SHA512", fmt.Sprintf("Checksum algorithm, you can choose multiple by using MD5,SHA512... \nsupported algos: %s", supportedAlgs))
 	c.LogLevel = flag.String("logLevel", "WARNING", "log level, supported: {TRACE,DEBUG,INFO,WARNING,ERROR}")
 	c.Proxy = flag.String("proxy", "", "Proxy address to reach file or servers")
