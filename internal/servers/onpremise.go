@@ -30,54 +30,71 @@ func (s *OnPremiseServer) Start() {
 	http.ListenAndServe(listenAddress, nil)
 }
 
+func handleGet(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
+	if s.Supplier == nil {
+		handleError("There is no running process", w)
+		return
+	}
+	status, err := json.Marshal(s.Supplier.Status())
+	if err != nil {
+		handleError("System can not parse given status %s", w, err.Error())
+		return
+	}
+	w.Write(status)
+}
+
+func handlePost(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
+	if s.Supplier != nil {
+		handleError("Server already running another process", w)
+		return
+	}
+	jsonDecoder := json.NewDecoder(r.Body)
+	config := Config{}
+	err := jsonDecoder.Decode(config)
+	if err != nil {
+		handleError("Can not read given config %s", w, err.Error())
+		return
+	}
+	err = validation.ValidateConfig(&config)
+	if err != nil {
+		handleError(err.Error(), w)
+		return
+
+	}
+	if factory == nil {
+		factory = new(SupplierFactory)
+	}
+
+	var algorithm = ValueOf(&config.Algorithm[0])
+	s.Supplier = factory.GetSupplierByAlgo(&config, &algorithm)
+	if s.Supplier == nil {
+		handleError("Can not create algorithm runner instance", w)
+	}
+	go s.Supplier.Run()
+}
+
+func handleDelete(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
+	if s.Supplier == nil {
+		handleError("There is no running process", w)
+		return
+	}
+	s.Supplier.Terminate()
+	w.WriteHeader(http.StatusOK)
+	s.Supplier = nil
+}
+
 func (s *OnPremiseServer) handle(w http.ResponseWriter, r *http.Request) {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
-	logger.Info("Request received on %s with method %s", r.Method, r.URL.Path)
+	logger.LogRequest(r)
 	switch r.Method {
 	case "GET":
-		if s.Supplier == nil {
-			handleError("There is no running process", w)
-			return
-		}
-		status, _ := json.Marshal(s.Supplier.Status())
-		w.Write(status)
+		handleGet(s, w, r)
 	case "POST":
-		if s.Supplier != nil {
-			handleError("Server already running a process", w)
-			return
-		}
-		jsonDecoder := json.NewDecoder(r.Body)
-		config := Config{}
-		err := jsonDecoder.Decode(config)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		err = validation.ValidateConfig(&config)
-		if err != nil {
-			handleError(err.Error(), w)
-			return
-
-		}
-
-		if factory == nil {
-			factory = new(SupplierFactory)
-		}
-
-		var algorithm = ValueOf(&config.Algorithm[0])
-		Supplier := factory.GetSupplierByAlgo(&config, &algorithm)
-		s.Supplier = Supplier
-		go s.Supplier.Run()
+		handlePost(s, w, r)
 	case "DELETE":
-		if s.Supplier == nil {
-			handleError("There is no running process", w)
-			return
-		}
-		s.Supplier.Terminate()
-		w.WriteHeader(http.StatusOK)
-		s.Supplier = nil
+		handleDelete(s, w, r)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		logger.Error("Can not handle request method rejecting request")
@@ -85,7 +102,12 @@ func (s *OnPremiseServer) handle(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func handleError(message string, w http.ResponseWriter) {
+func handleError(message string, w http.ResponseWriter, params ...interface{}) {
+	if params != nil {
+		message = fmt.Sprintf(message, params...)
+	}
+	logger.Error("An unexpected error occured %s", message)
+
 	status := &status.Status{Type: status.ERROR, Value: message}
 	jsonStatus, _ := json.Marshal(status)
 	w.Write(jsonStatus)

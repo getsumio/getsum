@@ -4,6 +4,8 @@ package logger
 import (
 	"fmt"
 	"log"
+	"net/http"
+	"net/http/httputil"
 
 	. "github.com/getsumio/getsum/internal/provider/types"
 	"github.com/getsumio/getsum/internal/status"
@@ -46,6 +48,16 @@ func SetLevel(level string) {
 	default:
 		log.Fatal("Given log level not understood!")
 	}
+}
+
+func LogRequest(r *http.Request) {
+	x, err := httputil.DumpRequest(r, true)
+	if err != nil {
+		Warn("Can not dump given request! %s", err.Error())
+		return
+	}
+	Info("A request received: %q", x)
+
 }
 
 func Debug(msg string, params ...interface{}) {
