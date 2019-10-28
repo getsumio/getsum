@@ -14,10 +14,10 @@ import (
 )
 
 type OnPremiseServer struct {
-	address     string
-	port        int
+	Address     string
+	Port        int
 	storagePath string
-	supplier    Supplier
+	Supplier    Supplier
 	mux         sync.Mutex
 }
 
@@ -26,7 +26,7 @@ var factory ISupplierFactory
 func (s *OnPremiseServer) Start() {
 	logger.Level = logger.LevelInfo
 	http.HandleFunc("/", s.handle)
-	listenAddress := fmt.Sprintf("%s:%d", s.address, s.port)
+	listenAddress := fmt.Sprintf("%s:%d", s.Address, s.Port)
 	http.ListenAndServe(listenAddress, nil)
 }
 
@@ -37,25 +37,25 @@ func (s *OnPremiseServer) handle(w http.ResponseWriter, r *http.Request) {
 	logger.Info("Request received on %s with method %s", r.Method, r.URL.Path)
 	switch r.Method {
 	case "GET":
-		if s.supplier == nil {
+		if s.Supplier == nil {
 			handleError("There is no running process", w)
 			return
 		}
-		status, _ := json.Marshal(s.supplier.Status())
+		status, _ := json.Marshal(s.Supplier.Status())
 		w.Write(status)
 	case "POST":
-		if s.supplier != nil {
+		if s.Supplier != nil {
 			handleError("Server already running a process", w)
 			return
 		}
 		jsonDecoder := json.NewDecoder(r.Body)
-		config := &Config{}
+		config := Config{}
 		err := jsonDecoder.Decode(config)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		err = validation.ValidateConfig(config)
+		err = validation.ValidateConfig(&config)
 		if err != nil {
 			handleError(err.Error(), w)
 			return
@@ -67,17 +67,17 @@ func (s *OnPremiseServer) handle(w http.ResponseWriter, r *http.Request) {
 		}
 
 		var algorithm = ValueOf(&config.Algorithm[0])
-		supplier := factory.GetSupplierByAlgo(config, &algorithm)
-		s.supplier = supplier
-		go s.supplier.Run()
+		Supplier := factory.GetSupplierByAlgo(&config, &algorithm)
+		s.Supplier = Supplier
+		go s.Supplier.Run()
 	case "DELETE":
-		if s.supplier == nil {
+		if s.Supplier == nil {
 			handleError("There is no running process", w)
 			return
 		}
-		s.supplier.Terminate()
+		s.Supplier.Terminate()
 		w.WriteHeader(http.StatusOK)
-		s.supplier = nil
+		s.Supplier = nil
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		logger.Error("Can not handle request method rejecting request")

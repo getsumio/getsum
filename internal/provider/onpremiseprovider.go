@@ -1,6 +1,8 @@
 package providers
 
 import (
+	"bytes"
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -12,8 +14,9 @@ import (
 
 type RemoteProvider struct {
 	BaseProvider
-	client http.Client
-	config *config.Config
+	client  *http.Client
+	config  *config.Config
+	address string
 }
 
 func (l *RemoteProvider) Run(quit <-chan bool, wait <-chan bool) <-chan *status.Status {
@@ -44,14 +47,28 @@ func (l *RemoteProvider) Run(quit <-chan bool, wait <-chan bool) <-chan *status.
 
 func remoteRun(l *RemoteProvider) {
 
+	body, _ := json.Marshal(*l.config)
+	resp, _ := l.client.Post(l.address, "application/json", bytes.NewBuffer(body))
+	defer resp.Body.Close()
 }
 
 func remoteStatus(l *RemoteProvider) *status.Status {
-	return nil
+	resp, _ := l.client.Get(l.address)
+	defer resp.Body.Close()
+	decoder := json.NewDecoder(resp.Body)
+	status := &status.Status{}
+	decoder.Decode(status)
+	return status
 }
 
 func remoteTerminate(l *RemoteProvider) {
+	req, err := http.NewRequest("DELETE", l.address, nil)
+	if err != nil {
+		panic(err)
+	}
 
+	resp, _ := l.client.Do(req)
+	defer resp.Body.Close()
 }
 
 func (l *RemoteProvider) Data() *BaseProvider {
@@ -59,7 +76,7 @@ func (l *RemoteProvider) Data() *BaseProvider {
 }
 
 func (l *RemoteProvider) Close() {
-	l.Supplier.Terminate()
+	remoteTerminate(l)
 }
 
 func (l *RemoteProvider) Region() string {

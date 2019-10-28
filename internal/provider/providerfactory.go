@@ -2,6 +2,7 @@ package providers
 
 import (
 	"fmt"
+	"net/http"
 
 	. "github.com/getsumio/getsum/internal/config"
 	"github.com/getsumio/getsum/internal/logger"
@@ -32,9 +33,20 @@ func (p *ProviderFactory) GetProviders(config *Config) ([]Provider, error) {
 	}
 
 	list = append(list, localProviders...)
+	list = append(list, getRemoteProvider(config))
 	logger.Debug("Generated providers: %v", list)
 
 	return list, nil
+}
+
+func getRemoteProvider(config *Config) Provider {
+	r := &RemoteProvider{}
+	r.Name = "remote"
+	r.address = "http://127.0.0.1:8081"
+	r.client = &http.Client{}
+	r.config = config
+	return r
+
 }
 
 func getProvider(pType ProviderType, supplier Supplier, config *Config, a Algorithm) Provider {
