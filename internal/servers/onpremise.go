@@ -22,12 +22,22 @@ type OnPremiseServer struct {
 
 var factory ISupplierFactory
 
-func (s *OnPremiseServer) Start(config *config.Config) {
+func (s *OnPremiseServer) Start(config *config.Config) error {
 	logger.Level = logger.LevelInfo
 	factory = new(SupplierFactory)
 	http.HandleFunc("/", s.handle)
 	listenAddress := fmt.Sprintf("%s:%d", *config.Listen, *config.Port)
-	http.ListenAndServe(listenAddress, nil)
+	var err error
+	if *config.TLSKey != "" {
+		err = http.ListenAndServeTLS(listenAddress, *config.TLSCert, *config.TLSKey, nil)
+	} else {
+		err = http.ListenAndServe(listenAddress, nil)
+	}
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func handleGet(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {

@@ -10,7 +10,7 @@ var supportedAlgs string = "MD2,MD4,MD5,GOST,SHA1,SHA224,SHA256,SHA384,SHA512,RM
 
 const (
 	defaultServe      = false
-	defaultListen     = "http://127.0.0.1"
+	defaultListen     = "127.0.0.1"
 	defaultPort       = 8088
 	defaultLocalOnly  = false
 	defaultAlgo       = "SHA512"
@@ -25,12 +25,16 @@ const (
 func ParseConfig() *Config {
 	c := new(Config)
 	var algo *string
-	c.Serve = flag.Bool("serve", defaultServe, "Run in server mode default address http://127.0.0.1:8088 otherwise set -listen and -port params")
+	c.Serve = flag.Bool("serve", defaultServe, "Run in server mode default address 127.0.0.1:8088 otherwise set -listen and -port params")
 	flag.BoolVar(c.Serve, "s", defaultServe, "shorthand of -serve")
 	c.Listen = flag.String("listen", defaultListen, "listen address only setted if -serve is true")
 	flag.StringVar(c.Listen, "l", defaultListen, "shorthand of -listen")
 	c.Port = flag.Int("port", defaultPort, "Listen port, only enabled if -serve is true")
 	flag.IntVar(c.Port, "p", defaultPort, "shorthand of -port")
+	c.TLSKey = flag.String("tlskey", "", "tls key to run in https/tls -serve and -tlscert also should be set")
+	flag.StringVar(c.TLSKey, "tk", "", "shorthand for -tlskey")
+	c.TLSCert = flag.String("tlscert", "", "tls cert to run in https/tls -serve and -tlskey also should be set")
+	flag.StringVar(c.TLSCert, "tc", "", "shorthand for -tlscert")
 	c.LocalOnly = flag.Bool("localOnly", defaultLocalOnly, "Only calculate checksum locally \nif remote servers present in config app will ignore those servers")
 	flag.BoolVar(c.LocalOnly, "local", defaultLocalOnly, "shorthand of -localOnly")
 	algo = flag.String("algorithm", defaultAlgo, fmt.Sprintf("Checksum algorithm, you can choose multiple by using MD5,SHA512... \nsupported algos: %s", supportedAlgs))

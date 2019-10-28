@@ -22,7 +22,11 @@ func main() {
 	if *config.Serve {
 		logger.Warn("Running in server mode listen address %s , port: %d", *config.Listen, *config.Port)
 		server := &servers.OnPremiseServer{}
-		server.Start(config)
+		err := server.Start(config)
+		if err != nil {
+			logger.Error("Can not start server: %s", err.Error())
+		}
+
 		return
 	}
 

@@ -22,6 +22,8 @@ type Config struct {
 	Port         *int           `json:"port"`
 	Servers      []ServerConfig `json:"servers"`
 	Dir          *string        `json:"dir"`
+	TLSKey       *string        `json:"tls_key"`
+	TLSCert      *string        `json:"tls_cert"`
 }
 
 type ServerConfig struct {
