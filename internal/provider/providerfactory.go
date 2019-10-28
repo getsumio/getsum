@@ -33,7 +33,7 @@ func (p *ProviderFactory) GetProviders(config *Config) ([]Provider, error) {
 	}
 
 	list = append(list, localProviders...)
-	list = append(list, getRemoteProvider(config))
+	//list = append(list, getRemoteProvider(config))
 	logger.Debug("Generated providers: %v", list)
 
 	return list, nil

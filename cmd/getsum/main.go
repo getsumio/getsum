@@ -30,15 +30,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	//server := &servers.OnPremiseServer{
-	//	Address:  "127.0.0.1",
-	//	Port:     8081,
-	//	Supplier: providers[0].Data().Supplier,
-	//}
-
-	//server.Start()
-
-	logger.Debug("providers: %v", providers)
+	logger.Info("providers: %v with size %d", providers, length)
 
 	quit, wait := make(chan bool), make(chan bool)
 	handleExit(quit)

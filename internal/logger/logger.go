@@ -50,7 +50,7 @@ func SetLevel(level string) {
 
 func Debug(msg string, params ...interface{}) {
 	if params != nil {
-		msg = fmt.Sprintf(msg, params)
+		msg = fmt.Sprintf(msg, params...)
 	}
 	if Level <= LevelDebug {
 		log.Printf("%s%s%s\n", color.Bold(color.Magenta(debug)), PADDING, msg)
@@ -59,7 +59,7 @@ func Debug(msg string, params ...interface{}) {
 
 func Trace(msg string, params ...interface{}) {
 	if params != nil {
-		msg = fmt.Sprintf(msg, params)
+		msg = fmt.Sprintf(msg, params...)
 	}
 	if Level <= LevelTrace {
 		log.Printf("%s%s%s\n", color.Bold(color.Faint(trace)), PADDING, msg)
@@ -83,7 +83,7 @@ func Header(providers []Provider) {
 
 func Info(msg string, params ...interface{}) {
 	if params != nil {
-		msg = fmt.Sprintf(msg, params)
+		msg = fmt.Sprintf(msg, params...)
 	}
 	if Level <= LevelInfo {
 		log.Printf("%s%s%s\n", color.Bold(color.Cyan(info)), PADDING, msg)
@@ -138,7 +138,7 @@ func Status(stats []*status.Status) {
 		}
 		msg = fmt.Sprintf("%s%10s\t%6s | ", msg, color.Bold(v), color.Bold(color.Yellow(val)))
 	}
-	if Level < LevelWarn {
+	if Level < LevelInfo {
 		fmt.Printf("%s\n", msg)
 	} else {
 		fmt.Printf("%s\r", msg)
@@ -154,7 +154,7 @@ func Inplace(msg string, params ...interface{}) {
 
 func Warn(msg string, params ...interface{}) {
 	if params != nil {
-		msg = fmt.Sprintf(msg, params)
+		msg = fmt.Sprintf(msg, params...)
 	}
 	if Level <= LevelWarn {
 		log.Printf("%s%s%s\n", color.Bold(color.Yellow(warn)), PADDING, msg)
@@ -163,7 +163,7 @@ func Warn(msg string, params ...interface{}) {
 
 func Error(msg string, params ...interface{}) {
 	if params != nil {
-		msg = fmt.Sprintf(msg, params)
+		msg = fmt.Sprintf(msg, params...)
 	}
 	if Level <= LevelError {
 		log.Printf("%s%s%s\n", color.Bold(color.Red(err)), PADDING, msg)
