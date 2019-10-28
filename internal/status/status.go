@@ -3,9 +3,9 @@ package status
 type StatusType uint8
 
 type Status struct {
-	Type     StatusType
-	Value    string
-	Checksum string
+	Type     StatusType `json:"type"`
+	Value    string     `json:"value"`
+	Checksum string     `json:"checksum"`
 }
 
 const (

@@ -4,6 +4,6 @@ import (
 	. "github.com/getsumio/getsum/internal/config"
 )
 
-func ValidateConfig(config *Config) {
-
+func ValidateConfig(config *Config) error {
+	return nil
 }
