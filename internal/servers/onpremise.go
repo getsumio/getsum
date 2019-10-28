@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/getsumio/getsum/internal/config"
 	. "github.com/getsumio/getsum/internal/config"
 	"github.com/getsumio/getsum/internal/logger"
 	"github.com/getsumio/getsum/internal/status"
@@ -14,8 +15,6 @@ import (
 )
 
 type OnPremiseServer struct {
-	Address     string
-	Port        int
 	storagePath string
 	Supplier    Supplier
 	mux         sync.Mutex
@@ -23,10 +22,11 @@ type OnPremiseServer struct {
 
 var factory ISupplierFactory
 
-func (s *OnPremiseServer) Start() {
+func (s *OnPremiseServer) Start(config *config.Config) {
 	logger.Level = logger.LevelInfo
+	factory = new(SupplierFactory)
 	http.HandleFunc("/", s.handle)
-	listenAddress := fmt.Sprintf("%s:%d", s.Address, s.Port)
+	listenAddress := fmt.Sprintf("%s:%d", *config.Listen, *config.Port)
 	http.ListenAndServe(listenAddress, nil)
 }
 
@@ -60,9 +60,6 @@ func handlePost(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
 		handleError(err.Error(), w)
 		return
 
-	}
-	if factory == nil {
-		factory = new(SupplierFactory)
 	}
 
 	var algorithm = ValueOf(&config.Algorithm[0])

@@ -9,6 +9,7 @@ import (
 	parser "github.com/getsumio/getsum/internal/config"
 	"github.com/getsumio/getsum/internal/logger"
 	. "github.com/getsumio/getsum/internal/provider"
+	"github.com/getsumio/getsum/internal/servers"
 	"github.com/getsumio/getsum/internal/status"
 	validator "github.com/getsumio/getsum/internal/validation"
 )
@@ -18,6 +19,13 @@ func main() {
 	validator.ValidateConfig(config)
 	logger.SetLevel(*config.LogLevel)
 	logger.Debug("Application  started, using config %v", *config)
+	if *config.Serve {
+		logger.Warn("Running in server mode listen address %s , port: %d", *config.Listen, *config.Port)
+		server := &servers.OnPremiseServer{}
+		server.Start(config)
+		return
+	}
+
 	logger.Trace("Collecting providers")
 	var factory IProviderFactory = new(ProviderFactory)
 	providers, err := factory.GetProviders(config)
