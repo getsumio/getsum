@@ -54,5 +54,6 @@ func setFields(base *BaseSupplier, algo Algorithm, config *Config) {
 	base.File = &File{Url: *config.File, Status: stat, Proxy: *config.Proxy, StoragePath: *config.Dir}
 	base.TimeOut = *config.Timeout
 	base.status = stat
+	base.File.Reset()
 
 }

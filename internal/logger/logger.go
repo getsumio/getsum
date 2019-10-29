@@ -131,7 +131,8 @@ func Logsum(providers []*Provider, stats []*status.Status) {
 
 var currentColumn int
 
-func Status(stats []*status.Status, providers *Providers, checksum string) {
+func Status(providers *Providers, checksum string) {
+	stats := providers.Status()
 	printStatus(stats, providers, currentColumn)
 	var anyRunner bool
 	for j := currentColumn; j < currentColumn+5; j++ {
@@ -152,7 +153,7 @@ func Status(stats []*status.Status, providers *Providers, checksum string) {
 		}
 		fmt.Println("\n")
 		printHeader(providers, currentColumn)
-		Status(stats, providers, checksum)
+		Status(providers, checksum)
 	}
 }
 

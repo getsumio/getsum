@@ -22,6 +22,7 @@ type IFile interface {
 	Fetch(timeout int) error
 	IsRemote() bool
 	Delete()
+	Reset()
 }
 
 type File struct {
@@ -46,6 +47,10 @@ func (f *File) Delete() {
 
 func (f *File) IsRemote() bool {
 	return strings.HasPrefix(f.Url, "http") || strings.HasPrefix(f.Url, "ftp")
+}
+
+func (f *File) Reset() {
+	fetchedSize = -1
 }
 
 func (f *File) Data() ([]byte, error) {
