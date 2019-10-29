@@ -65,18 +65,18 @@ func main() {
 
 }
 
-func watch(providers *Providers) {
+func watch(providers *Providers, config *parser.Config) {
 	for providers.IsRunning() {
-		logger.Status(providers.Status())
+		logger.Status(providers.Status(), providers, *config.Cheksum)
 		time.Sleep(200 * time.Millisecond)
 	}
-	logger.Status(providers.Status())
+	logger.Status(providers.Status(), providers, *config.Cheksum)
 }
 
 func checkMismatch(providers *Providers, config *parser.Config) {
 	if providers.HasMismatch(*config.Cheksum) {
 		logger.Debug("There are mismatches")
-		logger.Status(providers.Status())
+		logger.Status(providers.Status(), providers, *config.Cheksum)
 		logger.Logsum(providers.All, providers.Status())
 		os.Exit(1)
 	}
@@ -86,7 +86,7 @@ func checkMismatch(providers *Providers, config *parser.Config) {
 func runAll(providers *Providers, config *parser.Config) {
 	logger.Debug("Running all providers validation")
 	providers.Run()
-	watch(providers)
+	watch(providers, config)
 	providers.Terminate(true)
 	checkMismatch(providers, config)
 	logger.Logsum(providers.All, providers.Status())
@@ -97,14 +97,15 @@ func runRemoteFirst(providers *Providers, config *parser.Config) {
 	logger.Debug("Running remote providers")
 	providers.SuspendLocales()
 	providers.Run()
-	watch(providers)
+	watch(providers, config)
 	providers.Terminate(false)
 	checkMismatch(providers, config)
 	logger.Debug("Running local providers")
 	providers.ResumeLocales()
-	watch(providers)
+	watch(providers, config)
 	providers.Terminate(true)
 	checkMismatch(providers, config)
+	logger.Status(providers.Status(), providers, *config.Cheksum)
 	logger.Logsum(providers.All, providers.Status())
 }
 

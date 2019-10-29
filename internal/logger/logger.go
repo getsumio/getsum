@@ -79,13 +79,18 @@ func Trace(msg string, params ...interface{}) {
 }
 
 func Header(providers *Providers) {
+	printHeader(providers, 0)
+}
+func printHeader(providers *Providers, start int) {
 	var first string
 	var second string
-	for i, p := range providers.All {
-		if i > 6 {
+	var count int
+	for i := start; i < providers.Length; i++ {
+		if count >= 5 {
 			break
 		}
-		first = fmt.Sprintf("%s%s%23s", first, " ", color.Bold(color.Italic(color.BrightCyan(color.Underline((*p).Data().Name)))))
+		count++
+		first = fmt.Sprintf("%s%s%-23s", first, " ", color.Bold(color.Italic(color.BrightCyan(color.Underline((*providers.All[i]).Data().Name)))))
 		second = fmt.Sprintf("%s%10s\t%6s | ", second, "Status", "Value")
 	}
 	fmt.Printf("%s\n", first)
@@ -124,29 +129,56 @@ func Logsum(providers []*Provider, stats []*status.Status) {
 	}
 }
 
-func Status(stats []*status.Status) {
+var currentColumn int
+
+func Status(stats []*status.Status, providers *Providers, checksum string) {
+	printStatus(stats, providers, currentColumn)
+	var anyRunner bool
+	for j := currentColumn; j < currentColumn+5; j++ {
+		if j >= providers.Length {
+			break
+		}
+		if stats[j].Type < status.COMPLETED || stats[j].Type == status.SUSPENDED {
+			anyRunner = true
+			break
+		}
+	}
+	if !anyRunner {
+		providers.HasMismatch(checksum)
+		printStatus(stats, providers, currentColumn)
+		currentColumn += 5
+		if currentColumn >= providers.Length {
+			return
+		}
+		fmt.Println("\n")
+		printHeader(providers, currentColumn)
+		Status(stats, providers, checksum)
+	}
+}
+
+func printStatus(stats []*status.Status, providers *Providers, start int) {
 	var msg string
-	for i, s := range stats {
-		if i > 6 {
-			diff := len(stats) - 5
+	for i := start; i < providers.Length; i++ {
+		if i >= start+5 {
+			diff := providers.Length - i
 			msg = fmt.Sprintf("%s ...%d more running", msg, diff)
 			break
 		}
 		var v color.Value
 		var val string
-		switch s.Type {
+		switch stats[i].Type {
 		case status.TERMINATED, status.TIMEDOUT, status.MISMATCH:
-			v = color.Red(s.Type.Name())
-			val = s.Value
+			v = color.Red(stats[i].Type.Name())
+			val = stats[i].Value
 		case status.ERROR:
-			v = color.Red(s.Type.Name())
+			v = color.Red(stats[i].Type.Name())
 		case status.PREPARED:
-			v = color.Cyan(s.Type.Name())
+			v = color.Cyan(stats[i].Type.Name())
 		case status.STARTED:
-			v = color.Blink(s.Type.Name())
+			v = color.Blink(stats[i].Type.Name())
 		default:
-			v = color.Green(s.Type.Name())
-			val = s.Value
+			v = color.Green(stats[i].Type.Name())
+			val = stats[i].Value
 		}
 		msg = fmt.Sprintf("%s%10s\t%6s | ", msg, color.Bold(v), color.Bold(color.Yellow(val)))
 	}
