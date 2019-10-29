@@ -16,7 +16,7 @@ func (l *LocalProvider) Run(quit <-chan bool, wait <-chan bool) <-chan *status.S
 	logger.Debug("Running local provider %s", l.Name)
 	statusChannel := make(chan *status.Status)
 	logger.Trace("Triggering supplier %s", l.Name)
-	go l.Supplier.Run()
+	go l.Supplier.Run(false)
 	go func() {
 		for {
 			select {

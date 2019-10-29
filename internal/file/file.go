@@ -21,6 +21,7 @@ type IFile interface {
 	Data() ([]byte, error)
 	Fetch(timeout int) error
 	IsRemote() bool
+	Delete()
 }
 
 type File struct {
@@ -35,6 +36,12 @@ type File struct {
 
 func (f *File) Path() string {
 	return f.path
+}
+
+func (f *File) Delete() {
+	if f.path != "" {
+		os.Remove(f.path)
+	}
 }
 
 func (f *File) IsRemote() bool {

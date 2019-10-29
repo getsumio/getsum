@@ -82,7 +82,7 @@ func handlePost(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
 	if s.Supplier == nil {
 		handleError("Can not create algorithm runner instance", w)
 	}
-	go s.Supplier.Run()
+	go s.Supplier.Run(true)
 	logger.Info("Process started")
 }
 

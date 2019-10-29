@@ -50,7 +50,10 @@ func (s *GoSupplier) Supports() []Algorithm {
 	}
 }
 
-func (s *GoSupplier) Run() {
+func (s *GoSupplier) Run(deleteOnExit bool) {
+	if deleteOnExit {
+		defer s.File.Delete()
+	}
 	err := s.File.Fetch(s.TimeOut)
 	if err != nil {
 		s.status.Value = err.Error()

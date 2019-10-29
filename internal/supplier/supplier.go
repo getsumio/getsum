@@ -6,7 +6,7 @@ import (
 )
 
 type Supplier interface {
-	Run()
+	Run(deleteOnExit bool)
 	Status() *status.Status
 	Terminate()
 	Supports() []Algorithm

@@ -76,8 +76,10 @@ func kill(cmd *exec.Cmd) {
 
 var cmd *exec.Cmd
 
-func (s *CommandSupplier) Run() {
-
+func (s *CommandSupplier) Run(deleteOnExit bool) {
+	if deleteOnExit {
+		s.File.Delete()
+	}
 	err := s.File.Fetch(s.TimeOut)
 	if err != nil {
 		s.status.Value = err.Error()
