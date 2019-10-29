@@ -15,7 +15,17 @@ import (
 )
 
 func main() {
-	config := parser.ParseConfig()
+	config, err := parser.ParseConfig()
+	if err != nil {
+		logger.Error("Can not parse configuration: %s", err.Error())
+		os.Exit(1)
+	}
+	logger.Error("Configs %d", len(config.Servers.Servers))
+	for _, s := range config.Servers.Servers {
+		logger.Error(s.Name)
+		logger.Error(s.Address)
+	}
+
 	validator.ValidateConfig(config)
 	logger.SetLevel(*config.LogLevel)
 	logger.Debug("Application  started, using config %v", *config)
@@ -26,8 +36,7 @@ func main() {
 		if err != nil {
 			logger.Error("Can not start server: %s", err.Error())
 		}
-
-		return
+		os.Exit(1)
 	}
 
 	logger.Trace("Collecting providers")

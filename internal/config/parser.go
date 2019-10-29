@@ -3,7 +3,10 @@ package config
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"strings"
+
+	"gopkg.in/yaml.v2"
 )
 
 var supportedAlgs string = "MD2,MD4,MD5,GOST,SHA1,SHA224,SHA256,SHA384,SHA512,RMD160,SHA3-224,SHA3-256,SHA3-384,SHA3-512,SHA512-224,SHA512-256,BLAKE2s256,BLAKE2b256,BLAKE2b384,BLAKE2b512,SHAKE128,SHAKE256,SM3"
@@ -22,9 +25,29 @@ const (
 	defaultSupplier   = "go"
 )
 
-func ParseConfig() *Config {
+func parseYaml(config *Config) error {
+	if *config.ServerConfig == "" {
+		return nil
+	}
+	yamlFile, err := ioutil.ReadFile(*config.ServerConfig)
+	if err != nil {
+		return err
+	}
+	var configs ServerConfigs
+	err = yaml.Unmarshal(yamlFile, &configs)
+	if err != nil {
+		return err
+	}
+	config.Servers = configs
+
+	return nil
+}
+
+func ParseConfig() (*Config, error) {
 	c := new(Config)
 	var algo *string
+	c.ServerConfig = flag.String("serverconfig", "", "config file location for remote servers")
+	flag.StringVar(c.ServerConfig, "sc", "", "shorthand for -serverconfig")
 	c.Serve = flag.Bool("serve", defaultServe, "Run in server mode default address 127.0.0.1:8088 otherwise set -listen and -port params")
 	flag.BoolVar(c.Serve, "s", defaultServe, "shorthand of -serve")
 	c.Listen = flag.String("listen", defaultListen, "listen address only setted if -serve is true")
@@ -61,6 +84,11 @@ func ParseConfig() *Config {
 
 	upper := strings.ToUpper(*algo)
 	flag.Parse()
+	err := parseYaml(c)
+	if err != nil {
+		return nil, err
+	}
+
 	lower := strings.ToLower(*c.Supplier)
 	c.Supplier = &lower
 	c.Algorithm = strings.Split(upper, ",")
@@ -75,5 +103,5 @@ func ParseConfig() *Config {
 
 	}
 
-	return c
+	return c, nil
 }
