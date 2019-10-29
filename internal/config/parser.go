@@ -76,8 +76,7 @@ func ParseConfig() (*Config, error) {
 	c.Key = flag.String("key", defaultKey, "Key for blake2 hashing")
 	flag.StringVar(c.Key, "k", defaultKey, "shorthand of -key")
 	c.Dir = flag.String("dir", ".", "Default folder to save files, default is current folder")
-	c.Supplier = flag.String("supplier", defaultSupplier, "Algorithm supplier default is [GO] that core golang libraries used, if you want to use unix, win, mac default apps set to [OS], for openssl set [openssl] cloud providers support may vary")
-	flag.StringVar(c.Supplier, "su", defaultSupplier, "shorthand of -supplier")
+	c.Supplier = flag.String("lib", defaultSupplier, "Algorithm lib default is [GO] that core golang libraries used, if you want to use unix, win, mac default apps set to [OS], for openssl set [openssl]")
 	var empty string = ""
 	c.File = &empty
 	c.Cheksum = &empty

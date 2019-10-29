@@ -70,6 +70,7 @@ func watch(providers *Providers) {
 		logger.Status(providers.Status())
 		time.Sleep(200 * time.Millisecond)
 	}
+	logger.Status(providers.Status())
 }
 
 func checkMismatch(providers *Providers, config *parser.Config) {

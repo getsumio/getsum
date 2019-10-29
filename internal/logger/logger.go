@@ -85,7 +85,7 @@ func Header(providers *Providers) {
 		if i > 6 {
 			break
 		}
-		first = fmt.Sprintf("%s%s%s%s", first, PADDING, color.Bold(color.Italic(color.BrightCyan(color.Underline((*p).Data().Name)))), PADDING)
+		first = fmt.Sprintf("%s%s%23s", first, " ", color.Bold(color.Italic(color.BrightCyan(color.Underline((*p).Data().Name)))))
 		second = fmt.Sprintf("%s%10s\t%6s | ", second, "Status", "Value")
 	}
 	fmt.Printf("%s\n", first)

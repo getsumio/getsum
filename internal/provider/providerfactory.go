@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 	"sync"
 
 	. "github.com/getsumio/getsum/internal/config"
@@ -79,7 +80,7 @@ func getRemoteProviders(config *Config) []*Provider {
 
 func getRemoteProvider(config *Config, serverConfig *ServerConfig) Provider {
 	r := &RemoteProvider{}
-	r.Name = serverConfig.Name
+	r.Name = strings.Join([]string{serverConfig.Name, config.Algorithm[0]}, "-")
 	r.address = serverConfig.Address
 	r.client = getHttpClient(config)
 	r.config = config
@@ -91,7 +92,7 @@ func getRemoteProvider(config *Config, serverConfig *ServerConfig) Provider {
 
 func getProvider(pType ProviderType, supplier Supplier, config *Config, a Algorithm) Provider {
 	l := &LocalProvider{}
-	l.Name = fmt.Sprintf("%s-%s", pType.Name(), a.Name())
+	l.Name = strings.Join([]string{pType.Name(), a.Name()}, "-")
 	l.Type = pType
 	l.Supplier = supplier
 	l.WG = &sync.WaitGroup{}

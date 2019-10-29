@@ -37,13 +37,13 @@ const (
 )
 
 var typStr = []string{
-	"AWS",
-	"GOOGLE",
-	"ORACLE",
-	"AZURE",
-	"IBM",
-	"LOCAL",
-	"ONPREMISE",
+	"aws",
+	"google",
+	"oracle",
+	"azure",
+	"ibm",
+	"local",
+	"onpremise",
 }
 
 func (p ProviderType) Name() string {
