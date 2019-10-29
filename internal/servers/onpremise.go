@@ -70,7 +70,7 @@ func handlePost(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
 		handleError("Can not read given config %s", w, err.Error())
 		return
 	}
-	err = validation.ValidateConfig(config)
+	err = validation.ValidateConfig(config, true)
 	if err != nil {
 		handleError(err.Error(), w)
 		return

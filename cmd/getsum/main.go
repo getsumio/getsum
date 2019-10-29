@@ -21,7 +21,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	validator.ValidateConfig(config)
+	err = validator.ValidateConfig(config, false)
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+
 	logger.SetLevel(*config.LogLevel)
 	logger.Debug("Application  started, using config %v", *config)
 	if *config.Serve {

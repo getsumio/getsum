@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strings"
 
 	"gopkg.in/yaml.v2"
@@ -25,9 +26,16 @@ const (
 	defaultSupplier   = "go"
 )
 
+var defaultConfig string = "~/.getsum/servers.yml"
+
 func parseYaml(config *Config) error {
 	if *config.ServerConfig == "" {
-		return nil
+		_, err := os.Stat(defaultConfig)
+		if os.IsNotExist(err) {
+			return nil
+		}
+		config.ServerConfig = &defaultConfig
+
 	}
 	yamlFile, err := ioutil.ReadFile(*config.ServerConfig)
 	if err != nil {

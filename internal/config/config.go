@@ -2,7 +2,6 @@ package config
 
 type Config struct {
 	File         *string       `json:"file"`
-	Remote       *bool         `json:"remote"`
 	LocalOnly    *bool         `json:"local_only"`
 	Proxy        *string       `json:"proxy"`
 	Algorithm    []string      `json:"algorithm"`

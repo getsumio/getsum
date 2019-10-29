@@ -44,8 +44,7 @@ func remoteRun(l *RemoteProvider) {
 	}
 
 	resp, err := l.client.Post(l.address, "application/json", bytes.NewBuffer(body))
-	defer resp.Body.Close()
-
+	defer closeResponse(resp)
 	if err != nil {
 		l.ErrorStatus = getErrorStatus(err)
 		return
@@ -54,13 +53,19 @@ func remoteRun(l *RemoteProvider) {
 
 }
 
+func closeResponse(response *http.Response) {
+	if response != nil && response.Body != nil {
+		response.Body.Close()
+	}
+}
+
 func remoteStatus(l *RemoteProvider) *status.Status {
 	resp, err := l.client.Get(l.address)
 	if err != nil {
 		return getErrorStatus(err)
 	}
 
-	defer resp.Body.Close()
+	defer closeResponse(resp)
 	decoder := json.NewDecoder(resp.Body)
 	status := &status.Status{}
 	err = decoder.Decode(status)
@@ -78,7 +83,7 @@ func remoteTerminate(l *RemoteProvider) error {
 	}
 
 	resp, err := l.client.Do(req)
-	defer resp.Body.Close()
+	defer closeResponse(resp)
 	if err != nil {
 		return err
 	}
