@@ -25,7 +25,7 @@ func (l *RemoteProvider) Run(quit <-chan bool, wait <-chan bool) <-chan *status.
 	logger.Trace("Triggering supplier %s", l.Name)
 	go remoteRun(l, statusChannel)
 	go func() {
-		time.Sleep(time.Second)
+		time.Sleep(500 * time.Millisecond)
 		for {
 			select {
 			case <-wait:

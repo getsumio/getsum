@@ -70,6 +70,7 @@ func getRemoteProvider(config *Config, serverConfig *ServerConfig) Provider {
 	r.address = serverConfig.Address
 	r.client = getHttpClient(config)
 	r.config = config
+	r.Type = OnPremise
 	return r
 
 }
@@ -77,7 +78,6 @@ func getRemoteProvider(config *Config, serverConfig *ServerConfig) Provider {
 func getProvider(pType ProviderType, supplier Supplier, config *Config, a Algorithm) Provider {
 	l := &LocalProvider{}
 	l.Name = fmt.Sprintf("%s-%s", pType.Name(), a.Name())
-	l.Proxy = config.Proxy
 	l.Type = pType
 	l.Supplier = supplier
 	return l

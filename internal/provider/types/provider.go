@@ -12,7 +12,6 @@ type Provider interface {
 
 type BaseProvider struct {
 	Name     string
-	Proxy    *string
 	Type     ProviderType
 	Supplier supplier.Supplier
 }
@@ -20,12 +19,13 @@ type BaseProvider struct {
 type ProviderType int
 
 const (
-	Aws    ProviderType = iota
-	Google ProviderType = iota
-	Oracle ProviderType = iota
-	Azure  ProviderType = iota
-	IBM    ProviderType = iota
-	Local  ProviderType = iota
+	Aws ProviderType = iota
+	Google
+	Oracle
+	Azure
+	IBM
+	Local
+	OnPremise
 )
 
 var typStr = []string{
@@ -35,6 +35,7 @@ var typStr = []string{
 	"AZURE",
 	"IBM",
 	"LOCAL",
+	"ONPREMISE",
 }
 
 func (p ProviderType) Name() string {
