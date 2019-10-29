@@ -6,7 +6,6 @@ import (
 )
 
 type Provider interface {
-	Close()
 	Data() *BaseProvider
 	Run(quit <-chan bool, wait <-chan bool) <-chan *status.Status
 }

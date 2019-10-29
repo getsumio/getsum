@@ -56,8 +56,10 @@ func getHttpClient(config *Config) *http.Client {
 }
 func getRemoteProviders(config *Config) []Provider {
 	list := []Provider{}
-	for _, s := range config.Servers.Servers {
-		list = append(list, getRemoteProvider(config, &s))
+	if !*config.LocalOnly {
+		for _, s := range config.Servers.Servers {
+			list = append(list, getRemoteProvider(config, &s))
+		}
 	}
 	return list
 }

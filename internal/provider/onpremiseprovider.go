@@ -110,7 +110,3 @@ func remoteTerminate(l *RemoteProvider) error {
 func (l *RemoteProvider) Data() *BaseProvider {
 	return &l.BaseProvider
 }
-
-func (l *RemoteProvider) Close() {
-	remoteTerminate(l)
-}

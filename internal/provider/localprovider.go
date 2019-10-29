@@ -14,7 +14,6 @@ type LocalProvider struct {
 
 func (l *LocalProvider) Run(quit <-chan bool, wait <-chan bool) <-chan *status.Status {
 	logger.Debug("Running local provider %s", l.Name)
-	defer l.Close()
 	statusChannel := make(chan *status.Status)
 	logger.Trace("Triggering supplier %s", l.Name)
 	go l.Supplier.Run()
@@ -41,8 +40,4 @@ func (l *LocalProvider) Run(quit <-chan bool, wait <-chan bool) <-chan *status.S
 
 func (l *LocalProvider) Data() *BaseProvider {
 	return &l.BaseProvider
-}
-
-func (l *LocalProvider) Close() {
-	l.Supplier.Terminate()
 }

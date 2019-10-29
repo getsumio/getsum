@@ -24,12 +24,13 @@ type IFile interface {
 }
 
 type File struct {
-	path   string
-	data   []byte
-	Url    string
-	Status *status.Status
-	Size   int64
-	Proxy  string
+	path        string
+	data        []byte
+	Url         string
+	Status      *status.Status
+	Size        int64
+	Proxy       string
+	StoragePath string
 }
 
 func (f *File) Path() string {
@@ -76,6 +77,9 @@ func fetchRemote(f *File, timeout int) error {
 	mux.Lock()
 	defer mux.Unlock()
 	filename := path.Base(f.Url)
+	if f.StoragePath != "" {
+		filename = strings.Join([]string{filename, f.StoragePath}, "/")
+	}
 	if fetchedSize > 0 { //another process already fetched
 		f.Size = fetchedSize
 		f.path = filename
