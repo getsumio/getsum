@@ -42,7 +42,7 @@ func (p *ProviderFactory) GetProviders(config *Config) (*Providers, error) {
 	lengthRemote := len(remoteProviders)
 	lengthTotal := len(allProviders)
 	providers := &Providers{
-		Locales:   localProviders,
+		Locals:   localProviders,
 		Remotes:   remoteProviders,
 		All:       allProviders,
 		HasRemote: lengthRemote > 0,

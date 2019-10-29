@@ -8,7 +8,7 @@ import (
 
 type Providers struct {
 	Remotes   []*Provider
-	Locales   []*Provider
+	Locals   []*Provider
 	All       []*Provider
 	Statuses  []*status.Status
 	Length    int
@@ -23,25 +23,25 @@ func (providers *Providers) RunRemotes() {
 	time.Sleep(200 * time.Millisecond)
 }
 
-func (providers *Providers) RunLocales() {
-	for _, provider := range providers.Locales {
+func (providers *Providers) RunLocals() {
+	for _, provider := range providers.Locals {
 		go (*provider).Run()
 	}
 }
 
 func (providers *Providers) Run() {
 	providers.RunRemotes()
-	providers.RunLocales()
+	providers.RunLocals()
 }
 
-func (providers *Providers) SuspendLocales() {
-	for _, provider := range providers.Locales {
+func (providers *Providers) SuspendLocals() {
+	for _, provider := range providers.Locals {
 		(*provider).Wait()
 	}
 }
 
-func (providers *Providers) ResumeLocales() {
-	for _, provider := range providers.Locales {
+func (providers *Providers) ResumeLocals() {
+	for _, provider := range providers.Locals {
 		(*provider).Resume()
 	}
 }

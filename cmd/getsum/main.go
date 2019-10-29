@@ -95,13 +95,13 @@ func runAll(providers *Providers, config *parser.Config) {
 
 func runRemoteFirst(providers *Providers, config *parser.Config) {
 	logger.Debug("Running remote providers")
-	providers.SuspendLocales()
+	providers.SuspendLocals()
 	providers.Run()
 	watch(providers, config)
 	providers.Terminate(false)
 	checkMismatch(providers, config)
 	logger.Debug("Running local providers")
-	providers.ResumeLocales()
+	providers.ResumeLocals()
 	watch(providers, config)
 	providers.Terminate(true)
 	checkMismatch(providers, config)
