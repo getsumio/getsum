@@ -23,8 +23,9 @@ func (l *LocalProvider) Run(quit <-chan bool, wait <-chan bool) <-chan *status.S
 			select {
 			case <-wait:
 			case <-quit:
-				logger.Trace("Quit triggered %s", l.Name)
+				logger.Debug("Quit triggered %s", l.Name)
 				l.Supplier.Terminate()
+				close(statusChannel)
 				return
 			default:
 				stat := l.Supplier.Status()

@@ -30,11 +30,12 @@ func (l *RemoteProvider) Run(quit <-chan bool, wait <-chan bool) <-chan *status.
 			select {
 			case <-wait:
 			case <-quit:
-				logger.Trace("Quit triggered %s", l.Name)
+				logger.Debug("Quit triggered %s", l.Name)
 				err := remoteTerminate(l)
 				if err != nil {
 					statusChannel <- getErrorStatus(err)
 				}
+				close(statusChannel)
 				return
 			default:
 				stat := remoteStatus(l)

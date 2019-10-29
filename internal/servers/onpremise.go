@@ -45,11 +45,13 @@ func handleGet(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
 		handleError("There is no running process", w)
 		return
 	}
-	status, err := json.Marshal(s.Supplier.Status())
+	stat := s.Supplier.Status()
+	status, err := json.Marshal(stat)
 	if err != nil {
 		handleError("System can not parse given status %s", w, err.Error())
 		return
 	}
+	logger.Info("Returning status %v", *stat)
 	w.Write(status)
 }
 

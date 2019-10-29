@@ -50,6 +50,7 @@ func main() {
 
 	quit, wait := make(chan bool), make(chan bool)
 	handleExit(quit)
+	defer close(quit)
 
 	chans := make([]<-chan *status.Status, length)
 	logger.Debug("Running providers, total length: %d", length)
