@@ -21,10 +21,11 @@ type RemoteProvider struct {
 
 func (l *RemoteProvider) Run() {
 	if l.BaseProvider.Wait {
+		logger.Info("Process %s on hold", l.Type.Name())
 		l.WG.Wait()
 	}
 	logger.Debug("Running remote provider %s", l.Name)
-	go remoteRun(l)
+	remoteRun(l)
 }
 
 func getErrorStatus(err error) *status.Status {
@@ -92,11 +93,16 @@ func (l *RemoteProvider) Data() *BaseProvider {
 func (l *RemoteProvider) Wait() {
 	logger.Info("Provider %s suspended", l.Name)
 	l.BaseProvider.Wait = true
+	l.WG.Add(1)
+	stat := l.Supplier.Status()
+	stat.Type = status.SUSPENDED
 }
 
 func (l *RemoteProvider) Resume() {
 	logger.Info("Resuming %s", l.Name)
 	l.WG.Done()
+	stat := l.Supplier.Status()
+	stat.Type = status.RESUMING
 }
 
 func (l *RemoteProvider) Terminate() error {
@@ -106,6 +112,7 @@ func (l *RemoteProvider) Terminate() error {
 }
 
 func (l *RemoteProvider) Status() *status.Status {
+	logger.Debug("Remote status requested")
 	if l.ErrorStatus != nil {
 		return l.ErrorStatus
 	}

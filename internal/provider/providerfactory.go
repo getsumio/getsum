@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"sync"
 
 	. "github.com/getsumio/getsum/internal/config"
 	"github.com/getsumio/getsum/internal/logger"
@@ -83,6 +84,7 @@ func getRemoteProvider(config *Config, serverConfig *ServerConfig) Provider {
 	r.client = getHttpClient(config)
 	r.config = config
 	r.Type = OnPremise
+	r.WG = &sync.WaitGroup{}
 	return r
 
 }
@@ -92,6 +94,7 @@ func getProvider(pType ProviderType, supplier Supplier, config *Config, a Algori
 	l.Name = fmt.Sprintf("%s-%s", pType.Name(), a.Name())
 	l.Type = pType
 	l.Supplier = supplier
+	l.WG = &sync.WaitGroup{}
 	return l
 
 }

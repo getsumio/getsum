@@ -12,10 +12,11 @@ type LocalProvider struct {
 
 func (l *LocalProvider) Run() {
 	if l.BaseProvider.Wait {
+		logger.Info("Process on hold! %s", l.Type.Name())
 		l.WG.Wait()
 	}
 	logger.Debug("Running local provider %s", l.Name)
-	go l.Supplier.Run(false)
+	l.Supplier.Run(false)
 }
 
 func (l *LocalProvider) Data() *BaseProvider {
@@ -25,11 +26,16 @@ func (l *LocalProvider) Data() *BaseProvider {
 func (l *LocalProvider) Wait() {
 	logger.Info("Provider %s suspended", l.Name)
 	l.BaseProvider.Wait = true
+	l.WG.Add(1)
+	stat := l.Supplier.Status()
+	stat.Type = status.SUSPENDED
 }
 
 func (l *LocalProvider) Resume() {
 	logger.Info("Resuming %s", l.Name)
 	l.WG.Done()
+	stat := l.Supplier.Status()
+	stat.Type = status.RESUMING
 }
 
 func (l *LocalProvider) Terminate() error {

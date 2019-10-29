@@ -86,6 +86,7 @@ func runAll(providers *Providers, config *parser.Config) {
 	logger.Debug("Running without validation")
 	providers.Run()
 	watch(providers)
+	providers.Terminate(true)
 	checkMismatch(providers, config)
 	logger.Logsum(providers.All, providers.Status())
 
@@ -96,9 +97,11 @@ func runRemoteFirst(providers *Providers, config *parser.Config) {
 	providers.SuspendLocales()
 	providers.Run()
 	watch(providers)
+	providers.Terminate(false)
 	checkMismatch(providers, config)
 	providers.ResumeLocales()
 	watch(providers)
+	providers.Terminate(true)
 	checkMismatch(providers, config)
 	logger.Logsum(providers.All, providers.Status())
 }
@@ -109,7 +112,7 @@ func handleExit(providers *Providers) {
 
 	go func() {
 		<-sign
-		providers.Terminate()
+		providers.Terminate(true)
 		time.Sleep(300 * time.Millisecond)
 		logger.Warn("\n\nTerminate requested by user")
 		os.Exit(1)

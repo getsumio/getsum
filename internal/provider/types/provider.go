@@ -20,7 +20,7 @@ type BaseProvider struct {
 	Name     string
 	Type     ProviderType
 	Supplier supplier.Supplier
-	WG       sync.WaitGroup
+	WG       *sync.WaitGroup
 	Wait     bool
 }
 

@@ -1,6 +1,8 @@
 package providers
 
 import (
+	"time"
+
 	"github.com/getsumio/getsum/internal/status"
 )
 
@@ -16,13 +18,14 @@ type Providers struct {
 
 func (providers *Providers) RunRemotes() {
 	for _, provider := range providers.Remotes {
-		(*provider).Run()
+		go (*provider).Run()
 	}
+	time.Sleep(200 * time.Millisecond)
 }
 
 func (providers *Providers) RunLocales() {
 	for _, provider := range providers.Locales {
-		(*provider).Run()
+		go (*provider).Run()
 	}
 }
 
@@ -43,17 +46,19 @@ func (providers *Providers) ResumeLocales() {
 	}
 }
 
-func (providers *Providers) Terminate() {
-	for _, provider := range providers.All {
-		go (*provider).Terminate()
+func (providers *Providers) Terminate(force bool) {
+	for i, provider := range providers.All {
+		if force || providers.Statuses[i].Type >= status.COMPLETED {
+			(*provider).Terminate()
+		}
 	}
 }
 
 func (providers *Providers) Status() []*status.Status {
-	var i int = 0
-	for _, provider := range providers.All {
-		providers.Statuses[i] = (*provider).Status()
-		i++
+	for i, provider := range providers.All {
+		if providers.Statuses[i] == nil || providers.Statuses[i].Type < status.COMPLETED {
+			providers.Statuses[i] = (*provider).Status()
+		}
 	}
 	return providers.Statuses
 }
@@ -69,7 +74,7 @@ func (providers *Providers) HasError() bool {
 
 func (providers *Providers) IsRunning() bool {
 	for _, stat := range providers.Status() {
-		if stat != nil && stat.Type < status.COMPLETED {
+		if stat.Type < status.COMPLETED {
 			return true
 		}
 	}
@@ -82,7 +87,7 @@ func (providers *Providers) HasMismatch(checksum string) bool {
 	}
 	var mismatch bool = false
 	for _, stat := range providers.Statuses {
-		if stat != nil && stat.Checksum != checksum {
+		if stat.Type == status.COMPLETED && stat.Checksum != checksum {
 			stat.Type = status.MISMATCH
 			mismatch = true
 		}
