@@ -30,7 +30,7 @@ func (l *LocalProvider) Run(quit <-chan bool, wait <-chan bool) <-chan *status.S
 				stat := l.Supplier.Status()
 				logger.Trace("Status received", (*stat).Type.Name(), (*stat).Value, l.Name)
 				statusChannel <- stat
-				time.Sleep(50 * time.Millisecond)
+				time.Sleep(150 * time.Millisecond)
 
 			}
 		}

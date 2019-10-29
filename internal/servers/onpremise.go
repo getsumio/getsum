@@ -55,17 +55,20 @@ func handleGet(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
 
 func handlePost(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
 	if s.Supplier != nil {
-		handleError("Server already running another process", w)
-		return
+		stat := s.Supplier.Status()
+		if stat.Type <= status.RUNNING {
+			handleError("Server already running another process", w)
+			return
+		}
 	}
 	jsonDecoder := json.NewDecoder(r.Body)
-	config := Config{}
+	config := &Config{}
 	err := jsonDecoder.Decode(config)
 	if err != nil {
 		handleError("Can not read given config %s", w, err.Error())
 		return
 	}
-	err = validation.ValidateConfig(&config)
+	err = validation.ValidateConfig(config)
 	if err != nil {
 		handleError(err.Error(), w)
 		return
@@ -73,11 +76,12 @@ func handlePost(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
 	}
 
 	var algorithm = ValueOf(&config.Algorithm[0])
-	s.Supplier = factory.GetSupplierByAlgo(&config, &algorithm)
+	s.Supplier = factory.GetSupplierByAlgo(config, &algorithm)
 	if s.Supplier == nil {
 		handleError("Can not create algorithm runner instance", w)
 	}
 	go s.Supplier.Run()
+	logger.Info("Process started")
 }
 
 func handleDelete(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
@@ -88,6 +92,7 @@ func handleDelete(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
 	s.Supplier.Terminate()
 	w.WriteHeader(http.StatusOK)
 	s.Supplier = nil
+	logger.Info("Process terminated")
 }
 
 func (s *OnPremiseServer) handle(w http.ResponseWriter, r *http.Request) {
