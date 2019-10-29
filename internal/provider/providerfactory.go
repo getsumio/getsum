@@ -3,6 +3,7 @@ package providers
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 
 	. "github.com/getsumio/getsum/internal/config"
 	"github.com/getsumio/getsum/internal/logger"
@@ -33,17 +34,39 @@ func (p *ProviderFactory) GetProviders(config *Config) ([]Provider, error) {
 	}
 
 	list = append(list, localProviders...)
-	//list = append(list, getRemoteProvider(config))
+	list = append(list, getRemoteProviders(config)...)
 	logger.Debug("Generated providers: %v", list)
 
 	return list, nil
 }
 
-func getRemoteProvider(config *Config) Provider {
+func getHttpClient(config *Config) *http.Client {
+	proxyUrl := http.ProxyFromEnvironment
+	if *config.Proxy != "" {
+		proxy, _ := url.Parse(*config.Proxy)
+		proxyUrl = http.ProxyURL(proxy)
+	}
+	tr := &http.Transport{
+		Proxy: proxyUrl,
+	}
+	client := &http.Client{
+		Transport: tr,
+	}
+	return client
+}
+func getRemoteProviders(config *Config) []Provider {
+	list := []Provider{}
+	for _, s := range config.Servers.Servers {
+		list = append(list, getRemoteProvider(config, &s))
+	}
+	return list
+}
+
+func getRemoteProvider(config *Config, serverConfig *ServerConfig) Provider {
 	r := &RemoteProvider{}
-	r.Name = "remote"
-	r.address = "http://127.0.0.1:8081"
-	r.client = &http.Client{}
+	r.Name = serverConfig.Name
+	r.address = serverConfig.Address
+	r.client = getHttpClient(config)
 	r.config = config
 	return r
 
