@@ -42,7 +42,7 @@ func main() {
 		logger.Error(err.Error())
 		os.Exit(1)
 	} else if length < 1 {
-		logger.Error("There is no other supported algorithm asked to run, terminating")
+		logger.Error("No runner specified or no supported algorithm, terminating")
 		os.Exit(1)
 	}
 

@@ -114,7 +114,3 @@ func (l *RemoteProvider) Data() *BaseProvider {
 func (l *RemoteProvider) Close() {
 	remoteTerminate(l)
 }
-
-func (l *RemoteProvider) Region() string {
-	return l.Zone
-}

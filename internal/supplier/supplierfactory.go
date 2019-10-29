@@ -51,7 +51,7 @@ func setFields(base *BaseSupplier, algo Algorithm, config *Config) {
 	stat := &status.Status{status.PREPARED, "", ""}
 	base.Algorithm = algo
 	base.Key = *config.Key
-	base.File = &File{Url: *config.File, Status: stat}
+	base.File = &File{Url: *config.File, Status: stat, Proxy: *config.Proxy}
 	base.TimeOut = *config.Timeout
 	base.status = stat
 

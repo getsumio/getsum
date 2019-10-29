@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"strconv"
@@ -28,6 +29,7 @@ type File struct {
 	Url    string
 	Status *status.Status
 	Size   int64
+	Proxy  string
 }
 
 func (f *File) Path() string {
@@ -91,30 +93,27 @@ func fetchRemote(f *File, timeout int) error {
 	}
 	defer out.Close()
 
-	header, err := http.Head(f.Url)
+	client := getHttpClient(f, timeout)
+
+	header, err := client.Head(f.Url)
 	if err != nil {
 		return err
 	}
 	defer header.Body.Close()
 	size, err := strconv.Atoi(header.Header.Get("Content-Length"))
 	if err != nil {
-		f.Status.Type = status.ERROR
 		return err
 	}
 	f.Size = int64(size)
 	f.path = filename
 
 	quit := make(chan bool)
+	defer close(quit)
 	go downloadFile(quit, f)
-
-	client := http.Client{
-		Timeout: time.Duration(timeout) * time.Second,
-	}
 
 	resp, err := client.Get(f.Url)
 	if err != nil {
 		quit <- true
-		f.Status.Type = status.ERROR
 		return err
 	}
 	defer resp.Body.Close()
@@ -151,4 +150,20 @@ func remove(fileOrDir string) error {
 	}
 	return nil
 
+}
+
+func getHttpClient(f *File, timeout int) *http.Client {
+	proxyUrl := http.ProxyFromEnvironment
+	if f.Proxy != "" {
+		proxy, _ := url.Parse(f.Proxy)
+		proxyUrl = http.ProxyURL(proxy)
+	}
+	tr := &http.Transport{
+		Proxy: proxyUrl,
+	}
+	client := &http.Client{
+		Transport: tr,
+		Timeout:   time.Duration(timeout) * time.Second,
+	}
+	return client
 }

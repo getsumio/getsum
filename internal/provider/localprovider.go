@@ -46,7 +46,3 @@ func (l *LocalProvider) Data() *BaseProvider {
 func (l *LocalProvider) Close() {
 	l.Supplier.Terminate()
 }
-
-func (l *LocalProvider) Region() string {
-	return l.Zone
-}

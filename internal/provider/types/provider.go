@@ -9,15 +9,11 @@ type Provider interface {
 	Close()
 	Data() *BaseProvider
 	Run(quit <-chan bool, wait <-chan bool) <-chan *status.Status
-	Region() string
 }
 
 type BaseProvider struct {
 	Name     string
-	Address  *string
-	Zone     string
 	Proxy    *string
-	File     *string
 	Type     ProviderType
 	Supplier supplier.Supplier
 }
