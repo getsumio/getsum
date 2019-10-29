@@ -1,6 +1,8 @@
 package providers
 
 import (
+	"sync"
+
 	"github.com/getsumio/getsum/internal/status"
 	"github.com/getsumio/getsum/internal/supplier"
 )
@@ -8,12 +10,16 @@ import (
 type Provider interface {
 	Data() *BaseProvider
 	Run(quit <-chan bool, wait <-chan bool) <-chan *status.Status
+	Wait()
+	Resume()
 }
 
 type BaseProvider struct {
 	Name     string
 	Type     ProviderType
 	Supplier supplier.Supplier
+	WG       sync.WaitGroup
+	Wait     bool
 }
 
 type ProviderType int

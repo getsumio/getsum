@@ -20,6 +20,9 @@ type RemoteProvider struct {
 }
 
 func (l *RemoteProvider) Run(quit <-chan bool, wait <-chan bool) <-chan *status.Status {
+	if l.BaseProvider.Wait {
+		l.WG.Wait()
+	}
 	logger.Debug("Running remote provider %s", l.Name)
 	statusChannel := make(chan *status.Status)
 	logger.Trace("Triggering supplier %s", l.Name)
@@ -109,4 +112,14 @@ func remoteTerminate(l *RemoteProvider) error {
 
 func (l *RemoteProvider) Data() *BaseProvider {
 	return &l.BaseProvider
+}
+
+func (l *RemoteProvider) Wait() {
+	logger.Info("Provider %s suspended", l.Name)
+	l.BaseProvider.Wait = true
+}
+
+func (l *RemoteProvider) Resume() {
+	logger.Info("Resuming %s", l.Name)
+	l.WG.Done()
 }

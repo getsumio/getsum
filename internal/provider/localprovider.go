@@ -13,6 +13,9 @@ type LocalProvider struct {
 }
 
 func (l *LocalProvider) Run(quit <-chan bool, wait <-chan bool) <-chan *status.Status {
+	if l.BaseProvider.Wait {
+		l.WG.Wait()
+	}
 	logger.Debug("Running local provider %s", l.Name)
 	statusChannel := make(chan *status.Status)
 	logger.Trace("Triggering supplier %s", l.Name)
@@ -40,4 +43,14 @@ func (l *LocalProvider) Run(quit <-chan bool, wait <-chan bool) <-chan *status.S
 
 func (l *LocalProvider) Data() *BaseProvider {
 	return &l.BaseProvider
+}
+
+func (l *LocalProvider) Wait() {
+	logger.Info("Provider %s suspended", l.Name)
+	l.BaseProvider.Wait = true
+}
+
+func (l *LocalProvider) Resume() {
+	logger.Info("Resuming %s", l.Name)
+	l.WG.Done()
 }
