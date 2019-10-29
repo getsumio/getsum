@@ -78,14 +78,14 @@ func Trace(msg string, params ...interface{}) {
 	}
 }
 
-func Header(providers []Provider) {
+func Header(providers *Providers) {
 	var first string
 	var second string
-	for i, p := range providers {
+	for i, p := range providers.All {
 		if i > 6 {
 			break
 		}
-		first = fmt.Sprintf("%s%s%s%s", first, PADDING, color.Bold(color.Italic(color.BrightCyan(color.Underline(p.Data().Name)))), PADDING)
+		first = fmt.Sprintf("%s%s%s%s", first, PADDING, color.Bold(color.Italic(color.BrightCyan(color.Underline((*p).Data().Name)))), PADDING)
 		second = fmt.Sprintf("%s%10s\t%6s | ", second, "Status", "Value")
 	}
 	fmt.Printf("%s\n", first)
@@ -101,7 +101,7 @@ func Info(msg string, params ...interface{}) {
 		log.Printf("%s%s%s\n", color.Bold(color.Cyan(info)), PADDING, msg)
 	}
 }
-func Logsum(providers []Provider, stats []*status.Status) {
+func Logsum(providers []*Provider, stats []*status.Status) {
 	fmt.Println("\n\n")
 	for i, s := range stats {
 		var c color.Value
@@ -120,7 +120,7 @@ func Logsum(providers []Provider, stats []*status.Status) {
 
 		}
 
-		fmt.Printf("\t%s %s %s\n", c, color.Bold(color.Blue(providers[i].Data().Name)), val)
+		fmt.Printf("\t%s %s %s\n", c, color.Bold(color.Blue((*providers[i]).Data().Name)), val)
 	}
 }
 

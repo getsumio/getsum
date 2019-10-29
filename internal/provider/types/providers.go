@@ -1,56 +1,92 @@
 package providers
 
 import (
-	"sync"
-	"time"
-
-	"github.com/getsumio/getsum/internal/config"
 	"github.com/getsumio/getsum/internal/status"
 )
 
 type Providers struct {
-	List     []Provider
-	config   *config.Config
-	quit     chan bool
-	wait     chan bool
-	channels []<-chan *status.Status
-	statuses []*status.Status
-	length   int
+	Remotes   []*Provider
+	Locales   []*Provider
+	All       []*Provider
+	Statuses  []*status.Status
+	Length    int
+	HasRemote bool
+	HasLocal  bool
 }
 
-func (p *Providers) init() {
-	p.length = p.Size()
-	p.quit, p.wait = make(chan bool, p.length), make(chan bool)
-	p.statuses = make([]*status.Status, p.length)
-	p.channels = make([]<-chan *status.Status, p.length)
-}
-
-func (p *Providers) Run(wg *sync.WaitGroup) {
-	defer wg.Done()
-	p.init()
-
-}
-
-func (p *Providers) Terminate() {
-	for i := 0; i < p.length; i++ {
-		p.quit <- true
+func (providers *Providers) RunRemotes() {
+	for _, provider := range providers.Remotes {
+		(*provider).Run()
 	}
-	close(p.quit)
-	time.Sleep(200 * time.Millisecond)
-
 }
 
-func (p *Providers) HasError() bool {
+func (providers *Providers) RunLocales() {
+	for _, provider := range providers.Locales {
+		(*provider).Run()
+	}
+}
+
+func (providers *Providers) Run() {
+	providers.RunRemotes()
+	providers.RunLocales()
+}
+
+func (providers *Providers) SuspendLocales() {
+	for _, provider := range providers.Locales {
+		(*provider).Wait()
+	}
+}
+
+func (providers *Providers) ResumeLocales() {
+	for _, provider := range providers.Locales {
+		(*provider).Resume()
+	}
+}
+
+func (providers *Providers) Terminate() {
+	for _, provider := range providers.All {
+		go (*provider).Terminate()
+	}
+}
+
+func (providers *Providers) Status() []*status.Status {
+	var i int = 0
+	for _, provider := range providers.All {
+		providers.Statuses[i] = (*provider).Status()
+		i++
+	}
+	return providers.Statuses
+}
+
+func (providers *Providers) HasError() bool {
+	for _, stat := range providers.Statuses {
+		if stat.Type > status.COMPLETED {
+			return true
+		}
+	}
 	return false
 }
 
-func (p *Providers) IsFinish() bool {
+func (providers *Providers) IsRunning() bool {
+	for _, stat := range providers.Status() {
+		if stat != nil && stat.Type < status.COMPLETED {
+			return true
+		}
+	}
 	return false
 }
 
-func (p *Providers) Size() int {
-	if p.List == nil {
-		return 0
+func (providers *Providers) HasMismatch(checksum string) bool {
+	if checksum == "" {
+		return false
 	}
-	return len(p.List)
+	var mismatch bool = false
+	for _, stat := range providers.Statuses {
+		if stat != nil && stat.Checksum != checksum {
+			stat.Type = status.MISMATCH
+			mismatch = true
+		}
+	}
+	return mismatch
+
 }

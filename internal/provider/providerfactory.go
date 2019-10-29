@@ -8,12 +8,13 @@ import (
 	. "github.com/getsumio/getsum/internal/config"
 	"github.com/getsumio/getsum/internal/logger"
 	. "github.com/getsumio/getsum/internal/provider/types"
+	"github.com/getsumio/getsum/internal/status"
 	. "github.com/getsumio/getsum/internal/supplier"
 )
 
 //Factory interface to init providers
 type IProviderFactory interface {
-	GetProviders(config *Config) ([]Provider, error)
+	GetProviders(config *Config) (*Providers, error)
 }
 
 //provider factory
@@ -24,20 +25,30 @@ type ProviderFactory struct {
 //according to params initializes list of providers
 //if present remote ones are AWS,GCE,IBM,ORCL,Azure
 //local provider is Local
-func (p *ProviderFactory) GetProviders(config *Config) ([]Provider, error) {
+func (p *ProviderFactory) GetProviders(config *Config) (*Providers, error) {
 	logger.Debug("Providers requested for config %v", *config)
 	var factory ISupplierFactory = new(SupplierFactory)
-	list := []Provider{}
 	localProviders, err := getLocalProviders(config, factory)
+	logger.Debug("Localproviders %v", localProviders)
 	if err != nil {
 		return nil, err
 	}
-
-	list = append(list, localProviders...)
-	list = append(list, getRemoteProviders(config)...)
-	logger.Debug("Generated providers: %v", list)
-
-	return list, nil
+	remoteProviders := getRemoteProviders(config)
+	logger.Debug("Remoteproviders %v", remoteProviders)
+	allProviders := append(localProviders, remoteProviders...)
+	lengthLocal := len(localProviders)
+	lengthRemote := len(remoteProviders)
+	lengthTotal := len(allProviders)
+	providers := &Providers{
+		Locales:   localProviders,
+		Remotes:   remoteProviders,
+		All:       allProviders,
+		HasRemote: lengthRemote > 0,
+		HasLocal:  lengthLocal > 0,
+		Length:    lengthTotal,
+		Statuses:  make([]*status.Status, lengthTotal),
+	}
+	return providers, nil
 }
 
 func getHttpClient(config *Config) *http.Client {
@@ -54,11 +65,12 @@ func getHttpClient(config *Config) *http.Client {
 	}
 	return client
 }
-func getRemoteProviders(config *Config) []Provider {
-	list := []Provider{}
+func getRemoteProviders(config *Config) []*Provider {
+	list := []*Provider{}
 	if !*config.LocalOnly {
 		for _, s := range config.Servers.Servers {
-			list = append(list, getRemoteProvider(config, &s))
+			provider := getRemoteProvider(config, &s)
+			list = append(list, &provider)
 		}
 	}
 	return list
@@ -84,9 +96,9 @@ func getProvider(pType ProviderType, supplier Supplier, config *Config, a Algori
 
 }
 
-func getLocalProviders(config *Config, factory ISupplierFactory) ([]Provider, error) {
+func getLocalProviders(config *Config, factory ISupplierFactory) ([]*Provider, error) {
 	logger.Debug("Instantiating local providers")
-	locals := []Provider{}
+	locals := []*Provider{}
 	if !*config.RemoteOnly {
 		logger.Debug("Config is remote only")
 		var algos []Algorithm
@@ -113,7 +125,7 @@ func getLocalProviders(config *Config, factory ISupplierFactory) ([]Provider, er
 			}
 			l := getProvider(Local, supplier, config, a)
 			logger.Debug("Generated provider: %v", l)
-			locals = append(locals, l)
+			locals = append(locals, &l)
 		}
 	}
 

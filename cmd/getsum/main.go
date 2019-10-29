@@ -9,8 +9,8 @@ import (
 	parser "github.com/getsumio/getsum/internal/config"
 	"github.com/getsumio/getsum/internal/logger"
 	. "github.com/getsumio/getsum/internal/provider"
+	. "github.com/getsumio/getsum/internal/provider/types"
 	"github.com/getsumio/getsum/internal/servers"
-	"github.com/getsumio/getsum/internal/status"
 	validator "github.com/getsumio/getsum/internal/validation"
 )
 
@@ -37,75 +37,80 @@ func main() {
 	logger.Trace("Collecting providers")
 	var factory IProviderFactory = new(ProviderFactory)
 	providers, err := factory.GetProviders(config)
-	length := len(providers)
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
-	} else if length < 1 {
+	} else if providers.Length < 1 {
 		logger.Error("No runner specified or no supported algorithm, terminating")
 		os.Exit(1)
 	}
 
-	logger.Info("providers: %v with size %d", providers, length)
+	logger.Info("providers: %v with size %d", providers, providers.Length)
+	handleExit(providers)
 
-	quit, wait := make(chan bool, length), make(chan bool)
-	handleExit(quit)
-
-	chans := make([]<-chan *status.Status, length)
-	logger.Debug("Running providers, total length: %d", length)
-	for i := 0; i < length; i++ {
-		chans[i] = providers[i].Run(quit, wait)
-	}
-	stats := make([]*status.Status, length)
 	logger.Trace("Starting to watch running processes")
-	anyRunner, hasValidation, hasError := true, *config.Cheksum != "", false
+	hasValidation := *config.Cheksum != ""
+
 	logger.Header(providers)
-	for anyRunner {
-		anyRunner = false
-		for i := 0; i < length; i++ {
-			s := <-chans[i]
-			logger.Trace("Update value %v from provider", *s)
-			if s.Type < status.COMPLETED {
-				anyRunner = true
-			} else if s.Type > status.COMPLETED {
-				hasError = true
-			} else {
-				if hasValidation && s.Checksum != *config.Cheksum {
-					logger.Debug("Checksum mismatch: asked: %s, found %s", *config.Cheksum, s.Checksum)
-					s.Type = status.MISMATCH
-					hasError = true
-				}
-			}
-			stats[i] = s
-		}
-		if anyRunner {
-			wait <- true
-		} else {
-			for i := 0; i < length; i++ {
-				quit <- true
-			}
-			close(quit)
-			time.Sleep(200 * time.Millisecond)
-		}
-		logger.Status(stats)
+	if hasValidation && providers.HasRemote && providers.HasLocal {
+		runRemoteFirst(providers, config)
+	} else {
+		runAll(providers, config)
 	}
-	logger.Logsum(providers, stats)
 	logger.Debug("Application finish")
 
-	if hasError {
+	if providers.HasError() {
 		os.Exit(1)
 	}
 
 }
 
-func handleExit(quit chan bool) {
+func watch(providers *Providers) {
+	for providers.IsRunning() {
+		logger.Status(providers.Status())
+		time.Sleep(200 * time.Millisecond)
+	}
+}
+
+func checkMismatch(providers *Providers, config *parser.Config) {
+	if providers.HasMismatch(*config.Cheksum) {
+		logger.Debug("There are mismatches")
+		logger.Status(providers.Status())
+		logger.Logsum(providers.All, providers.Status())
+		os.Exit(1)
+	}
+
+}
+
+func runAll(providers *Providers, config *parser.Config) {
+	logger.Debug("Running without validation")
+	providers.Run()
+	watch(providers)
+	checkMismatch(providers, config)
+	logger.Logsum(providers.All, providers.Status())
+
+}
+
+func runRemoteFirst(providers *Providers, config *parser.Config) {
+	logger.Debug("Running without validation")
+	providers.SuspendLocales()
+	providers.Run()
+	watch(providers)
+	checkMismatch(providers, config)
+	providers.ResumeLocales()
+	watch(providers)
+	checkMismatch(providers, config)
+	logger.Logsum(providers.All, providers.Status())
+}
+
+func handleExit(providers *Providers) {
 	sign := make(chan os.Signal, 1)
 	signal.Notify(sign, os.Interrupt)
 
 	go func() {
 		<-sign
-		quit <- true
-		time.Sleep(time.Second)
+		providers.Terminate()
+		time.Sleep(300 * time.Millisecond)
 		logger.Warn("\n\nTerminate requested by user")
 		os.Exit(1)
 	}()

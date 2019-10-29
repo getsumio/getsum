@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"github.com/getsumio/getsum/internal/config"
 	"github.com/getsumio/getsum/internal/logger"
@@ -14,42 +13,18 @@ import (
 
 type RemoteProvider struct {
 	BaseProvider
-	client  *http.Client
-	config  *config.Config
-	address string
+	client      *http.Client
+	config      *config.Config
+	address     string
+	ErrorStatus *status.Status
 }
 
-func (l *RemoteProvider) Run(quit <-chan bool, wait <-chan bool) <-chan *status.Status {
+func (l *RemoteProvider) Run() {
 	if l.BaseProvider.Wait {
 		l.WG.Wait()
 	}
 	logger.Debug("Running remote provider %s", l.Name)
-	statusChannel := make(chan *status.Status)
-	logger.Trace("Triggering supplier %s", l.Name)
-	go remoteRun(l, statusChannel)
-	go func() {
-		time.Sleep(500 * time.Millisecond)
-		for {
-			select {
-			case <-wait:
-			case <-quit:
-				logger.Debug("Quit triggered %s", l.Name)
-				err := remoteTerminate(l)
-				if err != nil {
-					statusChannel <- getErrorStatus(err)
-				}
-				close(statusChannel)
-				return
-			default:
-				stat := remoteStatus(l)
-				logger.Trace("Status received", (*stat).Type.Name(), (*stat).Value, l.Name)
-				statusChannel <- stat
-				time.Sleep(150 * time.Millisecond)
-
-			}
-		}
-	}()
-	return statusChannel
+	go remoteRun(l)
 }
 
 func getErrorStatus(err error) *status.Status {
@@ -59,11 +34,11 @@ func getErrorStatus(err error) *status.Status {
 	return stat
 }
 
-func remoteRun(l *RemoteProvider, statusChannel chan *status.Status) {
+func remoteRun(l *RemoteProvider) {
 
 	body, err := json.Marshal(*l.config)
 	if err != nil {
-		statusChannel <- getErrorStatus(err)
+		l.ErrorStatus = getErrorStatus(err)
 		return
 	}
 
@@ -71,7 +46,7 @@ func remoteRun(l *RemoteProvider, statusChannel chan *status.Status) {
 	defer resp.Body.Close()
 
 	if err != nil {
-		statusChannel <- getErrorStatus(err)
+		l.ErrorStatus = getErrorStatus(err)
 		return
 
 	}
@@ -122,4 +97,17 @@ func (l *RemoteProvider) Wait() {
 func (l *RemoteProvider) Resume() {
 	logger.Info("Resuming %s", l.Name)
 	l.WG.Done()
+}
+
+func (l *RemoteProvider) Terminate() error {
+	logger.Debug("Quit triggered %s", l.Name)
+	return remoteTerminate(l)
+
+}
+
+func (l *RemoteProvider) Status() *status.Status {
+	if l.ErrorStatus != nil {
+		return l.ErrorStatus
+	}
+	return remoteStatus(l)
 }

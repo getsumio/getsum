@@ -9,9 +9,11 @@ import (
 
 type Provider interface {
 	Data() *BaseProvider
-	Run(quit <-chan bool, wait <-chan bool) <-chan *status.Status
+	Run()
 	Wait()
 	Resume()
+	Status() *status.Status
+	Terminate() error
 }
 
 type BaseProvider struct {

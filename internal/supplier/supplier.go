@@ -8,7 +8,7 @@ import (
 type Supplier interface {
 	Run(deleteOnExit bool)
 	Status() *status.Status
-	Terminate()
+	Terminate() error
 	Supports() []Algorithm
 }
 

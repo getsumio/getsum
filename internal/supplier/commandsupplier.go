@@ -68,10 +68,11 @@ func execute(cmd *exec.Cmd, status chan string, e chan string) {
 	}
 }
 
-func kill(cmd *exec.Cmd) {
+func kill(cmd *exec.Cmd) error {
 	if cmd != nil && cmd.Process != nil {
-		cmd.Process.Kill()
+		return cmd.Process.Kill()
 	}
+	return nil
 }
 
 var cmd *exec.Cmd
@@ -129,11 +130,12 @@ func (s *CommandSupplier) Status() *status.Status {
 	return s.status
 }
 
-func (s *CommandSupplier) Terminate() {
-	kill(cmd)
+func (s *CommandSupplier) Terminate() error {
+	err := kill(cmd)
 	if s.status.Type == status.RUNNING {
 		s.status.Type = status.TERMINATED
 	}
+	return err
 }
 
 func getSSLCommand(algo Algorithm, path string) *exec.Cmd {

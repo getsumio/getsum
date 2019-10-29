@@ -99,10 +99,11 @@ func (s *GoSupplier) Status() *status.Status {
 	return s.status
 }
 
-func (s *GoSupplier) Terminate() {
+func (s *GoSupplier) Terminate() error {
 	if s.status.Type == status.RUNNING {
 		s.status.Type = status.TERMINATED
 	}
+	return nil
 
 }
 
