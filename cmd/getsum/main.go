@@ -20,11 +20,6 @@ func main() {
 		logger.Error("Can not parse configuration: %s", err.Error())
 		os.Exit(1)
 	}
-	logger.Error("Configs %d", len(config.Servers.Servers))
-	for _, s := range config.Servers.Servers {
-		logger.Error(s.Name)
-		logger.Error(s.Address)
-	}
 
 	validator.ValidateConfig(config)
 	logger.SetLevel(*config.LogLevel)
