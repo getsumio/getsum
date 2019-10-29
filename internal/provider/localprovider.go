@@ -12,7 +12,7 @@ type LocalProvider struct {
 
 func (l *LocalProvider) Run() {
 	if l.BaseProvider.Wait {
-		logger.Info("Process on hold! %s", l.Type.Name())
+		logger.Info("Provider Process on hold! %s", l.Type.Name())
 		l.WG.Wait()
 	}
 	logger.Debug("Running local provider %s", l.Name)
@@ -44,5 +44,7 @@ func (l *LocalProvider) Terminate() error {
 }
 
 func (l *LocalProvider) Status() *status.Status {
-	return l.Supplier.Status()
+	stat := l.Supplier.Status()
+	logger.Trace("%s Returning status %v", l.Name, *stat)
+	return stat
 }

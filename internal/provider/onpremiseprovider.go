@@ -112,9 +112,13 @@ func (l *RemoteProvider) Terminate() error {
 }
 
 func (l *RemoteProvider) Status() *status.Status {
-	logger.Debug("Remote status requested")
+	var stat *status.Status
 	if l.ErrorStatus != nil {
-		return l.ErrorStatus
+		stat = l.ErrorStatus
+	} else {
+		stat = remoteStatus(l)
 	}
-	return remoteStatus(l)
+
+	logger.Trace("%s - Remote status received: %v", l.Name, *stat)
+	return stat
 }

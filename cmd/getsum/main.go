@@ -83,7 +83,7 @@ func checkMismatch(providers *Providers, config *parser.Config) {
 }
 
 func runAll(providers *Providers, config *parser.Config) {
-	logger.Debug("Running without validation")
+	logger.Debug("Running all providers validation")
 	providers.Run()
 	watch(providers)
 	providers.Terminate(true)
@@ -93,12 +93,13 @@ func runAll(providers *Providers, config *parser.Config) {
 }
 
 func runRemoteFirst(providers *Providers, config *parser.Config) {
-	logger.Debug("Running without validation")
+	logger.Debug("Running remote providers")
 	providers.SuspendLocales()
 	providers.Run()
 	watch(providers)
 	providers.Terminate(false)
 	checkMismatch(providers, config)
+	logger.Debug("Running local providers")
 	providers.ResumeLocales()
 	watch(providers)
 	providers.Terminate(true)
