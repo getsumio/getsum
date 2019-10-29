@@ -48,9 +48,8 @@ func main() {
 
 	logger.Info("providers: %v with size %d", providers, length)
 
-	quit, wait := make(chan bool), make(chan bool)
+	quit, wait := make(chan bool, length), make(chan bool)
 	handleExit(quit)
-	defer close(quit)
 
 	chans := make([]<-chan *status.Status, length)
 	logger.Debug("Running providers, total length: %d", length)
@@ -82,7 +81,11 @@ func main() {
 		if anyRunner {
 			wait <- true
 		} else {
-			quit <- true
+			for i := 0; i < length; i++ {
+				quit <- true
+			}
+			close(quit)
+			time.Sleep(200 * time.Millisecond)
 		}
 		logger.Status(stats)
 	}

@@ -82,8 +82,8 @@ func ParseConfig() (*Config, error) {
 	c.File = &empty
 	c.Cheksum = &empty
 
-	upper := strings.ToUpper(*algo)
 	flag.Parse()
+	upper := strings.ToUpper(*algo)
 	err := parseYaml(c)
 	if err != nil {
 		return nil, err
