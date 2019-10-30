@@ -26,8 +26,12 @@ const (
 
 var defaultConfig string = ".getsum/servers.yml"
 
+//checks first if user specified a config file via params
+//if not then checks $HOME/.getsum/servers.yml file if exist
+//if yes attempts to parse it and set servers part of configuration
 func parseYaml(config *Config) error {
 	if *config.ServerConfig == "" {
+		//no config present check home folder
 		home := os.Getenv("HOME")
 		if home != "" {
 			homeConfig := strings.Join([]string{home, defaultConfig}, "/")
@@ -39,20 +43,24 @@ func parseYaml(config *Config) error {
 
 		}
 	}
+	//read the file
 	yamlFile, err := ioutil.ReadFile(*config.ServerConfig)
 	if err != nil {
 		return err
 	}
+	//parse
 	var configs ServerConfigs
 	err = yaml.Unmarshal(yamlFile, &configs)
 	if err != nil {
 		return err
 	}
+	//set config value
 	config.Servers = configs
 
 	return nil
 }
 
+//parses terminal params and after reads config files
 func ParseConfig() (*Config, error) {
 	c := new(Config)
 	var algo *string
@@ -89,16 +97,22 @@ func ParseConfig() (*Config, error) {
 	c.Cheksum = &empty
 
 	flag.Parse()
+	//make sure no case issue
 	upper := strings.ToUpper(*algo)
 	err := parseYaml(c)
 	if err != nil {
 		return nil, err
 	}
 
+	//make sure no case issue
 	lower := strings.ToLower(*c.Supplier)
 	c.Supplier = &lower
 	c.Algorithm = strings.Split(upper, ",")
 	args := flag.Args()
+	//args[0] is file location or address
+	//args[1] is checksum provided by user for validation
+	//i.e. getsum /tmp/tempfile 4fd654f646
+	//validation will be done after parse
 	if args != nil {
 		if len(args) > 0 && args[0] != "" {
 			c.File = &args[0]
