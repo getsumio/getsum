@@ -14,6 +14,7 @@ import (
 	"github.com/getsumio/getsum/internal/validation"
 )
 
+//server instance to run in server mode
 type OnPremiseServer struct {
 	storagePath string
 	Supplier    Supplier
@@ -22,6 +23,8 @@ type OnPremiseServer struct {
 
 var factory ISupplierFactory
 
+//start server in given config listen address and port or tls details
+//TODO add interface support
 func (s *OnPremiseServer) Start(config *config.Config) error {
 	logger.Level = logger.LevelInfo
 	factory = new(SupplierFactory)
@@ -40,11 +43,15 @@ func (s *OnPremiseServer) Start(config *config.Config) error {
 	return nil
 }
 
+//get executed to reach status
+//so collect status if there is any runner
 func handleGet(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
+	//check if any runner
 	if s.Supplier == nil {
 		handleError("There is no running process", w)
 		return
 	}
+	//collect status and return
 	stat := s.Supplier.Status()
 	status, err := json.Marshal(stat)
 	if err != nil {
@@ -55,7 +62,9 @@ func handleGet(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
 	w.Write(status)
 }
 
+//post executed to Run a new calculation
 func handlePost(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
+	//check if any runner
 	if s.Supplier != nil {
 		stat := s.Supplier.Status()
 		if stat.Type <= status.RUNNING {
@@ -63,6 +72,7 @@ func handlePost(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	//read the config from request
 	jsonDecoder := json.NewDecoder(r.Body)
 	config := &Config{}
 	err := jsonDecoder.Decode(config)
@@ -70,6 +80,7 @@ func handlePost(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
 		handleError("Can not read given config %s", w, err.Error())
 		return
 	}
+	//validate config
 	err = validation.ValidateConfig(config, true)
 	if err != nil {
 		handleError(err.Error(), w)
@@ -77,8 +88,10 @@ func handlePost(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
 
 	}
 
+	//get supplier instance, only single algo supported on server mode
 	var algorithm = ValueOf(&config.Algorithm[0])
 	s.Supplier = factory.GetSupplierByAlgo(config, &algorithm)
+	//something went  wrong, TODO add error handler
 	if s.Supplier == nil {
 		handleError("Can not create algorithm runner instance", w)
 	}
@@ -86,6 +99,7 @@ func handlePost(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
 	logger.Info("Process started")
 }
 
+//terminates running calculation
 func handleDelete(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
 	if s.Supplier == nil {
 		handleError("There is no running process", w)
@@ -98,6 +112,7 @@ func handleDelete(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
 	logger.Info("Process terminated")
 }
 
+//delegates GET POST DELETE main server listener
 func (s *OnPremiseServer) handle(w http.ResponseWriter, r *http.Request) {
 	s.mux.Lock()
 	defer s.mux.Unlock()
@@ -117,6 +132,7 @@ func (s *OnPremiseServer) handle(w http.ResponseWriter, r *http.Request) {
 
 }
 
+//utility to write given error to response
 func handleError(message string, w http.ResponseWriter, params ...interface{}) {
 	if params != nil {
 		message = fmt.Sprintf(message, params...)
