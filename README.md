@@ -7,11 +7,13 @@
 **Installation**
 
 **How to run**
+Run 'getsum -h' for all parameters
 ```
 getsum https://speed.hetzner.de/100MB.bin
 getsum /tmp/path/to/file
 getsum -a MD5,SHA512 https://speed.hetzner.de/100MB.bin cf1a31c3acf3a1c3f2a13cfa13
 getsum -remoteOnly https://speed.hetzner.de/100MB.bin cf1a31c3acf3a1c3f2a13cfa13
+getsum -h
 ``` 
 **Features**
 * Run in server mode to listen requests from another getsum client
@@ -27,7 +29,9 @@ getsum -remoteOnly https://speed.hetzner.de/100MB.bin cf1a31c3acf3a1c3f2a13cfa13
 For checksum calculations core Golang libraries will be used as default. If you have installed openssl set '-lib openssl'. If you want to use applications from operating system set '-lib os'.
 
 ```
-getsum -a -lib openssl https://speed.hetzner.de/100MB.bin
+getsum -a MD5 -lib openssl https://speed.hetzner.de/100MB.bin
+getsum -a MD5 -lib go https://speed.hetzner.de/100MB.bin
+getsum -a MD5 -lib os https://speed.hetzner.de/100MB.bin
 ``` 
 
 [![Watch the full record](docs/libs.gif)](https://asciinema.org/a/sy0OSLL8IWUOED2DFk1yFLiOB)
@@ -36,7 +40,7 @@ getsum -a -lib openssl https://speed.hetzner.de/100MB.bin
  
 **Running Multiple Algorithms** 
 
-Default algorithm is ***SHA512***. Use '-a' parameter to specify different algorithm. '-all' runs all algorithms at (if selected library doesnt support some of them only supported ones will run)
+Default algorithm is ***SHA512***. Use '-a' parameter to specify different algorithms. Algorithms are comma separated. '-all' runs all algorithms at once (if selected library doesnt support some of them only supported ones will run)
 
 ```
 getsum -a MD5,SHA512,SHA1 https://speed.hetzner.de/100MB.bin
@@ -47,12 +51,22 @@ getsum -all /tmp/path/to/file
 [![Watch the full record](docs/all.gif)](https://asciinema.org/a/KA4sT6xTNN9iTzKHJhdgnybrB)
 
 **Running in listen mode**
-Running in serve mode param is '-s' default listen address is 127.0.0.1 and port is 8088 
+Running in serve mode param is '-s' default listen address is 127.0.0.1 and port is 8088. 
 ```
 getsum -s 
 getsum -s -l 0.0.0.0 -p 9099
 getsum -s -l 0.0.0.0 -p 9099 -tlskey /tmp/tlskeyfile -tlscert /tmptlscertfile
 ``` 
+Create a config file at **$HOME/.getsum/servers.yml** with addresses of your servers, i.e.:
+```
+servers:
+  - name: gce-west-us
+    address: http://127.0.0.1:8088
+  - name: aws-eu-north
+    address: http://127.0.0.1:8089
+  - name: azure-east-us
+    address: http://127.0.0.1:8090
+```
 [![Watch the full record](docs/server.gif)](https://asciinema.org/a/KA4sT6xTNN9iTzKHJhdgnybrB)
 
 In case of 'os' selected:
