@@ -70,6 +70,7 @@ getsum -s -l 0.0.0.0 -p 9099
 getsum -s -l 0.0.0.0 -p 9099 -tk /tmp/tlskeyfile -tc /tmp/tlscertfile
 ``` 
 **Updating client to run with remote servers**
+
 Create a config file at **$HOME/.getsum/servers.yml** with addresses of your servers, i.e.:
 ```
 servers:
@@ -80,7 +81,8 @@ servers:
   - name: azure-east-us
     address: http://127.0.0.1:8090
 ```
-or use -serverconfig parameter for custom config location:
+"**servers,name and address" field names should be same** you just need to update values. 
+Also use -serverconfig parameter for custom config location:
 ```
 getsum -serverconfig /tmp/servers.yml /path/to/file
 getsum -sc /tmp/servers.yml /path/to/file
@@ -108,4 +110,7 @@ I will also write browser addons next week (4.November+) so you can set your ser
 
 **Serverless support**
  I really wanted to add native lambda, cloud functions support for different providers but each provider has their own limits i.e. 200mb storage space or 2GB memory, so its currently postponed.
+ 
+ **Issues**
+ Application not tested on mac but on linux and windows. If you had issues please raise here. Also unit tests are missing I will implement this month. 
 **
