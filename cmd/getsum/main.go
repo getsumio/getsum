@@ -54,10 +54,9 @@ func main() {
 	handleExit(providers)
 
 	logger.Trace("Starting to watch running processes")
-	hasValidation := *config.Cheksum != ""
 
 	logger.Header(providers)
-	if hasValidation && providers.HasRemote && providers.HasLocal {
+	if providers.HasValidation && providers.HasRemote && providers.HasLocal {
 		runRemoteFirst(providers, config)
 	} else {
 		runAll(providers, config)
@@ -72,18 +71,24 @@ func main() {
 
 func watch(providers *Providers, config *parser.Config) {
 	for providers.IsRunning() {
-		logger.Status(providers, *config.Cheksum)
+		logger.Status(providers)
 		time.Sleep(200 * time.Millisecond)
 	}
-	logger.Status(providers, *config.Cheksum)
+	logger.Status(providers)
 }
 
 func checkMismatch(providers *Providers, config *parser.Config) {
 	if providers.HasMismatch(*config.Cheksum) {
 		logger.Debug("There are mismatches")
-		logger.Status(providers, *config.Cheksum)
-		logger.Logsum(providers.All, providers.Status())
-		os.Exit(1)
+		logger.Status(providers)
+		logger.Logsum(providers)
+		if !*config.Keep {
+			logger.Debug("Exiting application no keep setted")
+			providers.Delete()
+			os.Exit(1)
+		}
+	} else {
+		logger.Status(providers)
 	}
 
 }
@@ -94,7 +99,7 @@ func runAll(providers *Providers, config *parser.Config) {
 	watch(providers, config)
 	providers.Terminate(true)
 	checkMismatch(providers, config)
-	logger.Logsum(providers.All, providers.Status())
+	logger.Logsum(providers)
 
 }
 
@@ -110,8 +115,7 @@ func runRemoteFirst(providers *Providers, config *parser.Config) {
 	watch(providers, config)
 	providers.Terminate(true)
 	checkMismatch(providers, config)
-	logger.Status(providers, *config.Cheksum)
-	logger.Logsum(providers.All, providers.Status())
+	logger.Logsum(providers)
 }
 
 func handleExit(providers *Providers) {

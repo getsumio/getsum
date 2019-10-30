@@ -42,7 +42,7 @@ func (p *ProviderFactory) GetProviders(config *Config) (*Providers, error) {
 	lengthRemote := len(remoteProviders)
 	lengthTotal := len(allProviders)
 	providers := &Providers{
-		Locals:   localProviders,
+		Locals:    localProviders,
 		Remotes:   remoteProviders,
 		All:       allProviders,
 		HasRemote: lengthRemote > 0,
@@ -50,6 +50,7 @@ func (p *ProviderFactory) GetProviders(config *Config) (*Providers, error) {
 		Length:    lengthTotal,
 		Statuses:  make([]*status.Status, lengthTotal),
 	}
+	providers.HasValidation = *config.Cheksum != ""
 	return providers, nil
 }
 

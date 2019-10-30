@@ -82,7 +82,7 @@ func handlePost(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
 	if s.Supplier == nil {
 		handleError("Can not create algorithm runner instance", w)
 	}
-	go s.Supplier.Run(true)
+	go s.Supplier.Run()
 	logger.Info("Process started")
 }
 
@@ -92,6 +92,7 @@ func handleDelete(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.Supplier.Terminate()
+	s.Supplier.Delete()
 	w.WriteHeader(http.StatusOK)
 	s.Supplier = nil
 	logger.Info("Process terminated")

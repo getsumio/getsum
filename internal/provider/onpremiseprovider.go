@@ -116,6 +116,10 @@ func (l *RemoteProvider) Terminate() error {
 
 }
 
+func (l *RemoteProvider) DeleteFile() {
+	//Do nothing
+}
+
 func (l *RemoteProvider) Status() *status.Status {
 	var stat *status.Status
 	if l.ErrorStatus != nil {

@@ -50,10 +50,7 @@ func (s *GoSupplier) Supports() []Algorithm {
 	}
 }
 
-func (s *GoSupplier) Run(deleteOnExit bool) {
-	if deleteOnExit {
-		defer s.File.Delete()
-	}
+func (s *GoSupplier) Run() {
 	err := s.File.Fetch(s.TimeOut)
 	if err != nil {
 		s.status.Value = err.Error()
@@ -97,6 +94,10 @@ func (s *GoSupplier) Run(deleteOnExit bool) {
 
 func (s *GoSupplier) Status() *status.Status {
 	return s.status
+}
+
+func (s *GoSupplier) Delete() {
+	s.File.Delete()
 }
 
 func (s *GoSupplier) Terminate() error {

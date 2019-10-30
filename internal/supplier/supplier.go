@@ -6,10 +6,11 @@ import (
 )
 
 type Supplier interface {
-	Run(deleteOnExit bool)
+	Run()
 	Status() *status.Status
 	Terminate() error
 	Supports() []Algorithm
+	Delete()
 }
 
 type BaseSupplier struct {

@@ -16,7 +16,7 @@ func (l *LocalProvider) Run() {
 		l.WG.Wait()
 	}
 	logger.Debug("Running local provider %s", l.Name)
-	l.Supplier.Run(false)
+	l.Supplier.Run()
 }
 
 func (l *LocalProvider) Data() *BaseProvider {
@@ -47,4 +47,9 @@ func (l *LocalProvider) Status() *status.Status {
 	stat := l.Supplier.Status()
 	logger.Trace("%s Returning status %v", l.Name, *stat)
 	return stat
+}
+
+func (l *LocalProvider) DeleteFile() {
+	logger.Debug("Removing file %s", l.Name)
+	l.Supplier.Delete()
 }

@@ -9,8 +9,6 @@ type Config struct {
 	RemoteOnly   *bool         `json:"remote_only"`
 	OnlyChecksum *bool         `json:"only_checksum"`
 	LogLevel     *string       `json:"log_level"`
-	Validate     *bool         `json:"validate"`
-	Download     *bool         `json:"download"`
 	Timeout      *int          `json:"timeout"`
 	All          *bool         `json:"all"`
 	Key          *string       `json:"key"`
@@ -24,6 +22,7 @@ type Config struct {
 	TLSKey       *string       `json:"tls_key"`
 	TLSCert      *string       `json:"tls_cert"`
 	ServerConfig *string       `json:"server_config"`
+	Keep         *bool         `json:"keep"`
 }
 
 type ServerConfig struct {

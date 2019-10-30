@@ -1,19 +1,22 @@
 package providers
 
 import (
+	"sync"
 	"time"
 
 	"github.com/getsumio/getsum/internal/status"
 )
 
 type Providers struct {
-	Remotes   []*Provider
-	Locals   []*Provider
-	All       []*Provider
-	Statuses  []*status.Status
-	Length    int
-	HasRemote bool
-	HasLocal  bool
+	Remotes       []*Provider
+	Locals        []*Provider
+	All           []*Provider
+	Statuses      []*status.Status
+	Length        int
+	HasRemote     bool
+	HasLocal      bool
+	HasValidation bool
+	mux           sync.Mutex
 }
 
 func (providers *Providers) RunRemotes() {
@@ -40,6 +43,12 @@ func (providers *Providers) SuspendLocals() {
 	}
 }
 
+func (providers *Providers) Delete() {
+	for _, p := range providers.All {
+		(*p).DeleteFile()
+	}
+}
+
 func (providers *Providers) ResumeLocals() {
 	for _, provider := range providers.Locals {
 		(*provider).Resume()
@@ -55,6 +64,8 @@ func (providers *Providers) Terminate(force bool) {
 }
 
 func (providers *Providers) Status() []*status.Status {
+	providers.mux.Lock()
+	defer providers.mux.Unlock()
 	for i, provider := range providers.All {
 		if providers.Statuses[i] == nil || providers.Statuses[i].Type < status.COMPLETED {
 			providers.Statuses[i] = (*provider).Status()
@@ -82,14 +93,21 @@ func (providers *Providers) IsRunning() bool {
 }
 
 func (providers *Providers) HasMismatch(checksum string) bool {
+
 	if checksum == "" {
 		return false
 	}
+	providers.mux.Lock()
+	defer providers.mux.Unlock()
 	var mismatch bool = false
-	for _, stat := range providers.Statuses {
-		if stat.Type == status.COMPLETED && stat.Checksum != checksum {
-			stat.Type = status.MISMATCH
-			mismatch = true
+	for i, stat := range providers.Statuses {
+		if stat.Type == status.COMPLETED {
+			if stat.Checksum != checksum {
+				providers.Statuses[i].Type = status.MISMATCH
+				mismatch = true
+			} else {
+				providers.Statuses[i].Type = status.VALIDATED
+			}
 		}
 	}
 	return mismatch

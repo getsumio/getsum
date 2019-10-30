@@ -14,6 +14,7 @@ type Provider interface {
 	Resume()
 	Status() *status.Status
 	Terminate() error
+	DeleteFile()
 }
 
 type BaseProvider struct {

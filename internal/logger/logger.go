@@ -106,14 +106,14 @@ func Info(msg string, params ...interface{}) {
 		log.Printf("%s%s%s\n", color.Bold(color.Cyan(info)), PADDING, msg)
 	}
 }
-func Logsum(providers []*Provider, stats []*status.Status) {
+func Logsum(providers *Providers) {
 	fmt.Println("\n\n")
-	for i, s := range stats {
+	for i, s := range providers.Statuses {
 		var c color.Value
 		var val string
 
 		switch s.Type {
-		case status.COMPLETED:
+		case status.COMPLETED, status.VALIDATED:
 			c = color.Bold(color.BrightYellow("\u2713"))
 			val = s.Checksum
 		case status.MISMATCH:
@@ -125,13 +125,13 @@ func Logsum(providers []*Provider, stats []*status.Status) {
 
 		}
 
-		fmt.Printf("\t%s %s %s\n", c, color.Bold(color.Blue((*providers[i]).Data().Name)), val)
+		fmt.Printf("\t%s %s %s\n", c, color.Bold(color.Blue((*providers.All[i]).Data().Name)), val)
 	}
 }
 
 var currentColumn int
 
-func Status(providers *Providers, checksum string) {
+func Status(providers *Providers) {
 	stats := providers.Status()
 	printStatus(stats, providers, currentColumn)
 	var anyRunner bool
@@ -139,21 +139,19 @@ func Status(providers *Providers, checksum string) {
 		if j >= providers.Length {
 			break
 		}
-		if stats[j].Type < status.COMPLETED || stats[j].Type == status.SUSPENDED {
+		if stats[j].Type < status.COMPLETED || (providers.HasValidation && stats[j].Type < status.SUSPENDED) || stats[j].Type == status.SUSPENDED {
 			anyRunner = true
 			break
 		}
 	}
 	if !anyRunner {
-		providers.HasMismatch(checksum)
-		printStatus(stats, providers, currentColumn)
 		currentColumn += 5
 		if currentColumn >= providers.Length {
 			return
 		}
 		fmt.Println("\n")
 		printHeader(providers, currentColumn)
-		Status(providers, checksum)
+		Status(providers)
 	}
 }
 

@@ -21,6 +21,7 @@ const (
 	ERROR
 	TIMEDOUT
 	MISMATCH
+	VALIDATED
 	TERMINATED
 )
 
@@ -37,6 +38,7 @@ var statusStr = []string{
 	"ERROR",
 	"TIMEDOUT",
 	"MISMATCH",
+	"VALIDATED",
 	"TERMINATED",
 }
 

@@ -77,10 +77,7 @@ func kill(cmd *exec.Cmd) error {
 
 var cmd *exec.Cmd
 
-func (s *CommandSupplier) Run(deleteOnExit bool) {
-	if deleteOnExit {
-		s.File.Delete()
-	}
+func (s *CommandSupplier) Run() {
 	err := s.File.Fetch(s.TimeOut)
 	if err != nil {
 		s.status.Value = err.Error()
@@ -128,6 +125,10 @@ func (s *CommandSupplier) Run(deleteOnExit bool) {
 
 func (s *CommandSupplier) Status() *status.Status {
 	return s.status
+}
+
+func (s *CommandSupplier) Delete() {
+	s.File.Delete()
 }
 
 func (s *CommandSupplier) Terminate() error {

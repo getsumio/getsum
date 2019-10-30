@@ -19,8 +19,6 @@ const (
 	defaultLocalOnly  = false
 	defaultAlgo       = "SHA512"
 	defaultRemoteOnly = false
-	defaultValidate   = true
-	defaultDownload   = true
 	defaultTimeout    = 60
 	defaultKey        = ""
 	defaultSupplier   = "go"
@@ -78,10 +76,6 @@ func ParseConfig() (*Config, error) {
 	c.Proxy = flag.String("proxy", "", "Proxy address to reach file or servers")
 	c.RemoteOnly = flag.Bool("remoteOnly", defaultRemoteOnly, "Only calculate checksum remotely, by default calculation will be done locally and remotely as well")
 	flag.BoolVar(c.RemoteOnly, "r", defaultRemoteOnly, "shorthand of -remoteOnly")
-	c.Validate = flag.Bool("validate", defaultValidate, "Cross validates each calculated checksums, if any of them not matches doesnt download file with error output")
-	flag.BoolVar(c.Validate, "v", defaultValidate, "shorthand of -validate")
-	c.Download = flag.Bool("download", defaultDownload, "If all checksums are matches download file into current path, set false if you just want to retrieve file, if local allowed file still be downloaded")
-	flag.BoolVar(c.Download, "d", defaultDownload, "shorthand of -download")
 	c.Timeout = flag.Int("timeout", defaultTimeout, "Timeout in secounds for each running calculation")
 	flag.IntVar(c.Timeout, "t", defaultTimeout, "shorthand of -timeout")
 	c.All = flag.Bool("all", false, "Run all algorithms (MD5,SHA1 , SHA256 ...) for each running client")
@@ -89,6 +83,7 @@ func ParseConfig() (*Config, error) {
 	flag.StringVar(c.Key, "k", defaultKey, "shorthand of -key")
 	c.Dir = flag.String("dir", ".", "Default folder to save files, default is current folder")
 	c.Supplier = flag.String("lib", defaultSupplier, "Algorithm lib default is [GO] that core golang libraries used, if you want to use unix, win, mac default apps set to [OS], for openssl set [openssl]")
+	c.Keep = flag.Bool("keep", false, "If there is a checksum provided to validate and doesnt match with calculated results still keep the file")
 	var empty string = ""
 	c.File = &empty
 	c.Cheksum = &empty
