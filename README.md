@@ -66,8 +66,9 @@ Running in serve mode param is '-s' default listen address is 127.0.0.1 and port
 ```
 getsum -s 
 getsum -s -l 0.0.0.0 -p 9099
-getsum -s -l 0.0.0.0 -p 9099 -tlskey /tmp/tlskeyfile -tlscert /tmptlscertfile
+getsum -s -l 0.0.0.0 -p 9099 -tk /tmp/tlskeyfile -tc /tmp/tlscertfile
 ``` 
+**Updating client to run with remote servers**
 Create a config file at **$HOME/.getsum/servers.yml** with addresses of your servers, i.e.:
 ```
 servers:
@@ -78,6 +79,12 @@ servers:
   - name: azure-east-us
     address: http://127.0.0.1:8090
 ```
+or use -serverconfig parameter for custom config location:
+```
+getsum -serverconfig /tmp/servers.yml /path/to/file
+getsum -sc /tmp/servers.yml /path/to/file
+``` 
+
 [![Watch the full record](docs/server.gif)](https://asciinema.org/a/KA4sT6xTNN9iTzKHJhdgnybrB)
 
 **In case of 'os' selected**:
