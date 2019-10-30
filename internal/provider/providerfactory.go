@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strings"
 	"sync"
+	"time"
 
 	. "github.com/getsumio/getsum/internal/config"
 	"github.com/getsumio/getsum/internal/logger"
@@ -65,6 +66,7 @@ func getHttpClient(config *Config) *http.Client {
 	}
 	client := &http.Client{
 		Transport: tr,
+		Timeout:   time.Duration(*config.Timeout) * time.Second,
 	}
 	return client
 }
