@@ -80,14 +80,18 @@ var algoStr = []string{
 	"SM3",
 }
 
+//algo in string
 func (a Algorithm) Name() string {
 	return algoStr[a]
 }
 
+//algo enum index
 func (a Algorithm) Ordinal() uint8 {
 	return uint8(a)
 }
 
+//string to Algorithm type
+//TODO returns no error but instead 127
 func ValueOf(val *string) Algorithm {
 	for i, s := range algoStr {
 		if s == *val {

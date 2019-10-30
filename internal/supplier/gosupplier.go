@@ -23,10 +23,12 @@ import (
 	"golang.org/x/crypto/sha3"
 )
 
+//Calculates checksum using core go libraries
 type GoSupplier struct {
 	BaseSupplier
 }
 
+//return supported algos
 func (s *GoSupplier) Supports() []Algorithm {
 	return []Algorithm{
 		MD4,
@@ -50,7 +52,9 @@ func (s *GoSupplier) Supports() []Algorithm {
 	}
 }
 
+//start calculation
 func (s *GoSupplier) Run() {
+	//fetch file
 	err := s.File.Fetch(s.TimeOut)
 	if err != nil {
 		s.status.Value = err.Error()
@@ -62,12 +66,14 @@ func (s *GoSupplier) Run() {
 	s.status.Type = status.STARTED
 	t := time.After(time.Duration(s.TimeOut) * time.Second)
 	stat := make(chan string)
+	//collect related Hash instance
 	hash, err := getHash(s.Algorithm, s.Key)
 	if err != nil {
 		s.status.Value = err.Error()
 		s.status.Type = status.ERROR
 	}
 
+	//start calculation
 	go calculate(hash, stat, s.File)
 	for {
 		tEnd := time.Now()
@@ -75,15 +81,18 @@ func (s *GoSupplier) Run() {
 
 		select {
 		case <-t:
+			//timedout update status
 			s.status.Type = status.TIMEDOUT
 			s.status.Value = fmt.Sprintf("%dms", took.Milliseconds())
 			return
 		case val := <-stat:
+			//we got result return and terminate this loop
 			s.status.Type = status.COMPLETED
 			s.status.Value = fmt.Sprintf("%dms", took.Milliseconds())
 			s.status.Checksum = strings.Fields(val)[0]
 			return
 		default:
+			//still running update time
 			s.status.Type = status.RUNNING
 			s.status.Value = fmt.Sprintf("%dms", took.Milliseconds())
 			time.Sleep(15 * time.Millisecond)
@@ -92,14 +101,18 @@ func (s *GoSupplier) Run() {
 
 }
 
+//return status
 func (s *GoSupplier) Status() *status.Status {
 	return s.status
 }
 
+//delete file
 func (s *GoSupplier) Delete() {
 	s.File.Delete()
 }
 
+//terminate
+//TODO figure out how to terminate hash.sum() function
 func (s *GoSupplier) Terminate() error {
 	if s.status.Type == status.RUNNING {
 		s.status.Type = status.TERMINATED
@@ -108,6 +121,7 @@ func (s *GoSupplier) Terminate() error {
 
 }
 
+//calculates given file and returns checksum
 func calculate(hash hash.Hash, status chan string, file *file.File) {
 	f, _ := os.Open(file.Path())
 	defer f.Close()
@@ -116,6 +130,8 @@ func calculate(hash hash.Hash, status chan string, file *file.File) {
 	status <- hex.EncodeToString(hash.Sum(nil))
 }
 
+//Lucklily all go crypt hash impl. has same interface
+//simply collect and return related one
 func getHash(algo Algorithm, key string) (hash.Hash, error) {
 	switch algo {
 	case MD4:

@@ -5,6 +5,7 @@ import (
 	"github.com/getsumio/getsum/internal/status"
 )
 
+//Supplier ares main runner for calculation
 type Supplier interface {
 	Run()
 	Status() *status.Status
@@ -13,6 +14,7 @@ type Supplier interface {
 	Delete()
 }
 
+//embedded struct for suppliers
 type BaseSupplier struct {
 	Algorithm Algorithm
 	status    *status.Status
