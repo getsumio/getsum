@@ -7,6 +7,7 @@ import (
 	"github.com/getsumio/getsum/internal/status"
 )
 
+//TODO use single loop instead for each method
 type Providers struct {
 	Remotes       []*Provider
 	Locals        []*Provider
