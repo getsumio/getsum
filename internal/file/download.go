@@ -4,14 +4,19 @@ import (
 	"fmt"
 	"os"
 	"time"
+
+	"github.com/getsumio/getsum/internal/status"
 )
 
+//watches download process
+//and update status somethig like: DOWNLOAD 12%
+//quit channel immediatly terminates it
 func downloadFile(quit <-chan bool, f *File) {
-	var stop bool
+	f.Status.Type = status.DOWNLOAD
 	for {
 		select {
 		case <-quit:
-			stop = true
+			return
 		default:
 			file, err := os.Open(f.Path())
 			if err != nil {
@@ -27,10 +32,7 @@ func downloadFile(quit <-chan bool, f *File) {
 				size = 1
 			}
 			var percent float64 = float64(size) / float64(f.Size) * 100
-			f.StatusValue = fmt.Sprintf("%0.f%%", percent)
-			if stop {
-				break
-			}
+			f.Status.Value = fmt.Sprintf("%0.f%%", percent)
 			time.Sleep(time.Second)
 		}
 	}

@@ -6,6 +6,11 @@ import (
 	"os"
 )
 
+//validates if
+//file location param is given
+//it is a local file
+//is not dir
+//and is not symlink
 func validateLocal(f *File) error {
 	if f == nil {
 		return errors.New("File not initialized!")
@@ -19,7 +24,7 @@ func validateLocal(f *File) error {
 	}
 	info, err := os.Stat(f.Url)
 	if os.IsNotExist(err) {
-		return errors.New(fmt.Sprintf("Given url %s can not be accessed or not understood, supported protocols file, http, https, ftp", f.Url))
+		return errors.New(fmt.Sprintf("Given url %s can not be accessed or not understood, supported protocols file, http, https", f.Url))
 	} else if err != nil {
 		return err
 	}
@@ -38,11 +43,13 @@ func validateLocal(f *File) error {
 	return nil
 }
 
+//TODO not yet implemented, what to check? dns overkill
 func validateRemote(f *File) error {
 	return nil
 
 }
 
+//checks location is present
 func validateUrl(f *File) error {
 	if f.Url == "" {
 		return errors.New("Empty file url provided!")
