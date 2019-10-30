@@ -43,11 +43,16 @@ var openSSLAlgos []Algorithm = []Algorithm{
 	SM3,
 }
 
+//Common command executor for openssl or OS apps
+//for unix, max i.e. shaXXXsum application will be called
+//for openssl it is openssl see getCommand method for commands
 type CommandSupplier struct {
 	BaseSupplier
 	Type CommandType
 }
 
+//check if this runner can run given algo
+//i.e. openssl doesnt have MD2 support
 func (s *CommandSupplier) Supports() []Algorithm {
 	switch s.Type {
 	case OPENSSL:
@@ -59,6 +64,9 @@ func (s *CommandSupplier) Supports() []Algorithm {
 	}
 }
 
+//execute command on operating system
+//if error occured update status
+//then termination is listener job
 func execute(cmd *exec.Cmd, status chan string, e chan string) {
 	out, err := cmd.CombinedOutput()
 	if err != nil {
@@ -68,6 +76,9 @@ func execute(cmd *exec.Cmd, status chan string, e chan string) {
 	}
 }
 
+//terminate called
+//kill the running process
+//if there is any
 func kill(cmd *exec.Cmd) error {
 	if cmd != nil && cmd.Process != nil {
 		return cmd.Process.Kill()
@@ -77,7 +88,9 @@ func kill(cmd *exec.Cmd) error {
 
 var cmd *exec.Cmd
 
+//start calculation
 func (s *CommandSupplier) Run() {
+	//fetch the file
 	err := s.File.Fetch(s.TimeOut)
 	if err != nil {
 		s.status.Value = err.Error()
@@ -85,12 +98,14 @@ func (s *CommandSupplier) Run() {
 		return
 	}
 
+	//make sure timeout not reached
 	tStart := time.Now()
 	s.status.Type = status.STARTED
 	t := time.After(time.Duration(s.TimeOut) * time.Second)
 	stat := make(chan string)
 	e := make(chan string)
 	cmd = getCommand(s)
+	//execute command on routine in the main time start watching
 	go execute(cmd, stat, e)
 	for {
 		tEnd := time.Now()
@@ -98,11 +113,14 @@ func (s *CommandSupplier) Run() {
 
 		select {
 		case <-t:
+			//timeout occured kill and terminate
 			kill(cmd)
 			s.status.Type = status.TIMEDOUT
 			s.status.Value = fmt.Sprintf("%dms", took.Milliseconds())
 			return
 		case val := <-stat:
+			//process completed and we receive a result
+			//return result
 			s.status.Type = status.COMPLETED
 			s.status.Value = fmt.Sprintf("%dms", took.Milliseconds())
 			if s.Type == OPENSSL {
@@ -112,10 +130,12 @@ func (s *CommandSupplier) Run() {
 			}
 			return
 		case val := <-e:
+			//we got error
 			s.status.Type = status.ERROR
 			s.status.Value = val
 			return
 		default:
+			//still running update time
 			s.status.Type = status.RUNNING
 			s.status.Value = fmt.Sprintf("%dms", took.Milliseconds())
 			time.Sleep(15 * time.Millisecond)
@@ -123,14 +143,17 @@ func (s *CommandSupplier) Run() {
 	}
 }
 
+//return status
 func (s *CommandSupplier) Status() *status.Status {
 	return s.status
 }
 
+//remove file
 func (s *CommandSupplier) Delete() {
 	s.File.Delete()
 }
 
+//terminate process
 func (s *CommandSupplier) Terminate() error {
 	err := kill(cmd)
 	if s.status.Type == status.RUNNING {
@@ -139,6 +162,7 @@ func (s *CommandSupplier) Terminate() error {
 	return err
 }
 
+//returns i.e. openssl dgst -sha512 /file/path
 func getSSLCommand(algo Algorithm, path string) *exec.Cmd {
 	algorithm := strings.ToLower(algo.Name())
 	param := []string{"-", algorithm}
@@ -146,6 +170,7 @@ func getSSLCommand(algo Algorithm, path string) *exec.Cmd {
 	return exec.Command("openssl", "dgst", algoParam, path)
 }
 
+//returns i.e. sha512sum /file/path
 func getUnixCommand(a Algorithm, path string) *exec.Cmd {
 	algo := strings.ToLower(a.Name())
 	strs := []string{algo, "sum"}
@@ -154,12 +179,14 @@ func getUnixCommand(a Algorithm, path string) *exec.Cmd {
 
 }
 
+//returns i.e. certutil -hashfile /file/path SHA512
 func getWinCommand(a Algorithm, path string) *exec.Cmd {
 	algo := strings.ToUpper(a.Name())
 	return exec.Command("certUtil", "-hashfile", path, algo)
 
 }
 
+//returns related command according to -lib selection by the user
 func getCommand(s *CommandSupplier) *exec.Cmd {
 	switch s.Type {
 	case WINDOWS:

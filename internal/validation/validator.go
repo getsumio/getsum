@@ -10,6 +10,7 @@ import (
 
 var supportedAlgs string = "MD2,MD4,MD5,GOST,SHA1,SHA224,SHA256,SHA384,SHA512,RMD160,SHA3-224,SHA3-256,SHA3-384,SHA3-512,SHA512-224,SHA512-256,BLAKE2s256,BLAKE2b256,BLAKE2b384,BLAKE2b512,SHAKE128,SHAKE256,SM3"
 
+//validate config
 func ValidateConfig(config *Config, onPremise bool) error {
 	if *config.File == "" && !*config.Serve {
 		return errors.New("No file path/url provided, example usage: getsum /tmp/file ")
