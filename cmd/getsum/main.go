@@ -37,7 +37,7 @@ func main() {
 	if *config.Serve {
 		logger.Warn("Running in server mode listen address %s , port: %d", *config.Listen, *config.Port)
 		//onpremise is default server reads the config and listens given address and port no interface support atm
-		server := &servers.OnPremiseServer{}
+		server := &servers.OnPremiseServer{StoragePath: *config.Dir}
 		err := server.Start(config)
 		if err != nil {
 			logger.Error("Can not start server: %s", err.Error())
