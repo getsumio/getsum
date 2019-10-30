@@ -1,5 +1,6 @@
 package config
 
+//config dto
 type Config struct {
 	File         *string       `json:"file"`
 	LocalOnly    *bool         `json:"local_only"`
@@ -25,11 +26,13 @@ type Config struct {
 	Keep         *bool         `json:"keep"`
 }
 
+//this is for collecting server info from yaml files
 type ServerConfig struct {
 	Name    string
 	Address string
 }
 
+//wrapper for servers
 type ServerConfigs struct {
 	Servers []ServerConfig
 }
