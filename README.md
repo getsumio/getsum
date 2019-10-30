@@ -6,6 +6,22 @@
  
 **Installation**
 
+ Current binaries are stored on [release page](https://github.com/getsumio/getsum/releases/tag/v1.0). Please consider application only tested on Fedora 30. Windows binaries had some problem i will add next week. 
+ 
+ On linux:
+ ```
+ cd /location/to/store
+ wget https://github.com/getsumio/getsum/releases/download/v1.0/getsum-linux-amd64.tar.gz
+ tar xzvf getsum-linux-amd64.tar.gz
+ mv builds/linux/amd64/getsum .
+ rm -f ./builds
+ ```
+ then add binary location to /etc/profile or ~/.bashrc 
+ if you have alternatives installed:
+ ```
+ alternatives --install /usr/bin/getsum getsum /location/to/store/getsum 0
+ ```
+
 **How to run**
 
 Run 'getsum -h' for all parameters
