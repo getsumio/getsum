@@ -1,6 +1,6 @@
 # getsum : Tool for validating and calculating checksums
 
-***getsum*** calculates and validates checksum of files remotely or locally. According to user choice local downloads can be prevented if checksum mismatch. You can also run ***getsum*** in listen mode so you can run remotely deploy on your server or cloud provider of your choice. I get the idea from https://blog.linuxmint.com/?p=2994 so I thought it would be great fit for people who host binaries as well as users to validate their checksum. In validation mode if remote servers present application first calculates checksum on remote servers and if there is match it does download/calculation locally.
+***getsum*** calculates and validates checksum of files remotely or locally. According to user choice, local downloads can be prevented if checksum mismatch. You can also run ***getsum*** in listen mode so you can run remotely deploy on your server or cloud provider of your choice then use another getsum as client. I get the idea from https://blog.linuxmint.com/?p=2994 so I thought it would be great fit for people who host binaries as well as users to validate their checksum. In validation mode if remote servers are present, then application first calculates checksum on remote servers and if there is a match it does downloads the file and run another calculation locally.
 
  [![Watch the full record](docs/main.gif)](https://asciinema.org/a/ovpGNqNS56qlrKevUllOks1qT)
  
@@ -29,7 +29,7 @@ getsum -h
 
 **Selecting library/applications**
 
-For checksum calculations core Golang libraries will be used as default. If you have installed openssl set '-lib openssl'. If you want to use applications from operating system set '-lib os'.
+For checksum calculations core Golang libraries will be used as default. If you have installed openssl set *-lib openssl*. If you want to use applications from operating system set *-lib os*.
 
 ```
 getsum -a MD5 -lib openssl https://some.server.address/binary
@@ -43,7 +43,7 @@ getsum -a MD5 -lib os https://some.server.address/binary
  
 **Running Multiple Algorithms** 
 
-Default algorithm is ***SHA512***. Use '-a' parameter to specify different algorithms. Algorithms are comma separated. '-all' runs all algorithms at once (if selected library doesnt support some of them only supported ones will run)
+Default algorithm is ***SHA512***. Use *-a* parameter to specify different algorithms. Algorithms are comma separated. *-all* runs all algorithms at once (if selected library doesnt support some of them only supported ones will run)
 
 ```
 getsum -a MD5,SHA512,SHA1 https://some.server.address/binary
@@ -63,7 +63,7 @@ getsum -localOnly https://some.server.address/binary cf1a31c3acf3a1c3f2a13cfa13
 
 **Running in listen mode**
 
-Running in serve mode param is '-s' default listen address is 127.0.0.1 and port is 8088. In serve mode files are not stored that they are removed after calculation. Set '-dir' param to change save dir. There is no authentication method provided by this application you need to handle it if you are planning to open publicly.
+Running in serve mode param is *-s* default listen address is *127.0.0.1* and port is *8088*. In serve mode files are not stored that they are removed after calculation. Set *-dir* param to change save folder, default is current location. There is no authentication method provided by this application, you need to handle it if you are planning to run servers in public.
 ```
 getsum -s 
 getsum -s -l 0.0.0.0 -p 9099
@@ -82,7 +82,7 @@ servers:
     address: http://127.0.0.1:8090
 ```
 "**servers,name and address" field names should be same** you just need to update values. 
-Also use -serverconfig parameter for custom config location:
+Also use *-serverconfig* parameter for custom config location:
 ```
 getsum -serverconfig /tmp/servers.yml /path/to/file
 getsum -sc /tmp/servers.yml /path/to/file
@@ -92,8 +92,8 @@ getsum -sc /tmp/servers.yml /path/to/file
 
 **In case of 'os' selected**:
 below commands will be called:
-* For ***Linux/Mac*** :  md5sum,sha1sum,sha224sum,sha256sum,sha384sum,sha512sum
-* For ***Windows*** : certUtil will be called
+* For ***Linux/Mac*** :  *md5sum,sha1sum,sha224sum,sha256sum,sha384sum,sha512sum*
+* For ***Windows*** : *certUtil* will be called
 
 **Supported Algorithms**:
 * ***Windows***: MD2, MD4, MD5, SHA1, SHA224, SHA256, SHA384, SHA512
@@ -112,5 +112,8 @@ I will also write browser addons next week (4.November+) so you can set your ser
  I really wanted to add native lambda, cloud functions support for different providers but each provider has their own limits i.e. 200mb storage space or 2GB memory, so its currently postponed.
  
  **Issues**
- Application not tested on mac but on linux and windows. If you had issues please raise here. Also unit tests are missing I will implement this month. 
+ Application tested only on linux. Windows binary had path problem I will fix. If you had issues please raise here. Also unit tests are missing I will implement this month. 
+ 
+ **How to support**
+  Code review, pull requests, raise issues, promote :) 
 **
