@@ -10,10 +10,10 @@
 
 Run 'getsum -h' for all parameters
 ```
-getsum https://speed.hetzner.de/100MB.bin
+getsum https://some.server.address/binary
 getsum /tmp/path/to/file
-getsum -a MD5,SHA512 https://speed.hetzner.de/100MB.bin cf1a31c3acf3a1c3f2a13cfa13
-getsum -remoteOnly https://speed.hetzner.de/100MB.bin cf1a31c3acf3a1c3f2a13cfa13
+getsum -a MD5,SHA512 https://some.server.address/binary cf1a31c3acf3a1c3f2a13cfa13
+getsum -remoteOnly https://some.server.address/binary cf1a31c3acf3a1c3f2a13cfa13
 getsum -h
 ``` 
 **Features**
@@ -32,9 +32,9 @@ getsum -h
 For checksum calculations core Golang libraries will be used as default. If you have installed openssl set '-lib openssl'. If you want to use applications from operating system set '-lib os'.
 
 ```
-getsum -a MD5 -lib openssl https://speed.hetzner.de/100MB.bin
-getsum -a MD5 -lib go https://speed.hetzner.de/100MB.bin
-getsum -a MD5 -lib os https://speed.hetzner.de/100MB.bin
+getsum -a MD5 -lib openssl https://some.server.address/binary
+getsum -a MD5 -lib go https://some.server.address/binary
+getsum -a MD5 -lib os https://some.server.address/binary
 ``` 
 
 [![Watch the full record](docs/libs.gif)](https://asciinema.org/a/sy0OSLL8IWUOED2DFk1yFLiOB)
@@ -46,7 +46,7 @@ getsum -a MD5 -lib os https://speed.hetzner.de/100MB.bin
 Default algorithm is ***SHA512***. Use '-a' parameter to specify different algorithms. Algorithms are comma separated. '-all' runs all algorithms at once (if selected library doesnt support some of them only supported ones will run)
 
 ```
-getsum -a MD5,SHA512,SHA1 https://speed.hetzner.de/100MB.bin
+getsum -a MD5,SHA512,SHA1 https://some.server.address/binary
 getsum -all /tmp/path/to/file
 ``` 
 
@@ -56,9 +56,9 @@ getsum -all /tmp/path/to/file
 **Validation**
  If another checksum provided application will compare generated one with the given one. If there is mismatch file will be removed from host pc. Use ***-keep*** parameter if you want to keep file even there is mismatch. 
  ```
-getsum -a MD5 -keep https://speed.hetzner.de/100MB.bin cf1a31c3acf3a1c3f2a13cfa13
-getsum -remoteOnly https://speed.hetzner.de/100MB.bin cf1a31c3acf3a1c3f2a13cfa13
-getsum -localOnly https://speed.hetzner.de/100MB.bin cf1a31c3acf3a1c3f2a13cfa13
+getsum -a MD5 -keep https://some.server.address/binary cf1a31c3acf3a1c3f2a13cfa13
+getsum -remoteOnly https://some.server.address/binary cf1a31c3acf3a1c3f2a13cfa13
+getsum -localOnly https://some.server.address/binary cf1a31c3acf3a1c3f2a13cfa13
 ``` 
 
 **Running in listen mode**
