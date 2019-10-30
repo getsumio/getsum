@@ -6,7 +6,7 @@
  
 **Installation**
 
- Current binaries are stored on [release page](https://github.com/getsumio/getsum/releases/tag/v1.0). Please consider application only tested on Fedora 30. Windows binaries had some problem i will add next week. 
+ Current binaries are stored on [release page](https://github.com/getsumio/getsum/releases/tag/v1.0). Please consider application only tested on Fedora 30. Windows binaries had path problem that executable didnt run, i will commit fix next week. 
  
  On linux:
  ```
