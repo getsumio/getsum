@@ -8,6 +8,9 @@ import (
 	"github.com/getsumio/getsum/internal/status"
 )
 
+//watches download process
+//and update status somethig like: DOWNLOAD 12%
+//quit channel immediatly terminates it
 func downloadFile(quit <-chan bool, f *File) {
 	f.Status.Type = status.DOWNLOAD
 	for {

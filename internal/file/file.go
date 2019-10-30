@@ -16,6 +16,7 @@ import (
 	"github.com/getsumio/getsum/internal/status"
 )
 
+//file interface
 type IFile interface {
 	Path() string
 	Data() ([]byte, error)
@@ -25,6 +26,7 @@ type IFile interface {
 	Reset()
 }
 
+//file struct
 type File struct {
 	path        string
 	data        []byte
@@ -35,24 +37,34 @@ type File struct {
 	StoragePath string
 }
 
+//file location on local host
+//if file is remote file something like http/https
+//path will be present after file is downloaded
+//so you need to call Fetch method first
 func (f *File) Path() string {
 	return f.path
 }
 
+//simply removes file if its already fetched
 func (f *File) Delete() {
 	if f.path != "" {
 		os.Remove(f.path)
 	}
 }
 
+//checks file is not on local
+//TODO add file:/// support
 func (f *File) IsRemote() bool {
-	return strings.HasPrefix(f.Url, "http") || strings.HasPrefix(f.Url, "ftp")
+	return strings.HasPrefix(f.Url, "http")
 }
 
+//a bit of ugly but resets global variable
+//check variable comment for details
 func (f *File) Reset() {
 	fetchedSize = -1
 }
 
+//read the file data in bytes
 func (f *File) Data() ([]byte, error) {
 	if f.path == "" {
 		return nil, errors.New("File not fetched yet you need to first call Fetch()")
@@ -66,6 +78,9 @@ func (f *File) Data() ([]byte, error) {
 
 }
 
+//validates file
+//if remote fetches file
+//sets path location forthe stored file
 func (f *File) Fetch(timeout int) error {
 	err := validateUrl(f)
 	if err != nil {
@@ -81,9 +96,19 @@ func (f *File) Fetch(timeout int) error {
 	return nil
 }
 
+//TODO: sync.ONCE maybe better?
 var mux sync.Mutex
+
+//in case of user runs multiple checksum calculations
+//on same machine there is no point to
+//download file per routine
+//so first routine takes the leads and downloads file
+//then other routines check this variable
+//if present they use existing path
 var fetchedSize int64 = -1
 
+//fetches file remotely
+//unless not timedout sets details and path
 func fetchRemote(f *File, timeout int) error {
 
 	mux.Lock()
@@ -146,6 +171,8 @@ func fetchRemote(f *File, timeout int) error {
 	return err
 }
 
+//only validates file since its already hosted
+//see validation for details
 func fetchLocal(f *File) error {
 
 	err := validateLocal(f)
@@ -159,6 +186,7 @@ func fetchLocal(f *File) error {
 
 }
 
+//removes file
 func remove(fileOrDir string) error {
 	err := os.Remove(fileOrDir)
 	if err != nil {
@@ -168,6 +196,9 @@ func remove(fileOrDir string) error {
 
 }
 
+//return http client wrapped by
+//proxy settings
+//as well as timeout value
 func getHttpClient(f *File, timeout int) *http.Client {
 	proxyUrl := http.ProxyFromEnvironment
 	if f.Proxy != "" {
