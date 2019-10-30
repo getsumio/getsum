@@ -26,16 +26,20 @@ const (
 	defaultSupplier   = "go"
 )
 
-var defaultConfig string = "~/.getsum/servers.yml"
+var defaultConfig string = ".getsum/servers.yml"
 
 func parseYaml(config *Config) error {
 	if *config.ServerConfig == "" {
-		_, err := os.Stat(defaultConfig)
-		if os.IsNotExist(err) {
-			return nil
-		}
-		config.ServerConfig = &defaultConfig
+		home := os.Getenv("HOME")
+		if home != "" {
+			homeConfig := strings.Join([]string{home, defaultConfig}, "/")
+			_, err := os.Stat(homeConfig)
+			if os.IsNotExist(err) {
+				return nil
+			}
+			config.ServerConfig = &homeConfig
 
+		}
 	}
 	yamlFile, err := ioutil.ReadFile(*config.ServerConfig)
 	if err != nil {
