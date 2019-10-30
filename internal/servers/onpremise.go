@@ -16,7 +16,7 @@ import (
 
 //server instance to run in server mode
 type OnPremiseServer struct {
-	storagePath string
+	StoragePath string
 	Supplier    Supplier
 	mux         sync.Mutex
 }
@@ -90,6 +90,7 @@ func handlePost(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
 
 	//get supplier instance, only single algo supported on server mode
 	var algorithm = ValueOf(&config.Algorithm[0])
+	config.Dir = &s.StoragePath
 	s.Supplier = factory.GetSupplierByAlgo(config, &algorithm)
 	//something went  wrong, TODO add error handler
 	if s.Supplier == nil {
