@@ -26,18 +26,26 @@ type ProviderFactory struct {
 
 //Reads configuration file
 //according to params initializes list of providers
-//if present remote ones are AWS,GCE,IBM,ORCL,Azure
+//if present remote ones are OnPremise,AWS,GCE,IBM,ORCL,Azure
 //local provider is Local
 func (p *ProviderFactory) GetProviders(config *Config) (*Providers, error) {
 	logger.Debug("Providers requested for config %v", *config)
+	//each provider (runner) has a supplier
+	//providers just manages suppliers
 	var factory ISupplierFactory = new(SupplierFactory)
+	//collect local providers
+	//there might be more than one i.e. user wants to run
+	//all algos
 	localProviders, err := getLocalProviders(config, factory)
 	logger.Debug("Localproviders %v", localProviders)
 	if err != nil {
 		return nil, err
 	}
+	//collect remote providers
 	remoteProviders := getRemoteProviders(config)
 	logger.Debug("Remoteproviders %v", remoteProviders)
+	//Providers struct is wrapper for both local remote
+	//collect and set its fields
 	allProviders := append(localProviders, remoteProviders...)
 	lengthLocal := len(localProviders)
 	lengthRemote := len(remoteProviders)
@@ -55,6 +63,8 @@ func (p *ProviderFactory) GetProviders(config *Config) (*Providers, error) {
 	return providers, nil
 }
 
+//utility to instantiate http client
+//wrapped with proxy and timeout setting
 func getHttpClient(config *Config) *http.Client {
 	proxyUrl := http.ProxyFromEnvironment
 	if *config.Proxy != "" {
@@ -70,8 +80,12 @@ func getHttpClient(config *Config) *http.Client {
 	}
 	return client
 }
+
+//if config is not local only and some servers present
+//creates provider per server
 func getRemoteProviders(config *Config) []*Provider {
 	list := []*Provider{}
+	//check user wants to run only on host pc
 	if !*config.LocalOnly {
 		for _, s := range config.Servers.Servers {
 			provider := getRemoteProvider(config, &s)
@@ -81,6 +95,8 @@ func getRemoteProviders(config *Config) []*Provider {
 	return list
 }
 
+//utility to build provider instance
+//only OnPremise supported as of now
 func getRemoteProvider(config *Config, serverConfig *ServerConfig) Provider {
 	r := &RemoteProvider{}
 	r.Name = strings.Join([]string{serverConfig.Name, config.Algorithm[0]}, "-")
@@ -93,6 +109,7 @@ func getRemoteProvider(config *Config, serverConfig *ServerConfig) Provider {
 
 }
 
+//utility to instantiate local provider
 func getProvider(pType ProviderType, supplier Supplier, config *Config, a Algorithm) Provider {
 	l := &LocalProvider{}
 	l.Name = strings.Join([]string{pType.Name(), a.Name()}, "-")
@@ -103,6 +120,11 @@ func getProvider(pType ProviderType, supplier Supplier, config *Config, a Algori
 
 }
 
+//creates LocalProvider per algorithm specified in config
+//in case of remoteOnly returns empty
+//i.e. for param -a MD5, SHA512
+//there will be 2 provider with MD5 supplier and SHA512 supplier
+//supplier factory will take care of what algo and which library will be used
 func getLocalProviders(config *Config, factory ISupplierFactory) ([]*Provider, error) {
 	logger.Debug("Instantiating local providers")
 	locals := []*Provider{}
