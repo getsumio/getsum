@@ -33,6 +33,7 @@ const (
 var Level = LevelTrace
 var pending string
 
+//sets Level
 func SetLevel(level string) {
 	switch level {
 	case trace:
@@ -50,6 +51,7 @@ func SetLevel(level string) {
 	}
 }
 
+//dumps http.Request
 func LogRequest(r *http.Request) {
 	x, err := httputil.DumpRequest(r, true)
 	if err != nil {
@@ -60,6 +62,7 @@ func LogRequest(r *http.Request) {
 
 }
 
+//log in debug mode
 func Debug(msg string, params ...interface{}) {
 	if params != nil {
 		msg = fmt.Sprintf(msg, params...)
@@ -69,6 +72,7 @@ func Debug(msg string, params ...interface{}) {
 	}
 }
 
+//log in trace mode
 func Trace(msg string, params ...interface{}) {
 	if params != nil {
 		msg = fmt.Sprintf(msg, params...)
@@ -78,9 +82,12 @@ func Trace(msg string, params ...interface{}) {
 	}
 }
 
+//prints headers of running processes
 func Header(providers *Providers) {
 	printHeader(providers, 0)
 }
+
+//prints headers from given column index
 func printHeader(providers *Providers, start int) {
 	var first string
 	var second string
@@ -98,6 +105,7 @@ func printHeader(providers *Providers, start int) {
 
 }
 
+//info level
 func Info(msg string, params ...interface{}) {
 	if params != nil {
 		msg = fmt.Sprintf(msg, params...)
@@ -106,6 +114,9 @@ func Info(msg string, params ...interface{}) {
 		log.Printf("%s%s%s\n", color.Bold(color.Cyan(info)), PADDING, msg)
 	}
 }
+
+//prints checksums or error values
+//for each runners
 func Logsum(providers *Providers) {
 	fmt.Println("\n\n")
 	for i, s := range providers.Statuses {
@@ -131,6 +142,11 @@ func Logsum(providers *Providers) {
 
 var currentColumn int
 
+//prints status of each providers
+//if log level INFO+ prints horizontally
+//if horizontal 5 column per row
+//if all processes finished in current row
+//prints new one
 func Status(providers *Providers) {
 	stats := providers.Status()
 	printStatus(stats, providers, currentColumn)
@@ -155,6 +171,7 @@ func Status(providers *Providers) {
 	}
 }
 
+//see Status comment
 func printStatus(stats []*status.Status, providers *Providers, start int) {
 	var msg string
 	for i := start; i < providers.Length; i++ {
@@ -188,6 +205,8 @@ func printStatus(stats []*status.Status, providers *Providers, start int) {
 	}
 }
 
+//prints given log at the same line by removing previous comment
+//not used currently
 func Inplace(msg string, params ...interface{}) {
 	if params != nil {
 		msg = fmt.Sprintf(msg, params...)
@@ -195,6 +214,7 @@ func Inplace(msg string, params ...interface{}) {
 	fmt.Printf("%s%s%s%s\r", PADDING, color.Bold(color.Cyan(info)), PADDING, msg)
 }
 
+//log in warn level
 func Warn(msg string, params ...interface{}) {
 	if params != nil {
 		msg = fmt.Sprintf(msg, params...)
@@ -204,6 +224,7 @@ func Warn(msg string, params ...interface{}) {
 	}
 }
 
+//log in error level
 func Error(msg string, params ...interface{}) {
 	if params != nil {
 		msg = fmt.Sprintf(msg, params...)
