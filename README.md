@@ -17,7 +17,8 @@
  rm -f ./builds
  ```
  then add binary location to /etc/profile or ~/.bashrc 
- if you have alternatives installed:
+ 
+ or if you have alternatives installed:
  ```
  alternatives --install /usr/bin/getsum getsum /location/to/store/getsum 0
  ```
