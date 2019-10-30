@@ -24,7 +24,8 @@ getsum -h
 * Download file from internet and calculate checksum
 * Prevent download if checksum doesnt match
 * Local/Remote only calculations
-* Proxy/TLS support on listen mode
+* Proxy support
+* TLS support on listen mode
 
 **Selecting library/applications**
 
