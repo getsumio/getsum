@@ -1,24 +1,21 @@
 # getsum : Tool for validating and calculating checksums
 
-***getsum*** calculates and validates checksum of files remotely or locally. According to user choice, local downloads can be prevented if checksum mismatch. You can also run ***getsum*** in listen mode so you can run remotely deploy on your server or cloud provider of your choice then use another getsum as client. I get the idea from https://blog.linuxmint.com/?p=2994 so I thought it would be great fit for people who host binaries as well as users to validate their checksum. In validation mode if remote servers are present, then application first calculates checksum on remote servers and if there is a match it does downloads the file and run another calculation locally.
+***getsum*** calculates and validates checksum of files remotely or locally. According to user choice, local downloads can be prevented if their checksum mismatch. You can also run application in listen mode so you can remotely deploy on your server or cloud provider of your choice then use another getsum as client. I get the idea from https://blog.linuxmint.com/?p=2994 so I thought it would be great fit for people who host binaries as well as users to validate their checksum. In validation mode if remote servers are present, then application first calculates checksum on remote servers and if there is a match it does downloads the file and run another calculation locally.
 
  [![Watch the full record](docs/main.gif)](https://asciinema.org/a/ovpGNqNS56qlrKevUllOks1qT)
  
 **Installation**
 
- Current binaries are stored on [release page](https://github.com/getsumio/getsum/releases/tag/v1.0). Please consider application only tested on Fedora 30. Windows binaries had path problem that executable didnt run, i will commit fix next week. 
+ Current binaries are stored on [release page](https://github.com/getsumio/getsum/releases). Please consider application only tested on Fedora 30. 
  
- On linux:
+linux example:
  ```
  cd /location/to/store
- wget https://github.com/getsumio/getsum/releases/download/v1.0/getsum-linux-amd64.tar.gz
  tar xzvf getsum-linux-amd64.tar.gz
- mv builds/linux/amd64/getsum .
- rm -f ./builds
- ```
- then add binary location to /etc/profile or ~/.bashrc 
- 
- or if you have alternatives installed:
+ cd builds/linux/amd64/
+ ./getsum -h
+ ``` 
+ add binary location to /etc/profile or ~/.bashrc or if you have alternatives installed:
  ```
  alternatives --install /usr/bin/getsum getsum /location/to/store/getsum 0
  ```
@@ -78,7 +75,7 @@ getsum -remoteOnly https://some.server.address/binary cf1a31c3acf3a1c3f2a13cfa13
 getsum -localOnly https://some.server.address/binary cf1a31c3acf3a1c3f2a13cfa13
 ``` 
 
-**Running in listen mode**
+**Running in serve mode**
 
 Running in serve mode param is *-s* default listen address is *127.0.0.1* and port is *8088*. In serve mode files are not stored that they are removed after calculation. Set *-dir* param to change save folder, default is current location. There is no authentication method provided by this application, you need to handle it if you are planning to run servers in public.
 ```
@@ -110,7 +107,7 @@ getsum -sc /tmp/servers.yml /path/to/file
 **In case of 'os' selected**:
 below commands will be called:
 * For ***Linux/Mac*** :  *md5sum,sha1sum,sha224sum,sha256sum,sha384sum,sha512sum*
-* For ***Windows*** : *certUtil* will be called
+* For ***Windows*** : *certUtil* will be called 
 
 **Supported Algorithms**:
 * ***Windows***: MD2, MD4, MD5, SHA1, SHA224, SHA256, SHA384, SHA512
@@ -129,8 +126,7 @@ I will also write browser addons next week (4.November+) so you can set your ser
  I really wanted to add native lambda, cloud functions support for different providers but each provider has their own limits i.e. 200mb storage space or 2GB memory, so its currently postponed.
  
  **Issues**
- Application tested only on linux. Windows binary had path problem I will fix. If you had issues please raise here. Also unit tests are missing I will implement this month. 
+ Application tested only on linux. If you had issues please raise here. Also unit tests are missing I will implement this month. 
  
  **How to support**
   Code review, pull requests, raise issues, promote :) 
-**
