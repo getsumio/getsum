@@ -45,16 +45,9 @@ func setErrorStatus(err error, r *RemoteProvider) {
 func remoteRun(l *RemoteProvider) {
 
 	l.status = &status.Status{}
-	//parse config to json
-	body, err := json.Marshal(*l.config)
-	if err != nil {
-		setErrorStatus(err, l)
-		l.hasRunError = true
-		return
-	}
 
 	//send config to server, this only POST request so no need other param
-	resp, err := l.client.Post(l.address, "application/json", bytes.NewBuffer(body))
+	resp, err := l.client.Post(l.address, "application/json", bytes.NewBuffer(config.ConfigJson))
 	defer closeResponse(resp)
 	if err != nil {
 		//set error as provider status
