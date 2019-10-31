@@ -18,7 +18,7 @@ const (
 	OPENSSL
 )
 
-var unixAlgos []Algorithm = []Algorithm{MD5, SHA1, SHA224, SHA256, SHA384, SHA512}
+var unixAlgos []Algorithm = []Algorithm{MD5, SHA1, SHA256, SHA384, SHA512}
 var winAlgos []Algorithm = []Algorithm{MD2, MD4, MD5, SHA1, SHA224, SHA256, SHA384, SHA512}
 
 var openSSLAlgos []Algorithm = []Algorithm{
