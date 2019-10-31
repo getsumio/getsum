@@ -149,7 +149,7 @@ func getLocalProviders(config *Config, factory ISupplierFactory) ([]*Provider, e
 				}
 			}
 			if !supports {
-				logger.Warn(fmt.Sprintf("Algorithm %s not supported for local provider using %s libraries", a.Name(), *config.Supplier))
+				logger.Info(fmt.Sprintf("Algorithm %s not supported for local provider using %s libraries", a.Name(), *config.Supplier))
 				continue
 			}
 			l := getProvider(Local, supplier, config, a)

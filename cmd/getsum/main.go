@@ -31,7 +31,7 @@ func main() {
 
 	//if user defined set log level
 	logger.SetLevel(*config.LogLevel)
-	logger.Debug("Application  started, using config %v", *config)
+	logger.Debug("Application  started, using config %v", parser.ConfigJson)
 
 	//check if user wants to run in listen mode
 	if *config.Serve {

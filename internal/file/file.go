@@ -115,7 +115,7 @@ func fetchRemote(f *File, timeout int) error {
 	defer mux.Unlock()
 	filename := path.Base(f.Url)
 	if f.StoragePath != "" {
-		filename = strings.Join([]string{f.StoragePath, filename}, "/")
+		filename = strings.Join([]string{f.StoragePath, filename}, string(os.PathSeparator))
 	}
 	if fetchedSize > 0 { //another process already fetched
 		f.Size = fetchedSize
