@@ -118,6 +118,13 @@ below commands will be called:
 **Browser Addons**
 I will also write browser addons next week (4.November+) so you can set your servers on browser extension and validate during download.
 
+**Docker image**
+```
+docker pull getsum/getsum
+docker run -p127.0.0.1:8088:8088 getsum/getsum
+```
+
+
 **Cloud Deployment**
  TODO: add example gcloud deploy app, awscli ibm oracle ...
 
