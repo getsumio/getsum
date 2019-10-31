@@ -18,8 +18,8 @@ const (
 	OPENSSL
 )
 
-var unixAlgos []Algorithm = []Algorithm{MD5, SHA1, SHA256, SHA384, SHA512}
-var winAlgos []Algorithm = []Algorithm{MD2, MD4, MD5, SHA1, SHA224, SHA256, SHA384, SHA512}
+var unixAlgos []Algorithm = []Algorithm{MD5, SHA1, SHA224, SHA256, SHA384, SHA512}
+var winAlgos []Algorithm = []Algorithm{MD2, MD4, MD5, SHA1, SHA256, SHA384, SHA512}
 
 var openSSLAlgos []Algorithm = []Algorithm{
 	MD4,
@@ -125,6 +125,8 @@ func (s *CommandSupplier) Run() {
 			s.status.Value = fmt.Sprintf("%dms", took.Milliseconds())
 			if s.Type == OPENSSL {
 				s.status.Checksum = strings.Fields(val)[1]
+			} else if s.Type == WINDOWS {
+				s.status.Checksum = strings.Split(val, "\n")[1]
 			} else {
 				s.status.Checksum = strings.Fields(val)[0]
 			}
