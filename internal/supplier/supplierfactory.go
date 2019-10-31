@@ -25,26 +25,45 @@ func (factory *SupplierFactory) GetSupplierByAlgo(config *Config, algorithm *Alg
 
 }
 
+var cache map[string]Supplier = make(map[string]Supplier)
+
 //creates supplier instance
 func getSupplierInstance(config *Config, algo *Algorithm) Supplier {
 	if *config.Supplier == "go" {
-		s := &GoSupplier{}
-		setFields(&s.BaseSupplier, *algo, config)
+		s, ok := cache["go"+string(*algo)]
+		if !ok {
+			s = &GoSupplier{}
+			cache["go"+string(*algo)] = s
+
+		}
+		setFields(s.Data(), *algo, config)
 		return s
 	} else if *config.Supplier == "openssl" {
-		s := &CommandSupplier{Type: OPENSSL}
-		setFields(&s.BaseSupplier, *algo, config)
-		return s
+		s, ok := cache["openssl"+string(*algo)]
+		if !ok {
+			s = &CommandSupplier{Type: OPENSSL}
+			cache["openssl"+string(*algo)] = s
 
+		}
+		setFields(s.Data(), *algo, config)
+		return s
 	}
 	switch runtime.GOOS {
 	case "linux", "mac":
-		s := &CommandSupplier{Type: UNIX}
-		setFields(&s.BaseSupplier, *algo, config)
+		s, ok := cache["mac"+string(*algo)]
+		if !ok {
+			s = &CommandSupplier{Type: UNIX}
+			cache["mac"+string(*algo)] = s
+		}
+		setFields(s.Data(), *algo, config)
 		return s
 	case "windows":
-		s := &CommandSupplier{Type: WINDOWS}
-		setFields(&s.BaseSupplier, *algo, config)
+		s, ok := cache["windows"+string(*algo)]
+		if !ok {
+			s = &CommandSupplier{Type: WINDOWS}
+			cache["windows"+string(*algo)] = s
+		}
+		setFields(s.Data(), *algo, config)
 		return s
 	default:
 		return nil
@@ -54,12 +73,22 @@ func getSupplierInstance(config *Config, algo *Algorithm) Supplier {
 
 //utility to set fields
 func setFields(base *BaseSupplier, algo Algorithm, config *Config) {
-	stat := &status.Status{status.PREPARED, "", ""}
+	if base.status == nil {
+		base.status = &status.Status{}
+	}
+	base.status.Type = status.PREPARED
+	base.status.Value = ""
+	base.status.Checksum = ""
 	base.Algorithm = algo
 	base.Key = *config.Key
-	base.File = &File{Url: *config.File, Status: stat, Proxy: *config.Proxy, StoragePath: *config.Dir}
-	base.TimeOut = *config.Timeout
-	base.status = stat
+	if base.File == nil {
+		base.File = &File{}
+	}
 	base.File.Reset()
+	base.File.Url = *config.File
+	base.File.Status = base.status
+	base.File.Proxy = *config.Proxy
+	base.File.StoragePath = *config.Dir
 
+	base.TimeOut = *config.Timeout
 }

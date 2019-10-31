@@ -12,6 +12,7 @@ type Supplier interface {
 	Terminate() error
 	Supports() []Algorithm
 	Delete()
+	Data() *BaseSupplier
 }
 
 //embedded struct for suppliers

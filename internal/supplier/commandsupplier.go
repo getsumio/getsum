@@ -164,6 +164,10 @@ func (s *CommandSupplier) Terminate() error {
 	return err
 }
 
+func (s *CommandSupplier) Data() *BaseSupplier {
+	return &s.BaseSupplier
+}
+
 //returns i.e. openssl dgst -sha512 /file/path
 func getSSLCommand(algo Algorithm, path string) *exec.Cmd {
 	algorithm := strings.ToLower(algo.Name())
