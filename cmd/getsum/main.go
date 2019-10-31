@@ -107,10 +107,11 @@ func checkMismatch(providers *Providers, config *parser.Config) {
 		logger.Logsum(providers)
 		//check if user still wants to keep the file
 		if !*config.Keep {
-			logger.Debug("Exiting application no keep setted")
 			providers.Delete()
-			os.Exit(1)
 		}
+		logger.Debug("Exiting application no keep setted")
+		os.Exit(1)
+
 	} else {
 		//all good print one last time statuses
 		logger.Status(providers)

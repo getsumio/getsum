@@ -56,5 +56,9 @@ func ValidateConfig(config *Config, onPremise bool) error {
 		return errors.New("You specified -tlscert but not -tlskey, both parameter required for https/tls mode")
 	}
 
+	if *config.Key != "" && *config.Supplier != "go" {
+		return errors.New("-key parameter only used on go libs currently, set -lib go")
+	}
+
 	return nil
 }

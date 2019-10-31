@@ -91,12 +91,14 @@ func handlePost(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
 	//get supplier instance, only single algo supported on server mode
 	var algorithm = ValueOf(&config.Algorithm[0])
 	config.Dir = &s.StoragePath
-	s.Supplier = factory.GetSupplierByAlgo(config, &algorithm)
+	s.Supplier, err = factory.GetSupplierByAlgo(config, &algorithm)
 	//something went  wrong, TODO add error handler
-	if s.Supplier == nil {
-		handleError("Can not create algorithm runner instance", w)
+	if err != nil {
+		handleError("Can not create algorithm runner instance: "+err.Error(), w)
+		return
 	}
 	go s.Supplier.Run()
+	handleGet(s, w, r)
 	logger.Info("Process started")
 }
 

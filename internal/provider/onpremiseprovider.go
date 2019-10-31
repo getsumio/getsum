@@ -20,7 +20,8 @@ type RemoteProvider struct {
 	client      *http.Client
 	config      *config.Config
 	address     string
-	ErrorStatus *status.Status
+	status      *status.Status
+	hasRunError bool
 }
 
 //notifies server to run
@@ -35,20 +36,20 @@ func (l *RemoteProvider) Run() {
 }
 
 //utility to create a status struct with given value
-func getErrorStatus(err error) *status.Status {
-	stat := &status.Status{}
-	stat.Type = status.ERROR
-	stat.Value = err.Error()
-	return stat
+func setErrorStatus(err error, r *RemoteProvider) {
+	r.status.Type = status.ERROR
+	r.status.Value = err.Error()
 }
 
 //send request to server to start running
 func remoteRun(l *RemoteProvider) {
 
+	l.status = &status.Status{}
 	//parse config to json
 	body, err := json.Marshal(*l.config)
 	if err != nil {
-		l.ErrorStatus = getErrorStatus(err)
+		setErrorStatus(err, l)
+		l.hasRunError = true
 		return
 	}
 
@@ -58,10 +59,19 @@ func remoteRun(l *RemoteProvider) {
 	if err != nil {
 		//set error as provider status
 		//status() method will handle
-		l.ErrorStatus = getErrorStatus(err)
+		setErrorStatus(err, l)
+		l.hasRunError = true
 		return
 
 	}
+
+	decoder := json.NewDecoder(resp.Body)
+	err = decoder.Decode(l.status)
+	if err != nil {
+		setErrorStatus(err, l)
+		l.hasRunError = true
+	}
+	l.hasRunError = l.status.Type == status.ERROR
 
 }
 
@@ -77,19 +87,20 @@ func remoteStatus(l *RemoteProvider) *status.Status {
 	//reach the server
 	resp, err := l.client.Get(l.address)
 	if err != nil {
-		return getErrorStatus(err)
+		setErrorStatus(err, l)
+		return l.status
 	}
 
 	defer closeResponse(resp)
 	//parse response
 	decoder := json.NewDecoder(resp.Body)
-	status := &status.Status{}
-	err = decoder.Decode(status)
+	err = decoder.Decode(l.status)
 	if err != nil {
-		return getErrorStatus(err)
+		setErrorStatus(err, l)
+		return l.status
 	}
 
-	return status
+	return l.status
 }
 
 //trigger termination on remote server using http DELETE
@@ -150,8 +161,8 @@ func (l *RemoteProvider) Status() *status.Status {
 	var stat *status.Status
 	//check if this provided already faced an error
 	//if so dont bother raching to server
-	if l.ErrorStatus != nil {
-		stat = l.ErrorStatus
+	if l.hasRunError {
+		stat = l.status
 	} else {
 		stat = remoteStatus(l)
 	}

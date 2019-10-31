@@ -1,6 +1,8 @@
 package supplier
 
 import (
+	"errors"
+	"fmt"
 	"runtime"
 
 	. "github.com/getsumio/getsum/internal/config"
@@ -10,7 +12,7 @@ import (
 
 //reads the config and returns realted supplier
 type ISupplierFactory interface {
-	GetSupplierByAlgo(config *Config, algorithm *Algorithm) Supplier
+	GetSupplierByAlgo(config *Config, algorithm *Algorithm) (Supplier, error)
 }
 
 //factory struct
@@ -19,16 +21,34 @@ type SupplierFactory struct {
 
 //returns supplier instance for the given algo and lib
 //i.e. for -lib go -a MD5 it will return GoSupplier to calculate MD5
-func (factory *SupplierFactory) GetSupplierByAlgo(config *Config, algorithm *Algorithm) Supplier {
+func (factory *SupplierFactory) GetSupplierByAlgo(config *Config, algorithm *Algorithm) (Supplier, error) {
 
-	return getSupplierInstance(config, algorithm)
+	supplier, err := getSupplierInstance(config, algorithm)
+	if err != nil {
+		return nil, err
+	}
+	if !isSupplierSupportsAlgorithm(supplier, algorithm) {
+		msg := fmt.Sprintf("Algorithm %s not supported for provider using %s libraries", algorithm.Name(), *config.Supplier)
+		return nil, errors.New(msg)
+	}
+	return supplier, nil
 
 }
 
 var cache map[string]Supplier = make(map[string]Supplier)
 
+func isSupplierSupportsAlgorithm(supplier Supplier, algo *Algorithm) bool {
+	supports := false
+	for _, supportedAlgo := range supplier.Supports() {
+		if supportedAlgo == *algo {
+			supports = true
+		}
+	}
+	return supports
+}
+
 //creates supplier instance
-func getSupplierInstance(config *Config, algo *Algorithm) Supplier {
+func getSupplierInstance(config *Config, algo *Algorithm) (Supplier, error) {
 	if *config.Supplier == "go" {
 		s, ok := cache["go"+string(*algo)]
 		if !ok {
@@ -37,7 +57,7 @@ func getSupplierInstance(config *Config, algo *Algorithm) Supplier {
 
 		}
 		setFields(s.Data(), *algo, config)
-		return s
+		return s, nil
 	} else if *config.Supplier == "openssl" {
 		s, ok := cache["openssl"+string(*algo)]
 		if !ok {
@@ -46,7 +66,7 @@ func getSupplierInstance(config *Config, algo *Algorithm) Supplier {
 
 		}
 		setFields(s.Data(), *algo, config)
-		return s
+		return s, nil
 	}
 	switch runtime.GOOS {
 	case "linux", "mac":
@@ -56,7 +76,7 @@ func getSupplierInstance(config *Config, algo *Algorithm) Supplier {
 			cache["mac"+string(*algo)] = s
 		}
 		setFields(s.Data(), *algo, config)
-		return s
+		return s, nil
 	case "windows":
 		s, ok := cache["windows"+string(*algo)]
 		if !ok {
@@ -64,9 +84,10 @@ func getSupplierInstance(config *Config, algo *Algorithm) Supplier {
 			cache["windows"+string(*algo)] = s
 		}
 		setFields(s.Data(), *algo, config)
-		return s
+		return s, nil
 	default:
-		return nil
+		msg := fmt.Sprintf("Unsupported library: %s", *config.Supplier)
+		return nil, errors.New(msg)
 
 	}
 }
