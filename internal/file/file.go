@@ -61,6 +61,13 @@ func (f *File) IsRemote() bool {
 //a bit of ugly but resets global variable
 //check variable comment for details
 func (f *File) Reset() {
+	f.Url = ""
+	f.Size = 0
+	f.path = ""
+	f.data = nil
+	f.Proxy = ""
+	f.StoragePath = ""
+	f.Status = nil
 	fetchedSize = -1
 }
 
@@ -143,7 +150,7 @@ func fetchRemote(f *File, timeout int) error {
 	defer header.Body.Close()
 	size, err := strconv.Atoi(header.Header.Get("Content-Length"))
 	if err != nil {
-		return err
+		return errors.New("Can not get content length, is this a binary?")
 	}
 	f.Size = int64(size)
 	f.path = filename
