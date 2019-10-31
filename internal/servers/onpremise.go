@@ -3,7 +3,10 @@ package servers
 import (
 	"encoding/json"
 	"fmt"
+	"html"
 	"net/http"
+	"path"
+	"regexp"
 	"sync"
 
 	"github.com/getsumio/getsum/internal/config"
@@ -12,22 +15,32 @@ import (
 	"github.com/getsumio/getsum/internal/status"
 	. "github.com/getsumio/getsum/internal/supplier"
 	"github.com/getsumio/getsum/internal/validation"
+	"github.com/google/uuid"
 )
 
 //server instance to run in server mode
 type OnPremiseServer struct {
 	StoragePath string
-	Supplier    Supplier
-	mux         sync.Mutex
+	mux         *sync.RWMutex
+	suppliers   map[string]Supplier
 }
 
 var factory ISupplierFactory
+
+const uuidPattern = "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$"
+
+var regex *regexp.Regexp = regexp.MustCompile(uuidPattern)
+
+const default_capacity = 250
+const threshold = 150
 
 //start server in given config listen address and port or tls details
 //TODO add interface support
 func (s *OnPremiseServer) Start(config *config.Config) error {
 	logger.Level = logger.LevelInfo
 	factory = new(SupplierFactory)
+	s.suppliers = make(map[string]Supplier)
+	s.mux = &sync.RWMutex{}
 	http.HandleFunc("/", s.handle)
 	listenAddress := fmt.Sprintf("%s:%d", *config.Listen, *config.Port)
 	var err error
@@ -45,14 +58,18 @@ func (s *OnPremiseServer) Start(config *config.Config) error {
 
 //get executed to reach status
 //so collect status if there is any runner
-func handleGet(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
+func handleGet(s *OnPremiseServer, w http.ResponseWriter, r *http.Request, id string) {
 	//check if any runner
-	if s.Supplier == nil {
+	s.mux.RLock()
+	defer s.mux.RUnlock()
+	logger.Info("Checking if there is a process with id : %s", id)
+	supplier, ok := s.suppliers[id]
+	if !ok {
 		handleError("There is no running process", w)
 		return
 	}
 	//collect status and return
-	stat := s.Supplier.Status()
+	stat := supplier.Status()
 	status, err := json.Marshal(stat)
 	if err != nil {
 		handleError("System can not parse given status %s", w, err.Error())
@@ -64,14 +81,8 @@ func handleGet(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
 
 //post executed to Run a new calculation
 func handlePost(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
-	//check if any runner
-	if s.Supplier != nil {
-		stat := s.Supplier.Status()
-		if stat.Type <= status.RUNNING {
-			handleError("Server already running another process", w)
-			return
-		}
-	}
+	s.mux.Lock()
+	defer s.mux.Unlock()
 	//read the config from request
 	jsonDecoder := json.NewDecoder(r.Body)
 	config := &Config{}
@@ -85,49 +96,73 @@ func handlePost(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		handleError(err.Error(), w)
 		return
-
 	}
 
 	//get supplier instance, only single algo supported on server mode
 	var algorithm = ValueOf(&config.Algorithm[0])
 	config.Dir = &s.StoragePath
-	s.Supplier, err = factory.GetSupplierByAlgo(config, &algorithm)
+	supplier, err := factory.GetSupplierByAlgo(config, &algorithm)
 	//something went  wrong, TODO add error handler
 	if err != nil {
 		handleError("Can not create algorithm runner instance: "+err.Error(), w)
 		return
 	}
-	go s.Supplier.Run()
-	handleGet(s, w, r)
+	processId := uuid.New().String()
+	stat := supplier.Status()
+	stat.Type = status.STARTED
+	stat.Value = processId
+	jsonStat, err := json.Marshal(stat)
+	if err != nil {
+		handleError("Can not parse status"+err.Error(), w)
+		return
+	}
+	w.Write(jsonStat)
+	go supplier.Run()
+	s.suppliers[processId] = supplier
 	logger.Info("Process started")
+	s.ensureCapacity()
 }
 
 //terminates running calculation
-func handleDelete(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
-	if s.Supplier == nil {
+func handleDelete(s *OnPremiseServer, w http.ResponseWriter, r *http.Request, id string) {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+	supplier, ok := s.suppliers[id]
+	if !ok {
 		handleError("There is no running process", w)
 		return
 	}
-	s.Supplier.Terminate()
-	s.Supplier.Delete()
+
+	supplier.Terminate()
+	supplier.Delete()
 	w.WriteHeader(http.StatusOK)
-	s.Supplier = nil
+	delete(s.suppliers, id)
 	logger.Info("Process terminated")
 }
 
 //delegates GET POST DELETE main server listener
 func (s *OnPremiseServer) handle(w http.ResponseWriter, r *http.Request) {
-	s.mux.Lock()
-	defer s.mux.Unlock()
-
 	logger.LogRequest(r)
 	switch r.Method {
 	case "GET":
-		handleGet(s, w, r)
+		requestId := path.Base(html.EscapeString(r.URL.Path))
+		if !regex.MatchString(requestId) {
+			logger.Error("Request is not a valid request id! %s", requestId)
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		handleGet(s, w, r, requestId)
 	case "POST":
 		handlePost(s, w, r)
 	case "DELETE":
-		handleDelete(s, w, r)
+		requestId := path.Base(html.EscapeString(r.URL.Path))
+		if !regex.MatchString(requestId) {
+			logger.Error("Request is not a valid request id! %s", requestId)
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		handleDelete(s, w, r, requestId)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		logger.Error("Can not handle request method rejecting request")
@@ -146,4 +181,19 @@ func handleError(message string, w http.ResponseWriter, params ...interface{}) {
 	jsonStatus, _ := json.Marshal(status)
 	w.Write(jsonStatus)
 	return
+}
+
+func (s *OnPremiseServer) ensureCapacity() {
+	if len(s.suppliers) >= default_capacity {
+		var i int = 0
+		for k := range s.suppliers {
+			if i >= threshold {
+				supplier := s.suppliers[k]
+				if supplier.Status().Type >= status.RUNNING {
+					delete(s.suppliers, k)
+				}
+			}
+			i++
+		}
+	}
 }
