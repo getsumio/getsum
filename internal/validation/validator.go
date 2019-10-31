@@ -15,7 +15,7 @@ func ValidateConfig(config *Config, onPremise bool) error {
 	if *config.File == "" && !*config.Serve {
 		return errors.New("No file path/url provided, example usage: getsum /tmp/file ")
 	}
-	if *config.RemoteOnly {
+	if !onPremise && *config.RemoteOnly {
 		if *config.LocalOnly {
 			return errors.New("You can not set -localOnly and -remoteOnly at the same time")
 		}
@@ -40,7 +40,7 @@ func ValidateConfig(config *Config, onPremise bool) error {
 			return errors.New("Unrecognized algorithm, [" + a + "] supported types: " + supportedAlgs)
 		}
 	}
-	if *config.Dir != "" {
+	if !onPremise && *config.Dir != "" {
 		fi, err := os.Stat(*config.Dir)
 		if os.IsNotExist(err) {
 			return errors.New("Given -dir parameter " + *config.Dir + "doesnt exist")
@@ -49,14 +49,14 @@ func ValidateConfig(config *Config, onPremise bool) error {
 			return errors.New("Given -dir parameter is not a directory!")
 		}
 	}
-	if *config.TLSKey != "" && *config.TLSCert == "" {
+	if !onPremise && *config.TLSKey != "" && *config.TLSCert == "" {
 		return errors.New("You specified -tlskey but not -tlscert, both parameter required for https/tls mode")
 	}
-	if *config.TLSKey == "" && *config.TLSCert != "" {
+	if !onPremise && *config.TLSKey == "" && *config.TLSCert != "" {
 		return errors.New("You specified -tlscert but not -tlskey, both parameter required for https/tls mode")
 	}
 
-	if *config.Key != "" && *config.Supplier != "go" {
+	if !onPremise && *config.Key != "" && *config.Supplier != "go" {
 		return errors.New("-key parameter only used on go libs currently, set -lib go")
 	}
 

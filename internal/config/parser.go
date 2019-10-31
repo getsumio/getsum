@@ -27,7 +27,7 @@ const (
 )
 
 var defaultConfig string = ".getsum" + string(os.PathSeparator) + "servers.yml"
-var ConfigJson string
+var ConfigJson []byte
 
 //checks first if user specified a config file via params
 //if not then checks $HOME/.getsum/servers.yml file if exist
@@ -135,11 +135,10 @@ func ParseConfig() (*Config, error) {
 
 	}
 
-	configBytes, err := json.Marshal(*c)
+	ConfigJson, err = json.Marshal(*c)
 	if err != nil {
 		return nil, err
 	}
-	ConfigJson = string(configBytes)
 
 	return c, nil
 }
