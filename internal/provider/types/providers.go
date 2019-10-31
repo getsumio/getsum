@@ -77,7 +77,7 @@ func (providers *Providers) Status() []*status.Status {
 
 func (providers *Providers) HasError() bool {
 	for _, stat := range providers.Statuses {
-		if stat.Type > status.COMPLETED {
+		if stat.Type > status.SUSPENDED && stat.Type != status.VALIDATED {
 			return true
 		}
 	}

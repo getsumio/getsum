@@ -121,6 +121,10 @@ func (s *GoSupplier) Terminate() error {
 
 }
 
+func (s *GoSupplier) Data() *BaseSupplier {
+	return &s.BaseSupplier
+}
+
 //calculates given file and returns checksum
 func calculate(hash hash.Hash, status chan string, file *file.File) {
 	f, _ := os.Open(file.Path())

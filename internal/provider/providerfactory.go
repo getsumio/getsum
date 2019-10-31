@@ -1,7 +1,6 @@
 package providers
 
 import (
-	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
@@ -141,17 +140,12 @@ func getLocalProviders(config *Config, factory ISupplierFactory) ([]*Provider, e
 		logger.Debug("User requests all algos to be runned")
 		for _, a := range algos {
 			logger.Debug("Creating local provider for algorithm %s", a.Name())
-			supplier := factory.GetSupplierByAlgo(config, &a)
-			supports := false
-			for _, supportedAlgo := range supplier.Supports() {
-				if supportedAlgo == a {
-					supports = true
-				}
-			}
-			if !supports {
-				logger.Warn(fmt.Sprintf("Algorithm %s not supported for local provider using %s libraries", a.Name(), *config.Supplier))
+			supplier, err := factory.GetSupplierByAlgo(config, &a)
+			if err != nil {
+				logger.Warn(err.Error())
 				continue
 			}
+
 			l := getProvider(Local, supplier, config, a)
 			logger.Debug("Generated provider: %v", l)
 			locals = append(locals, &l)

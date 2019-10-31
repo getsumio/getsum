@@ -66,7 +66,7 @@ func (l *LocalProvider) Terminate() error {
 //collect status from running process and returns
 func (l *LocalProvider) Status() *status.Status {
 	stat := l.Supplier.Status()
-	logger.Trace("%s Returning status %v", l.Name, *stat)
+	logger.Trace("%s Returning status %v address %v supplier: %v ", l.Name, *stat, stat, l.Supplier)
 	return stat
 }
 

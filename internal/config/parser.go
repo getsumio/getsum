@@ -1,12 +1,14 @@
 package config
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
 
+	"github.com/mitchellh/go-homedir"
 	"gopkg.in/yaml.v2"
 )
 
@@ -24,25 +26,35 @@ const (
 	defaultSupplier   = "go"
 )
 
-var defaultConfig string = ".getsum/servers.yml"
+var defaultConfig string = ".getsum" + string(os.PathSeparator) + "servers.yml"
+var ConfigJson string
 
 //checks first if user specified a config file via params
 //if not then checks $HOME/.getsum/servers.yml file if exist
 //if yes attempts to parse it and set servers part of configuration
 func parseYaml(config *Config) error {
+	if *config.Dir == "" {
+		currentDir, err := os.Getwd()
+		if err != nil {
+			return err
+		}
+		config.Dir = &currentDir
+	}
 	if *config.ServerConfig == "" {
 		//no config present check home folder
-		home := os.Getenv("HOME")
-		if home != "" {
-			homeConfig := strings.Join([]string{home, defaultConfig}, "/")
-			_, err := os.Stat(homeConfig)
-			if os.IsNotExist(err) {
-				return nil
-			}
+		home, err := homedir.Dir()
+		if err != nil {
+			return err
+		}
+		homeConfig := strings.Join([]string{home, defaultConfig}, string(os.PathSeparator))
+		_, err = os.Stat(homeConfig)
+		if err != nil {
+			return nil
+		} else {
 			config.ServerConfig = &homeConfig
-
 		}
 	}
+
 	//read the file
 	yamlFile, err := ioutil.ReadFile(*config.ServerConfig)
 	if err != nil {
@@ -89,7 +101,7 @@ func ParseConfig() (*Config, error) {
 	c.All = flag.Bool("all", false, "Run all algorithms (MD5,SHA1 , SHA256 ...) for each running client")
 	c.Key = flag.String("key", defaultKey, "Key for blake2 hashing")
 	flag.StringVar(c.Key, "k", defaultKey, "shorthand of -key")
-	c.Dir = flag.String("dir", ".", "Default folder to save files, default is current folder")
+	c.Dir = flag.String("dir", "", "Default folder to save files, default is current folder")
 	c.Supplier = flag.String("lib", defaultSupplier, "Algorithm lib default is [GO] that core golang libraries used, if you want to use unix, win, mac default apps set to [OS], for openssl set [openssl]")
 	c.Keep = flag.Bool("keep", false, "If there is a checksum provided to validate and doesnt match with calculated results still keep the file")
 	var empty string = ""
@@ -122,6 +134,12 @@ func ParseConfig() (*Config, error) {
 		}
 
 	}
+
+	configBytes, err := json.Marshal(*c)
+	if err != nil {
+		return nil, err
+	}
+	ConfigJson = string(configBytes)
 
 	return c, nil
 }

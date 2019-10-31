@@ -14,11 +14,12 @@ import (
 )
 
 const (
-	LevelTrace = 0
-	LevelDebug = 1
-	LevelInfo  = 2
-	LevelWarn  = 3
-	LevelError = 4
+	LevelTrace = iota
+	LevelDebug
+	LevelInfo
+	LevelWarn
+	LevelError
+	LevelQuite
 )
 
 const (
@@ -27,6 +28,7 @@ const (
 	info    = "INFO"
 	warn    = "WARNING"
 	err     = "ERROR"
+	quite   = "QUITE"
 	PADDING = "\t"
 )
 
@@ -46,6 +48,8 @@ func SetLevel(level string) {
 		Level = LevelWarn
 	case err:
 		Level = LevelError
+	case quite:
+		Level = LevelQuite
 	default:
 		log.Fatal("Given log level not understood!")
 	}
@@ -84,6 +88,9 @@ func Trace(msg string, params ...interface{}) {
 
 //prints headers of running processes
 func Header(providers *Providers) {
+	if Level == LevelQuite {
+		return
+	}
 	printHeader(providers, 0)
 }
 
@@ -120,6 +127,10 @@ func Info(msg string, params ...interface{}) {
 func Logsum(providers *Providers) {
 	fmt.Println("\n\n")
 	for i, s := range providers.Statuses {
+		if Level == LevelQuite {
+			fmt.Println(s.Checksum)
+			return
+		}
 		var c color.Value
 		var val string
 
@@ -148,6 +159,9 @@ var currentColumn int
 //if all processes finished in current row
 //prints new one
 func Status(providers *Providers) {
+	if Level == LevelQuite {
+		return
+	}
 	stats := providers.Status()
 	printStatus(stats, providers, currentColumn)
 	var anyRunner bool
