@@ -3,6 +3,7 @@ package providers
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/getsumio/getsum/internal/config"
@@ -22,6 +23,7 @@ type RemoteProvider struct {
 	address     string
 	status      *status.Status
 	hasRunError bool
+	processId   string
 }
 
 //notifies server to run
@@ -52,6 +54,7 @@ func remoteRun(l *RemoteProvider) {
 	if err != nil {
 		//set error as provider status
 		//status() method will handle
+		logger.Debug("Run response has an error: %s", err.Error())
 		setErrorStatus(err, l)
 		l.hasRunError = true
 		return
@@ -61,10 +64,15 @@ func remoteRun(l *RemoteProvider) {
 	decoder := json.NewDecoder(resp.Body)
 	err = decoder.Decode(l.status)
 	if err != nil {
+		logger.Debug("Run response received for %s but got an error: %s", l.Name, err.Error())
 		setErrorStatus(err, l)
 		l.hasRunError = true
 	}
 	l.hasRunError = l.status.Type == status.ERROR
+	if !l.hasRunError {
+		logger.Trace("Process id for runner: %s", l.status.Value)
+		l.processId = l.status.Value
+	}
 
 }
 
@@ -77,8 +85,9 @@ func closeResponse(response *http.Response) {
 
 //fetches server using GET and collects its status
 func remoteStatus(l *RemoteProvider) *status.Status {
+	statusAddress := fmt.Sprintf("%s/%s", l.address, l.processId)
 	//reach the server
-	resp, err := l.client.Get(l.address)
+	resp, err := l.client.Get(statusAddress)
 	if err != nil {
 		setErrorStatus(err, l)
 		return l.status
@@ -99,7 +108,8 @@ func remoteStatus(l *RemoteProvider) *status.Status {
 //trigger termination on remote server using http DELETE
 func remoteTerminate(l *RemoteProvider) error {
 	//let the server know process terminated
-	req, err := http.NewRequest("DELETE", l.address, nil)
+	deleteAddress := fmt.Sprintf("%s/%s", l.address, l.processId)
+	req, err := http.NewRequest("DELETE", deleteAddress, nil)
 	if err != nil {
 		return err
 	}
