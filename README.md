@@ -89,11 +89,11 @@ getsum -s -l 0.0.0.0 -p 9099 -tk /tmp/tlskeyfile -tc /tmp/tlscertfile
 Create a config file at **$HOME/.getsum/servers.yml** with addresses of your servers, i.e.:
 ```
 servers:
-  - name: gce-west-us
+  - name: server1
     address: http://127.0.0.1:8088
-  - name: aws-eu-north
+  - name: server2
     address: http://127.0.0.1:8089
-  - name: azure-east-us
+  - name: server3
     address: http://127.0.0.1:8090
 ```
 "**servers,name and address" field names should be same** you just need to update values. 
