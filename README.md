@@ -58,7 +58,7 @@ getsum -a MD5 -lib os https://some.server.address/binary
  
 **Running Multiple Algorithms** 
 
-Default algorithm is ***SHA512***. Use *-a* parameter to specify different algorithms. Algorithms are comma separated. *-all* runs all algorithms at once (if selected library doesnt support some of them only supported ones will run)
+Default algorithm is ***SHA512***. Use *-a* parameter to specify different algorithms. Algorithms are comma separated. *-all* runs all algorithms at once (if selected library doesnt support some of them, only supported ones will run)
 
 ```
 getsum -a MD5,SHA512,SHA1 https://some.server.address/binary
