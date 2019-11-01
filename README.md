@@ -136,17 +136,6 @@ A quick 3 server 1 client example:
 
 [![Watch the full record](docs/server.gif)](https://asciinema.org/a/KA4sT6xTNN9iTzKHJhdgnybrB)
 
-**In case of 'os' selected**:
-below commands will be called:
-* For ***Linux/Mac*** :  *md5sum,sha1sum,sha224sum,sha256sum,sha384sum,sha512sum*
-* For ***Windows*** : *certUtil* will be called 
-
-**Supported Algorithms**:
-* ***Windows***: MD2, MD4, MD5, SHA1, SHA224, SHA256, SHA384, SHA512
-* ***Linux/MAC***: MD5, SHA1, SHA224, SHA256, SHA384, SHA512
-* ***GO***: MD4,MD5,SHA1,SHA224,SHA256,SHA384,SHA512,RMD160,SHA3_224,SHA3_256,SHA3_384,SHA3_512,SHA512_224,SHA512_256,BLAKE2s256,BLAKE2b256,BLAKE2b384,BLAKE2b512
-* ***OPENSSL***: MD4,MD5,SHA1,SHA224,SHA256,SHA384,SHA512,RMD160,SHA3_224,SHA3_256,SHA3_384,SHA3_512,SHA512_224,SHA512_256,BLAKE2s256,BLAKE2b512,SHAKE128,SHAKE256,SM3
-
 **Browser Addons**
 I will also write browser addons next week (4.November+) so you can set your servers on browser extension and validate during download.
 
@@ -163,3 +152,14 @@ docker run -p127.0.0.1:8088:8088 getsum/getsum
  
  **How to support**
   Code review, pull requests, raise issues, promote :) 
+
+**In case of 'os' selected**:
+below commands will be called:
+* For ***Linux/Mac*** :  *md5sum,sha1sum,sha224sum,sha256sum,sha384sum,sha512sum*
+* For ***Windows*** : *certUtil* will be called 
+
+**Supported Algorithms**:
+* ***Windows***: MD2, MD4, MD5, SHA1, SHA224, SHA256, SHA384, SHA512
+* ***Linux/MAC***: MD5, SHA1, SHA224, SHA256, SHA384, SHA512
+* ***GO***: MD4,MD5,SHA1,SHA224,SHA256,SHA384,SHA512,RMD160,SHA3_224,SHA3_256,SHA3_384,SHA3_512,SHA512_224,SHA512_256,BLAKE2s256,BLAKE2b256,BLAKE2b384,BLAKE2b512
+* ***OPENSSL***: MD4,MD5,SHA1,SHA224,SHA256,SHA384,SHA512,RMD160,SHA3_224,SHA3_256,SHA3_384,SHA3_512,SHA512_224,SHA512_256,BLAKE2s256,BLAKE2b512,SHAKE128,SHAKE256,SM3
