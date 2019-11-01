@@ -111,11 +111,11 @@ A quick 3 server 1 client example:
  
  cat > ~/.getsum/servers.yml << EOF
  servers:
-   - name: gce-west-us
+   - name: server1
      address: http://127.0.0.1:8088
-   - name: aws-eu-north
+   - name: server2
      address: http://127.0.0.1:8089
-   - name: azure-east-us
+   - name: server3
      address: http://127.0.0.1:8090
  EOF
 
