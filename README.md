@@ -8,13 +8,15 @@
 
  Current binaries are stored on [release page](https://github.com/getsumio/getsum/releases). Please consider application only tested on Fedora 30. 
  
-linux example:
  ```
  cd /location/to/store
- tar xzvf getsum-linux-amd64.tar.gz
+ tar xzvf getsum-linux-amd64-XXXX.tar.gz
  cd builds/linux/amd64/
+ 
  ./getsum -h
- ``` 
+ ```
+ 
+
  add binary location to /etc/profile or ~/.bashrc or if you have alternatives installed:
  ```
  alternatives --install /usr/bin/getsum getsum /location/to/store/getsum 0
@@ -28,7 +30,6 @@ getsum https://some.server.address/binary
 getsum /tmp/path/to/file
 getsum -a MD5,SHA512 https://some.server.address/binary cf1a31c3acf3a1c3f2a13cfa13
 getsum -remoteOnly https://some.server.address/binary cf1a31c3acf3a1c3f2a13cfa13
-getsum -h
 ``` 
 **Features**
 
@@ -124,6 +125,37 @@ docker pull getsum/getsum
 docker run -p127.0.0.1:8088:8088 getsum/getsum
 ```
 
+A quick 3 server 1 client example:
+ ```
+ cd /location/to/store
+ tar xzvf getsum-linux-amd64-XXXX.tar.gz
+ cd builds/linux/amd64/
+ mkdir {tmp{1,2,3},~/.getsum}
+ 
+ cat > ~/.getsum/servers.yml << EOF
+ servers:
+   - name: gce-west-us
+     address: http://127.0.0.1:8088
+   - name: aws-eu-north
+     address: http://127.0.0.1:8089
+   - name: azure-east-us
+     address: http://127.0.0.1:8090
+ EOF
+
+ 
+./getsum -s -dir ./tmp1 > ./tmp1/server1.log 2>&1 &
+./getsum -s -p 8089 -dir ./tmp2 > ./tmp2/server2.log 2>&1 &
+./getsum -s -p 8090 -dir ./tmp3 > ./tmp3/server3.log 2>&1 &
+
+./getsum -a MD5  -lib openssl https://download.microsoft.com/download/8/b/4/8b4addd8-e957-4dea-bdb8-c4e00af5b94b/NDP1.1sp1-KB867460-X86.exe 22e38a8a7d90c088064a0bbc882a69e5asd
+
+./getsum -a MD5  -lib openssl https://download.microsoft.com/download/8/b/4/8b4addd8-e957-4dea-bdb8-c4e00af5b94b/NDP1.1sp1-KB867460-X86.exe 22e38a8a7d90c088064a0bbc882a69e5
+
+ 
+ killall getsum
+ rm -Rf ./tmp{1,2,3}
+ 
+ ``` 
 
 **Serverless support**
  I really wanted to add native lambda, cloud functions support for different providers but each provider has their own limits i.e. 200mb storage space or 2GB memory, so its currently postponed.
