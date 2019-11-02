@@ -66,6 +66,7 @@ func (s *GoSupplier) Run() {
 	s.status.Type = status.STARTED
 	t := time.After(time.Duration(s.TimeOut) * time.Second)
 	stat := make(chan string)
+	errChan := make(chan string)
 	//collect related Hash instance
 	hash, err := getHash(s.Algorithm, s.Key)
 	if err != nil {
@@ -74,7 +75,7 @@ func (s *GoSupplier) Run() {
 	}
 
 	//start calculation
-	go calculate(hash, stat, s.File)
+	go calculate(hash, stat, errChan, s.File)
 	for {
 		tEnd := time.Now()
 		took := tEnd.Sub(tStart)
@@ -90,6 +91,10 @@ func (s *GoSupplier) Run() {
 			s.status.Type = status.COMPLETED
 			s.status.Value = fmt.Sprintf("%dms", took.Milliseconds())
 			s.status.Checksum = strings.Fields(val)[0]
+			return
+		case val := <-errChan:
+			s.status.Type = status.ERROR
+			s.status.Value = val
 			return
 		default:
 			//still running update time
@@ -112,7 +117,6 @@ func (s *GoSupplier) Delete() {
 }
 
 //terminate
-//TODO figure out how to terminate hash.sum() function
 func (s *GoSupplier) Terminate() error {
 	if s.status.Type == status.RUNNING {
 		s.status.Type = status.TERMINATED
@@ -126,10 +130,12 @@ func (s *GoSupplier) Data() *BaseSupplier {
 }
 
 //calculates given file and returns checksum
-func calculate(hash hash.Hash, status chan string, file *file.File) {
+func calculate(hash hash.Hash, status chan string, errChan chan string, file *file.File) {
 	f, _ := os.Open(file.Path())
 	defer f.Close()
 	if _, err := io.Copy(hash, f); err != nil {
+		errChan <- err.Error()
+		return
 	}
 	status <- hex.EncodeToString(hash.Sum(nil))
 }

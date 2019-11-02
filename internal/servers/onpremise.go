@@ -8,6 +8,7 @@ import (
 	"path"
 	"regexp"
 	"sync"
+	"time"
 
 	"github.com/getsumio/getsum/internal/config"
 	. "github.com/getsumio/getsum/internal/config"
@@ -32,7 +33,6 @@ const uuidPattern = "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][
 var regex *regexp.Regexp = regexp.MustCompile(uuidPattern)
 
 const default_capacity = 250
-const threshold = 150
 
 //start server in given config listen address and port or tls details
 //TODO add interface support
@@ -102,7 +102,6 @@ func handlePost(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
 	var algorithm = ValueOf(&config.Algorithm[0])
 	config.Dir = &s.StoragePath
 	supplier, err := factory.GetSupplierByAlgo(config, &algorithm)
-	//something went  wrong, TODO add error handler
 	if err != nil {
 		handleError("Can not create algorithm runner instance: "+err.Error(), w)
 		return
@@ -117,6 +116,7 @@ func handlePost(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write(jsonStat)
+	supplier.Data().StartTime = time.Now()
 	go supplier.Run()
 	s.suppliers[processId] = supplier
 	logger.Info("Process started")
@@ -185,15 +185,12 @@ func handleError(message string, w http.ResponseWriter, params ...interface{}) {
 
 func (s *OnPremiseServer) ensureCapacity() {
 	if len(s.suppliers) >= default_capacity {
-		var i int = 0
+		now := time.Now()
 		for k := range s.suppliers {
-			if i >= threshold {
-				supplier := s.suppliers[k]
-				if supplier.Status().Type >= status.RUNNING {
-					delete(s.suppliers, k)
-				}
+			supplier := s.suppliers[k]
+			if int(now.Sub(supplier.Data().StartTime).Seconds()) > (supplier.Data().TimeOut * 2) {
+				delete(s.suppliers, k)
 			}
-			i++
 		}
 	}
 }

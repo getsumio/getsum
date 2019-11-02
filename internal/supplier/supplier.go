@@ -1,6 +1,8 @@
 package supplier
 
 import (
+	"time"
+
 	"github.com/getsumio/getsum/internal/file"
 	"github.com/getsumio/getsum/internal/status"
 )
@@ -22,4 +24,5 @@ type BaseSupplier struct {
 	File      *file.File
 	TimeOut   int
 	Key       string
+	StartTime time.Time
 }
