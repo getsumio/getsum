@@ -1,24 +1,23 @@
 # getsum : Tool for validating and calculating checksums
 
-***getsum*** calculates and validates checksum of files remotely or locally. According to user choice, local downloads can be prevented if checksum mismatch. You can also run ***getsum*** in listen mode so you can run remotely deploy on your server or cloud provider of your choice then use another getsum as client. I get the idea from https://blog.linuxmint.com/?p=2994 so I thought it would be great fit for people who host binaries as well as users to validate their checksum. In validation mode if remote servers are present, then application first calculates checksum on remote servers and if there is a match it does downloads the file and run another calculation locally.
+***getsum*** calculates and validates checksum of files remotely or locally. According to user choice, local downloads can be prevented if their checksum mismatch. You can also run application in listen mode, so you can remotely deploy on your server or cloud provider. Then you can use another getsum as client on host pc (Please see also below docker image section). I get the idea from https://blog.linuxmint.com/?p=2994 so I thought it would be great fit for people who host binaries as well as users to validate their checksum. In validation mode if remote servers are present, then application first calculates checksum on remote servers and if there is a match it will download the file and run another calculation locally.
 
  [![Watch the full record](docs/main.gif)](https://asciinema.org/a/ovpGNqNS56qlrKevUllOks1qT)
  
 **Installation**
 
- Current binaries are stored on [release page](https://github.com/getsumio/getsum/releases/tag/v1.0). Please consider application only tested on Fedora 30. Windows binaries had path problem that executable didnt run, i will commit fix next week. 
+ Current binaries are stored on [release page](https://github.com/getsumio/getsum/releases). Please consider application only tested on Fedora 30. 
  
- On linux:
  ```
  cd /location/to/store
- wget https://github.com/getsumio/getsum/releases/download/v1.0/getsum-linux-amd64.tar.gz
- tar xzvf getsum-linux-amd64.tar.gz
- mv builds/linux/amd64/getsum .
- rm -f ./builds
- ```
- then add binary location to /etc/profile or ~/.bashrc 
+ tar xzvf getsum-linux-amd64-XXXX.tar.gz
+ cd builds/linux/amd64/
  
- or if you have alternatives installed:
+ ./getsum -h
+ ```
+ 
+
+ add binary location to /etc/profile or ~/.bashrc or if you have alternatives installed:
  ```
  alternatives --install /usr/bin/getsum getsum /location/to/store/getsum 0
  ```
@@ -31,7 +30,6 @@ getsum https://some.server.address/binary
 getsum /tmp/path/to/file
 getsum -a MD5,SHA512 https://some.server.address/binary cf1a31c3acf3a1c3f2a13cfa13
 getsum -remoteOnly https://some.server.address/binary cf1a31c3acf3a1c3f2a13cfa13
-getsum -h
 ``` 
 **Features**
 
@@ -60,7 +58,7 @@ getsum -a MD5 -lib os https://some.server.address/binary
  
 **Running Multiple Algorithms** 
 
-Default algorithm is ***SHA512***. Use *-a* parameter to specify different algorithms. Algorithms are comma separated. *-all* runs all algorithms at once (if selected library doesnt support some of them only supported ones will run)
+Default algorithm is ***SHA512***. Use *-a* parameter to specify different algorithms. Algorithms are comma separated. *-all* runs all algorithms at once (if selected library doesnt support some of them, only supported ones will run)
 
 ```
 getsum -a MD5,SHA512,SHA1 https://some.server.address/binary
@@ -78,7 +76,7 @@ getsum -remoteOnly https://some.server.address/binary cf1a31c3acf3a1c3f2a13cfa13
 getsum -localOnly https://some.server.address/binary cf1a31c3acf3a1c3f2a13cfa13
 ``` 
 
-**Running in listen mode**
+**Running in serve mode**
 
 Running in serve mode param is *-s* default listen address is *127.0.0.1* and port is *8088*. In serve mode files are not stored that they are removed after calculation. Set *-dir* param to change save folder, default is current location. There is no authentication method provided by this application, you need to handle it if you are planning to run servers in public.
 ```
@@ -91,11 +89,11 @@ getsum -s -l 0.0.0.0 -p 9099 -tk /tmp/tlskeyfile -tc /tmp/tlscertfile
 Create a config file at **$HOME/.getsum/servers.yml** with addresses of your servers, i.e.:
 ```
 servers:
-  - name: gce-west-us
+  - name: server1
     address: http://127.0.0.1:8088
-  - name: aws-eu-north
+  - name: server2
     address: http://127.0.0.1:8089
-  - name: azure-east-us
+  - name: server3
     address: http://127.0.0.1:8090
 ```
 "**servers,name and address" field names should be same** you just need to update values. 
@@ -104,33 +102,64 @@ Also use *-serverconfig* parameter for custom config location:
 getsum -serverconfig /tmp/servers.yml /path/to/file
 getsum -sc /tmp/servers.yml /path/to/file
 ``` 
+A quick 3 server 1 client example:
+ ```
+ cd /location/to/store
+ tar xzvf getsum-linux-amd64-XXXX.tar.gz
+ cd builds/linux/amd64/
+ mkdir {tmp{1,2,3},~/.getsum}
+ 
+ cat > ~/.getsum/servers.yml << EOF
+ servers:
+   - name: server1
+     address: http://127.0.0.1:8088
+   - name: server2
+     address: http://127.0.0.1:8089
+   - name: server3
+     address: http://127.0.0.1:8090
+ EOF
+
+ 
+./getsum -s -dir ./tmp1 > ./tmp1/server1.log 2>&1 &
+./getsum -s -p 8089 -dir ./tmp2 > ./tmp2/server2.log 2>&1 &
+./getsum -s -p 8090 -dir ./tmp3 > ./tmp3/server3.log 2>&1 &
+
+./getsum -a MD5  -lib openssl https://download.microsoft.com/download/8/b/4/8b4addd8-e957-4dea-bdb8-c4e00af5b94b/NDP1.1sp1-KB867460-X86.exe 22e38a8a7d90c088064a0bbc882a69e5asd
+
+./getsum -a MD5  -lib openssl https://download.microsoft.com/download/8/b/4/8b4addd8-e957-4dea-bdb8-c4e00af5b94b/NDP1.1sp1-KB867460-X86.exe 22e38a8a7d90c088064a0bbc882a69e5
+
+ 
+ killall getsum
+ rm -Rf ./tmp{1,2,3}
+ 
+ ``` 
 
 [![Watch the full record](docs/server.gif)](https://asciinema.org/a/KA4sT6xTNN9iTzKHJhdgnybrB)
-
-**In case of 'os' selected**:
-below commands will be called:
-* For ***Linux/Mac*** :  *md5sum,sha1sum,sha224sum,sha256sum,sha384sum,sha512sum*
-* For ***Windows*** : *certUtil* will be called
-
-**Supported Algorithms**:
-* ***Windows***: MD2, MD4, MD5, SHA1, SHA224, SHA256, SHA384, SHA512
-* ***Linux/MAC***: MD5, SHA1, SHA224, SHA256, SHA384, SHA512
-* ***GO***: MD4,MD5,SHA1,SHA224,SHA256,SHA384,SHA512,RMD160,SHA3_224,SHA3_256,SHA3_384,SHA3_512,SHA512_224,SHA512_256,BLAKE2s256,BLAKE2b256,BLAKE2b384,BLAKE2b512
-* ***OPENSSL***: MD4,MD5,SHA1,SHA224,SHA256,SHA384,SHA512,RMD160,SHA3_224,SHA3_256,SHA3_384,SHA3_512,SHA512_224,SHA512_256,BLAKE2s256,BLAKE2b512,SHAKE128,SHAKE256,SM3
 
 **Browser Addons**
 I will also write browser addons next week (4.November+) so you can set your servers on browser extension and validate during download.
 
-**Cloud Deployment**
- TODO: add example gcloud deploy app, awscli ibm oracle ...
-
-
+**Docker image**
+```
+docker pull getsum/getsum
+docker run -p127.0.0.1:8088:8088 getsum/getsum
+```
 **Serverless support**
  I really wanted to add native lambda, cloud functions support for different providers but each provider has their own limits i.e. 200mb storage space or 2GB memory, so its currently postponed.
  
  **Issues**
- Application tested only on linux. Windows binary had path problem I will fix. If you had issues please raise here. Also unit tests are missing I will implement this month. 
+ Application tested only on linux. If you had issues please raise here. Also unit tests are missing I will implement this month. 
  
  **How to support**
   Code review, pull requests, raise issues, promote :) 
-**
+
+**In case of 'os' selected**:
+below commands will be called:
+* For ***Linux/Mac*** :  *md5sum,sha1sum,sha224sum,sha256sum,sha384sum,sha512sum*
+* For ***Windows*** : *certUtil* will be called 
+
+**Supported Algorithms**:
+* ***Windows***: MD2, MD4, MD5, SHA1, SHA256, SHA384, SHA512
+* ***Linux/MAC***: MD5, SHA1, SHA224, SHA256, SHA384, SHA512
+* ***GO***: MD4,MD5,SHA1,SHA224,SHA256,SHA384,SHA512,RMD160,SHA3-224,SHA3-256,SHA3-384,SHA3-512,SHA512-224,SHA512-256,BLAKE2s256,BLAKE2b256,BLAKE2b384,BLAKE2b512
+* ***OPENSSL***: MD4,MD5,SHA1,SHA224,SHA256,SHA384,SHA512,RMD160,SHA3-224,SHA3-256,SHA3-384,SHA3-512,SHA512-224,SHA512-256,BLAKE2s256,BLAKE2b512,SHAKE128,SHAKE256,SM3
