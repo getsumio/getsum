@@ -23,10 +23,10 @@ func ValidateConfig(config *Config, onPremise bool) error {
 			return errors.New("No server recognized, create a ~/.getsum/servers.yml file or use -serverconfig parameter, for content of yaml file check documentation")
 		}
 	}
-	if *config.All && (*config.RemoteOnly || len(config.Servers.Servers) > 1) && !*config.LocalOnly {
+	if *config.All && (*config.RemoteOnly || len(config.Servers.Servers) > 0) && !*config.LocalOnly {
 		return errors.New("On remote servers you can only run single algorithm set -localOnly or example usage: getsum -a MD5 /tmp/file")
 	}
-	if len(config.Algorithm) != 1 && (*config.RemoteOnly || len(config.Servers.Servers) > 1) && !*config.LocalOnly {
+	if len(config.Algorithm) != 1 && (*config.RemoteOnly || len(config.Servers.Servers) > 0) && !*config.LocalOnly {
 		return errors.New("On remote servers you can only run single algorithm set -localOnly or example usage: getsum -a MD5 /tmp/file")
 	}
 	if *config.Timeout < 1 {
