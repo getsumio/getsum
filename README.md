@@ -44,7 +44,7 @@ getsum -remoteOnly https://some.server.address/binary cf1a31c3acf3a1c3f2a13cfa13
 
 **Selecting library/applications**
 
-For checksum calculations core Golang libraries will be used as default. If you have installed openssl set *-lib openssl*. If you want to use applications from operating system set *-lib os*.
+For checksum calculations core Golang libraries will be used as default. If you have openssl installed set *-lib openssl* or if you want to use applications from operating system then set *-lib os*.
 
 ```
 getsum -a MD5 -lib openssl https://some.server.address/binary
