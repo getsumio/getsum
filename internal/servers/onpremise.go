@@ -35,7 +35,6 @@ var regex *regexp.Regexp = regexp.MustCompile(uuidPattern)
 const default_capacity = 250
 
 //start server in given config listen address and port or tls details
-//TODO add interface support
 func (s *OnPremiseServer) Start(config *config.Config) error {
 	logger.Level = logger.LevelInfo
 	factory = new(SupplierFactory)
