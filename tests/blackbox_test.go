@@ -214,8 +214,7 @@ func TestServeAlgoFail(t *testing.T) {
 		t.Errorf("Can not start server instance! %s", err.Error())
 	}
 	commandStr = "-a MD5,SHA512 -sc servers.yml " + geturl + " " + MD4
-	execForError(commandStr, fileName, false, t, "SUSPENDED", "server1", "local")
-
+	execForError(commandStr, fileName, false, t, "you can only run single algorithm")
 }
 
 func killServer(cmd *exec.Cmd, t *testing.T) {
