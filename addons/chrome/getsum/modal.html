@@ -1,0 +1,60 @@
+<style>
+#getsumModalDialog {
+	z-index: 99999;
+	position: fixed;
+	right: 0;
+	bottom: 0;
+	display: none;
+}
+
+#container {
+	font-weight: bold;
+	display: inline-flex;
+	flex-direction: row;
+	height: 50px;
+	background: linear-gradient(to left, #a6feff, #ffffff);
+	padding: 15px;
+	padding-left:100px
+	opacity: 0.95;
+	filter: alpha(opacity = 50);
+	 -webkit-transition: opacity 400ms ease-in;
+    -moz-transition: opacity 400ms ease-in;
+    transition: opacity 400ms ease-in;
+     border-radius: 12px;
+    -moz-box-shadow: 1px 1px 2px #000;
+    -webkit-box-shadow: 1px 1px 2px #000;
+    box-shadow: 1px 1px 2px #000;
+}
+
+#getsumLabel {
+	margin-right: 20px;
+	margin-top: auto;
+	margin-bottom: auto;
+	font-family: serif;
+	font-weight: bold;
+	color: #569494 !important;
+}
+
+#getsumValue {
+	margin-top: auto;
+	margin-bottom: auto;
+	font-family: serif;
+	font-weight: bold;
+	color: #126b6b !important;
+}
+
+
+</style>
+<div id="getsumModalDialog">
+	<div id="container">
+		<div id="getsumLabel" >
+			<span>TERMINATED</span>
+		</div>
+		<div id="getsumValue" >
+			<span>75000s</span>
+		</div>
+	</div>
+
+
+
+</div>
