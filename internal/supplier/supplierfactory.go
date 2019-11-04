@@ -86,6 +86,7 @@ func setFields(base *BaseSupplier, algo Algorithm, config *Config) {
 	base.File.Status = base.status
 	base.File.Proxy = *config.Proxy
 	base.File.StoragePath = *config.Dir
+	base.File.SkipVerify = *config.InsecureSkipVerify
 
 	base.TimeOut = *config.Timeout
 }
