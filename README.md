@@ -40,7 +40,7 @@ getsum -remoteOnly https://some.server.address/binary cf1a31c3acf3a1c3f2a13cfa13
 * Prevent download if checksum doesnt match
 * Local/Remote only calculations
 * Proxy support
-* TLS support on listen mode
+* TLS support on listen mode or reaching files behind untrusted certificate
 
 **Selecting library/applications**
 
