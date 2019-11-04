@@ -144,6 +144,28 @@ I will also write browser addons next week (4.November+) so you can set your ser
 docker pull getsum/getsum
 docker run -p127.0.0.1:8088:8088 getsum/getsum
 ```
+
+Running docker in tls mode (assuming your key is server.key and cert is server.crt):
+```
+docker pull getsum/getsum
+docker create -p127.0.0.1:8088:8088 -e tlskey='server.key' -e tlscert='server.crt' --name getsum getsum/getsum
+docker cp /path/to/server.key getsum:/app/
+docker cp /path/to/server.crt getsum:/app/
+docker start -i getsum
+
+//then on client machine
+
+ cat > ~/.getsum/servers.yml << EOF
+ servers:
+   - name: server1
+     address: https://127.0.0.1:8088
+ EOF
+//on client use -skipVerify in case of self signed cert
+getsum -skipVerify -a MD5  -lib openssl https://download.microsoft.com/download/8/b/4/8b4addd8-e957-4dea-bdb8-c4e00af5b94b/NDP1.1sp1-KB867460-X86.exe 22e38a8a7d90c088064a0bbc882a69e5
+
+
+```
+
 **Serverless support**
  I really wanted to add native lambda, cloud functions support for different providers but each provider has their own limits i.e. 200mb storage space or 2GB memory, so its currently postponed.
  
