@@ -41,43 +41,44 @@ chrome.contextMenus.onClicked.addListener(function(info, tab) {
 	}
 
 });
-
-if (!ids.includes('calculate')) {
-	chrome.contextMenus.create({
-		id : 'calculate',
-		title : chrome.i18n.getMessage('openContextMenuCalculate'),
-		contexts : [ 'link' ],
-	});
-	ids.push('calculate');
-}
-if (!ids.includes('validate')) {
-	chrome.contextMenus.create({
-		id : 'validate',
-		title : chrome.i18n.getMessage('openContextMenuValidate'),
-		contexts : [ 'link' ],
-	});
-	ids.push('validate');
-}
-
-for (let i = 0; i < algs.length; i++) {
-	valId = 'validate:' + algs[i];
-	calId = 'calculate:' + algs[i];
-	if (!ids.includes(valId)) {
+chrome.contextMenus.removeAll(function() {
+	if (!ids.includes('calculate')) {
 		chrome.contextMenus.create({
-			id : valId,
-			title : algs[i],
+			id : 'calculate',
+			title : chrome.i18n.getMessage('openContextMenuCalculate'),
 			contexts : [ 'link' ],
-			parentId : 'validate'
 		});
-		ids.push(valId);
+		ids.push('calculate');
 	}
-	if (!ids.includes(calId)) {
+	if (!ids.includes('validate')) {
 		chrome.contextMenus.create({
-			id : calId,
-			title : algs[i],
+			id : 'validate',
+			title : chrome.i18n.getMessage('openContextMenuValidate'),
 			contexts : [ 'link' ],
-			parentId : 'calculate'
 		});
-		ids.push(calId);
+		ids.push('validate');
 	}
-}
+
+	for (let i = 0; i < algs.length; i++) {
+		valId = 'validate:' + algs[i];
+		calId = 'calculate:' + algs[i];
+		if (!ids.includes(valId)) {
+			chrome.contextMenus.create({
+				id : valId,
+				title : algs[i],
+				contexts : [ 'link' ],
+				parentId : 'validate'
+			});
+			ids.push(valId);
+		}
+		if (!ids.includes(calId)) {
+			chrome.contextMenus.create({
+				id : calId,
+				title : algs[i],
+				contexts : [ 'link' ],
+				parentId : 'calculate'
+			});
+			ids.push(calId);
+		}
+	}
+});
