@@ -76,6 +76,8 @@ func parseYaml(config *Config) error {
 func ParseConfig() (*Config, error) {
 	c := new(Config)
 	var algo *string
+	c.InsecureSkipVerify = flag.Bool("insecureSkipVerify", false, "Skip TLS verification,will be used to reaching out to servers. If set TRUE and if remote servers are present servers also will skip verification while reaching out to file only for this process. So in case of file or server located behind custom certificate that can not be verified set this parameter true.")
+	flag.BoolVar(c.InsecureSkipVerify, "skipVerify", false, "shorthand for -insecureSkipVerify")
 	c.ServerConfig = flag.String("serverconfig", "", "config file location for remote servers")
 	flag.StringVar(c.ServerConfig, "sc", "", "shorthand for -serverconfig")
 	c.Serve = flag.Bool("serve", defaultServe, "Run in server mode default address 127.0.0.1:8088 otherwise set -listen and -port params")

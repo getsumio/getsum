@@ -40,11 +40,11 @@ getsum -remoteOnly https://some.server.address/binary cf1a31c3acf3a1c3f2a13cfa13
 * Prevent download if checksum doesnt match
 * Local/Remote only calculations
 * Proxy support
-* TLS support on listen mode
+* TLS support on listen mode or reaching files behind untrusted certificate
 
 **Selecting library/applications**
 
-For checksum calculations core Golang libraries will be used as default. If you have installed openssl set *-lib openssl*. If you want to use applications from operating system set *-lib os*.
+For checksum calculations core Golang libraries will be used as default. If you have openssl installed set *-lib openssl* or if you want to use applications from operating system then set *-lib os*.
 
 ```
 getsum -a MD5 -lib openssl https://some.server.address/binary
@@ -144,11 +144,33 @@ I will also write browser addons next week (4.November+) so you can set your ser
 docker pull getsum/getsum
 docker run -p127.0.0.1:8088:8088 getsum/getsum
 ```
+
+Running docker in tls mode (assuming your key is server.key and cert is server.crt):
+```
+docker pull getsum/getsum
+docker create -p127.0.0.1:8088:8088 -e tlskey='server.key' -e tlscert='server.crt' --name getsum getsum/getsum
+docker cp /path/to/server.key getsum:/app/
+docker cp /path/to/server.crt getsum:/app/
+docker start -i getsum
+
+//then on client machine
+
+ cat > ~/.getsum/servers.yml << EOF
+ servers:
+   - name: server1
+     address: https://127.0.0.1:8088
+ EOF
+//on client use -skipVerify in case of self signed cert
+getsum -skipVerify -a MD5  -lib openssl https://download.microsoft.com/download/8/b/4/8b4addd8-e957-4dea-bdb8-c4e00af5b94b/NDP1.1sp1-KB867460-X86.exe 22e38a8a7d90c088064a0bbc882a69e5
+
+
+```
+
 **Serverless support**
  I really wanted to add native lambda, cloud functions support for different providers but each provider has their own limits i.e. 200mb storage space or 2GB memory, so its currently postponed.
  
  **Issues**
- Application tested only on linux. If you had issues please raise here. Also unit tests are missing I will implement this month. 
+ Application tested only on linux. If you had issues please raise here. 
  
  **How to support**
   Code review, pull requests, raise issues, promote :) 
