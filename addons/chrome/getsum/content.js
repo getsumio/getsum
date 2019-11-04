@@ -29,7 +29,7 @@ function toggleDialog() {
 function start(configData){
 	data = JSON.stringify(configData);
 	console.log(data);
-	$j.post('http://127.0.0.1:8088',   // url
+	$j.post('https://example.com:8088',   // url
 		       { config: data }, // data to be submit
 		       function(data, status, jqXHR) {// success callback
 		                $j('#getsumModalDialog').append('status: ' + status + ', data: ' + data);
