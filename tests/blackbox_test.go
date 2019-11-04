@@ -27,6 +27,7 @@ const (
 	validDir            = "-dir /tmp "
 	keep                = "-keep "
 	serve               = "-s " + validDir
+	tlsServe            = "-logLevel TRACE -tk ./server.key -tc ./server.crt " + validDir
 
 	MD4        = "bb137fd4893ab9d85906257ede37dfaf"
 	MD5        = "22e38a8a7d90c088064a0bbc882a69e5"
@@ -215,6 +216,18 @@ func TestServeAlgoFail(t *testing.T) {
 	}
 	commandStr = "-a MD5,SHA512 -sc servers.yml " + geturl + " " + MD4
 	execForError(commandStr, fileName, false, t, "you can only run single algorithm")
+}
+
+func TestTLS(t *testing.T) {
+	commandStr := serve + tlsServe
+	cmd := getCommand(commandStr)
+	err := cmd.Start()
+	defer killServer(cmd, t)
+	if err != nil {
+		t.Errorf("Can not start server instance! %s", err.Error())
+	}
+	commandStr = "-a MD5 -sc tlsservers.yml -skipVerify " + geturl + " " + MD5
+	execCommand(commandStr, fileName, true, t, "VALIDATED")
 }
 
 func killServer(cmd *exec.Cmd, t *testing.T) {

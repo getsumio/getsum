@@ -1,6 +1,7 @@
 package file
 
 import (
+	"crypto/tls"
 	"errors"
 	"io"
 	"io/ioutil"
@@ -35,6 +36,7 @@ type File struct {
 	Size        int64
 	Proxy       string
 	StoragePath string
+	SkipVerify  bool
 }
 
 //file location on local host
@@ -213,7 +215,8 @@ func getHttpClient(f *File, timeout int) *http.Client {
 		proxyUrl = http.ProxyURL(proxy)
 	}
 	tr := &http.Transport{
-		Proxy: proxyUrl,
+		Proxy:           proxyUrl,
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: f.SkipVerify},
 	}
 	client := &http.Client{
 		Transport: tr,

@@ -1,6 +1,7 @@
 package providers
 
 import (
+	"crypto/tls"
 	"net/http"
 	"net/url"
 	"strings"
@@ -71,7 +72,8 @@ func getHttpClient(config *Config) *http.Client {
 		proxyUrl = http.ProxyURL(proxy)
 	}
 	tr := &http.Transport{
-		Proxy: proxyUrl,
+		Proxy:           proxyUrl,
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: *config.InsecureSkipVerify},
 	}
 	client := &http.Client{
 		Transport: tr,
