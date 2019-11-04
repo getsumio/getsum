@@ -170,7 +170,7 @@ getsum -skipVerify -a MD5  -lib openssl https://download.microsoft.com/download/
  I really wanted to add native lambda, cloud functions support for different providers but each provider has their own limits i.e. 200mb storage space or 2GB memory, so its currently postponed.
  
  **Issues**
- Application tested only on linux. If you had issues please raise here. Also unit tests are missing I will implement this month. 
+ Application tested only on linux. If you had issues please raise here. 
  
  **How to support**
   Code review, pull requests, raise issues, promote :) 
