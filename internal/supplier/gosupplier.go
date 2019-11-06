@@ -121,8 +121,9 @@ func (s *GoSupplier) Terminate() error {
 	if s.status.Type == status.RUNNING {
 		s.status.Type = status.TERMINATED
 	}
-	return nil
+	s.File.Terminate()
 
+	return nil
 }
 
 func (s *GoSupplier) Data() *BaseSupplier {

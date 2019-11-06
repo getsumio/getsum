@@ -25,6 +25,7 @@ type IFile interface {
 	IsRemote() bool
 	Delete()
 	Reset()
+	Terminate()
 }
 
 //file struct
@@ -37,6 +38,7 @@ type File struct {
 	Proxy       string
 	StoragePath string
 	SkipVerify  bool
+	response    *http.Response
 }
 
 //file location on local host
@@ -51,6 +53,12 @@ func (f *File) Path() string {
 func (f *File) Delete() {
 	if f.path != "" {
 		os.Remove(f.path)
+	}
+}
+
+func (f *File) Terminate() {
+	if f.response != nil && f.response.Body != nil {
+		f.response.Body.Close()
 	}
 }
 
@@ -126,8 +134,7 @@ func fetchRemote(f *File, timeout int, concurrent bool) error {
 
 	if concurrent {
 		mux.Lock()
-		defer unlock()
-		hasLock = true
+		defer mux.Unlock()
 	}
 
 	filename := path.Base(f.Url)
@@ -192,13 +199,6 @@ func fetchRemote(f *File, timeout int, concurrent bool) error {
 	fetchedSize = f.Size
 	hasLock = false
 	return err
-}
-
-func unlock() {
-	if hasLock {
-		hasLock = false
-		mux.Unlock()
-	}
 }
 
 //only validates file since its already hosted

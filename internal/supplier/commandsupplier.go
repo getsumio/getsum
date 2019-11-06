@@ -161,6 +161,7 @@ func (s *CommandSupplier) Terminate() error {
 	if s.status.Type == status.RUNNING {
 		s.status.Type = status.TERMINATED
 	}
+	s.File.Terminate()
 	return err
 }
 
