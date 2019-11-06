@@ -21,7 +21,7 @@ import (
 type IFile interface {
 	Path() string
 	Data() ([]byte, error)
-	Fetch(timeout int) error
+	Fetch(timeout int, concurrent bool) error
 	IsRemote() bool
 	Delete()
 	Reset()
@@ -94,7 +94,7 @@ func (f *File) Data() ([]byte, error) {
 //validates file
 //if remote fetches file
 //sets path location forthe stored file
-func (f *File) Fetch(timeout int) error {
+func (f *File) Fetch(timeout int, concurrent bool) error {
 	err := validateUrl(f)
 	if err != nil {
 		return err
@@ -103,13 +103,12 @@ func (f *File) Fetch(timeout int) error {
 	if !isRemote {
 		return fetchLocal(f)
 	} else {
-		return fetchRemote(f, timeout)
+		return fetchRemote(f, timeout, concurrent)
 	}
 
 	return nil
 }
 
-//TODO: sync.ONCE maybe better?
 var mux sync.Mutex
 var hasLock bool
 
@@ -123,11 +122,13 @@ var fetchedSize int64 = -1
 
 //fetches file remotely
 //unless not timedout sets details and path
-func fetchRemote(f *File, timeout int) error {
+func fetchRemote(f *File, timeout int, concurrent bool) error {
 
-	mux.Lock()
-	defer unlock()
-	hasLock = true
+	if concurrent {
+		mux.Lock()
+		defer unlock()
+		hasLock = true
+	}
 
 	filename := path.Base(f.Url)
 	if f.StoragePath != "" {
@@ -194,8 +195,10 @@ func fetchRemote(f *File, timeout int) error {
 }
 
 func unlock() {
-	hasLock = false
-	mux.Unlock()
+	if hasLock {
+		hasLock = false
+		mux.Unlock()
+	}
 }
 
 //only validates file since its already hosted

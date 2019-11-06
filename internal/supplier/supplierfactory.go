@@ -89,4 +89,5 @@ func setFields(base *BaseSupplier, algo Algorithm, config *Config) {
 	base.File.SkipVerify = *config.InsecureSkipVerify
 
 	base.TimeOut = *config.Timeout
+	base.IsConcurrent = *config.All
 }
