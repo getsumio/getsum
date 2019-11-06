@@ -71,6 +71,10 @@ func (f *File) Reset() {
 	f.StoragePath = ""
 	f.Status = nil
 	fetchedSize = -1
+	if hasLock {
+		mux.Unlock()
+		hasLock = false
+	}
 }
 
 //read the file data in bytes
@@ -107,6 +111,7 @@ func (f *File) Fetch(timeout int) error {
 
 //TODO: sync.ONCE maybe better?
 var mux sync.Mutex
+var hasLock bool
 
 //in case of user runs multiple checksum calculations
 //on same machine there is no point to
@@ -121,7 +126,9 @@ var fetchedSize int64 = -1
 func fetchRemote(f *File, timeout int) error {
 
 	mux.Lock()
-	defer mux.Unlock()
+	defer unlock()
+	hasLock = true
+
 	filename := path.Base(f.Url)
 	if f.StoragePath != "" {
 		filename = strings.Join([]string{f.StoragePath, filename}, string(os.PathSeparator))
@@ -182,7 +189,13 @@ func fetchRemote(f *File, timeout int) error {
 
 	f.Status.Type = status.FETCHED
 	fetchedSize = f.Size
+	hasLock = false
 	return err
+}
+
+func unlock() {
+	hasLock = false
+	mux.Unlock()
 }
 
 //only validates file since its already hosted
