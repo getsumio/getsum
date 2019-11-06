@@ -3,6 +3,7 @@ package file
 import (
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -80,7 +81,7 @@ func (f *File) Reset() {
 	f.Status = nil
 	fetchedSize = -1
 	if hasLock {
-		mux.Unlock()
+		concurrentLock.Unlock()
 		hasLock = false
 	}
 }
@@ -117,8 +118,9 @@ func (f *File) Fetch(timeout int, concurrent bool) error {
 	return nil
 }
 
-var mux sync.Mutex
+var concurrentLock sync.Mutex
 var hasLock bool
+var moveLock sync.Mutex
 
 //in case of user runs multiple checksum calculations
 //on same machine there is no point to
@@ -133,19 +135,23 @@ var fetchedSize int64 = -1
 func fetchRemote(f *File, timeout int, concurrent bool) error {
 
 	if concurrent {
-		mux.Lock()
-		defer mux.Unlock()
+		concurrentLock.Lock()
+		defer concurrentLock.Unlock()
 	}
 
 	filename := path.Base(f.Url)
 	if f.StoragePath != "" {
 		filename = strings.Join([]string{f.StoragePath, filename}, string(os.PathSeparator))
 	}
-	if fetchedSize > 0 { //another process already fetched
-		f.Size = fetchedSize
-		f.path = filename
-		f.Status.Type = status.FETCHED
-		return nil
+	original := filename
+	filename = fmt.Sprintf("%s.download.%d", filename, time.Now().Nanosecond())
+	if concurrent {
+		if fetchedSize > 0 { //another process already fetched
+			f.Size = fetchedSize
+			f.path = original
+			f.Status.Type = status.FETCHED
+			return nil
+		}
 	}
 	err := validateRemote(f)
 	if err != nil {
@@ -198,7 +204,15 @@ func fetchRemote(f *File, timeout int, concurrent bool) error {
 	f.Status.Type = status.FETCHED
 	fetchedSize = f.Size
 	hasLock = false
-	return err
+
+	moveLock.Lock()
+	defer moveLock.Unlock()
+	err = os.Rename(filename, original)
+	if err != nil {
+		return err
+	}
+	f.path = original
+	return nil
 }
 
 //only validates file since its already hosted
