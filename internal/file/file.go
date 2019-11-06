@@ -145,25 +145,13 @@ func fetchRemote(f *File, timeout int) error {
 
 	client := getHttpClient(f, timeout)
 
-	header, err := client.Head(f.Url)
-	if err != nil {
-		return err
-	}
-	defer header.Body.Close()
-	size, err := strconv.Atoi(header.Header.Get("Content-Length"))
-	if err != nil {
-		return errors.New("Can not get content length, is this a binary?")
-	}
-	f.Size = int64(size)
 	f.path = filename
 
 	quit := make(chan bool)
 	defer close(quit)
-	go downloadFile(quit, f)
 
 	resp, err := client.Get(f.Url)
 	if err != nil {
-		quit <- true
 		return err
 	}
 	defer resp.Body.Close()
@@ -171,8 +159,25 @@ func fetchRemote(f *File, timeout int) error {
 	resp.Header.Set("Connection", "Keep-Alive")
 	resp.Header.Set("Accept-Language", "en-US")
 	resp.Header.Set("User-Agent", "Mozilla/5.0")
+	contentLength := resp.Header.Get("Content-Length")
+	if contentLength == "" {
+		return errors.New("Can not get content length, is this a binary file?")
+	}
+	size, err := strconv.Atoi(resp.Header.Get("Content-Length"))
+	if err != nil {
+		return errors.New("Can not parse content-length, is this binary? " + err.Error())
+	}
+
+	f.Size = int64(size)
+
+	go downloadFile(quit, f)
 
 	_, err = io.Copy(out, resp.Body)
+	if err != nil {
+		quit <- true
+		return err
+	}
+
 	quit <- true
 
 	f.Status.Type = status.FETCHED
