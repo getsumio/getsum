@@ -76,6 +76,10 @@ func handleGet(s *OnPremiseServer, w http.ResponseWriter, r *http.Request, id st
 	}
 	logger.Info("Returning status %v", *stat)
 	w.Write(status)
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST,GET,DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "application/json")
+
 }
 
 //post executed to Run a new calculation
@@ -109,12 +113,16 @@ func handlePost(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
 	stat := supplier.Status()
 	stat.Type = status.STARTED
 	stat.Value = processId
-	jsonStat, err := json.Marshal(stat)
+	jsonStat, err := json.Marshal(*stat)
 	if err != nil {
 		handleError("Can not parse status"+err.Error(), w)
 		return
 	}
 	w.Write(jsonStat)
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST,GET,DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "application/json")
+
 	supplier.Data().StartTime = time.Now()
 	go supplier.Run()
 	s.suppliers[processId] = supplier
@@ -135,6 +143,10 @@ func handleDelete(s *OnPremiseServer, w http.ResponseWriter, r *http.Request, id
 	supplier.Terminate()
 	supplier.Delete()
 	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST,GET,DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "application/json")
+
 	delete(s.suppliers, id)
 	logger.Info("Process terminated")
 }
