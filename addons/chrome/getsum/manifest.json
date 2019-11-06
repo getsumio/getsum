@@ -23,6 +23,7 @@
     "modal.html"
   ],
 	"default_locale": "en",
+	"options_page": "options.html",
 	"permissions": [
 		"contextMenus",
 		"downloads",

@@ -104,6 +104,7 @@ function handleErrors(response) {
 
 
 function postToServer(dataStr, id){
+	processId = "";
 	fetch("http://127.0.0.1:8088", {
 	    method: 'post',
 	    cache: 'no-cache',
@@ -115,32 +116,40 @@ function postToServer(dataStr, id){
 	}) .then(handleErrors)
 	    .then(result => {
 	        // Here body is not ready yet, throw promise
-	        if (!result.ok) throw result;
+	        if (!result.ok) {
+	        	res.text().then(text => {throw Error(text);})
+	        }
 	        
 	        result.json().then(function (json) {
 	        	console.log("Post Response:");
 	        	console.log(json);
 	        	if(json.type == 4){
 	        		processId = json.value;
-		        	json.value = "";
 		        	callBack(json, id);
-		        	listen(processId, id);
+		        	listen(id);
 	        	}else{
 	        		callBack(json, id);
 	        	}
 	        });
 	    }).catch(error => {
-	    	console.log("Get error:");
-        	console.log(error);
-	    	callBack({
-	    		type: 9,
-	    		value: error,
-	    		checksum: ""
-	    	}, id);
+	    	 console.log("Get error:");
+			    errorStr = String(error);
+		       	console.log(errorStr);
+		       	if(errorStr.includes("Failed to fetch")){
+		       		errorStr = "Can not reach server, is it running?";
+		       	}
+		       	callBack( {
+			    		type: 9,
+			    		value: errorStr,
+			    		checksum: ""
+			    	},id);
 	    });
 }
 
-function getFromServer(processId, id){
+function getFromServer(id){
+	if(processId == null || processId == ""){
+		return;
+	}
 	 return fetch("http://127.0.0.1:8088/" + processId, {
 	    method: 'get',
 	    cache: 'no-cache',
@@ -150,28 +159,72 @@ function getFromServer(processId, id){
 	}) .then(handleErrors)
 	    .then(result => {
 	        // Here body is not ready yet, throw promise
-	        if (!result.ok) throw result;
+	    	if (!result.ok) {
+	        	res.text().then(text => {throw Error(text);})
+	        }
 	        return result.json();
 	    }).catch(error => {
-	    	console.log("Get error:");
-        	console.log(error);
-	    	return {
-	    		type: 9,
-	    		value: error,
-	    		checksum: ""
-	    	};
+	    	 console.log("Get error:");
+			    errorStr = String(error);
+		       	console.log(errorStr);
+		       	if(errorStr.includes("Failed to fetch")){
+		       		errorStr = "Can not reach server, is it running?";
+		       	}
+		       	callBack( {
+			    		type: 9,
+			    		value: errorStr,
+			    		checksum: ""
+			    	},id);
 	    });
 }
 
-function listen(processId, id){
+function terminate(id){
+	if(processId == null || processId == ""){
+		return;
+	}
+	 return fetch("http://127.0.0.1:8088/" + processId, {
+	    method: 'delete',
+	    cache: 'no-cache',
+	    headers: {
+	        'Accept': 'application/json'
+	    }
+	}) .then(handleErrors)
+	    .then(result => {
+	        // Here body is not ready yet, throw promise
+	    	if (!result.ok) {
+	        	res.text().then(text => {throw Error(text);})
+	        }
+	        processId = "";
+	    	callBack(  {
+	        	type: 13,
+	    		value: "Process terminated",
+	    		checksum: ""
+	        },id);
+	    }).catch(error => {
+		    console.log("Get error:");
+		    errorStr = String(error);
+	       	console.log(errorStr);
+	       	if(errorStr.includes("Failed to fetch")){
+	       		errorStr = "Can not reach server, is it running?";
+	       	}
+	       	callBack( {
+		    		type: 9,
+		    		value: errorStr,
+		    		checksum: ""
+		    	},id);
+	    });
+}
+
+
+function listen(id){
 	setTimeout(function () {  
-		getFromServer(processId, id).then(result => {
+		getFromServer(id).then(result => {
 			console.log("Get feedback");
 			console.log(result);
 			if(result){
 				callBack(result, id);
 				if(result.type < 7){
-					listen(processId, id);
+					listen(id);
 				}
 			}
 		});
@@ -183,6 +236,9 @@ function callBack(result, id){
 	console.log('sending response');
 	console.log(result);
 	console.log(id);
+	if(result.type == 4){
+		result.value = "Waiting server response";
+	}
 	chrome.tabs.sendMessage(id, {
 		name : 'status',
 		dataStr : result,
@@ -197,9 +253,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
 		console.log("Request received with id: " + message.ids);
 		postToServer(message.dataStr,message.ids);
 		
-	}else if(message.requestType == 'status'){
-		
 	}else if(message.requestType == 'terminate'){
+		console.log("Request received with id: " + message.ids);
+		terminate(message.ids);
 		
 	}
 });
