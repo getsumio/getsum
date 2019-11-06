@@ -4,12 +4,20 @@
 
 var config = {
 	file : "",
-	algorithm : "",
+	algorithm : [],
 	checksum : "",
 	timeout : 60,
-	supplier : "go"
+	supplier : "go",
+	all: false,
+	remoteonly:false,
+	localonly:false,
+	timeout: 60,
+	key: "",
+	proxy: "",
+	insecureskipverify: true
 };
 
+var processId = "";
 const algs = [ "MD4", "MD5", "SHA1", "SHA224", "SHA256", "SHA384", "SHA512",
 		"RMD160", "SHA3-224", "SHA3-256", "SHA3-384", "SHA3-512", "SHA512-224",
 		"SHA512-256", "BLAKE2s256", "BLAKE2b256", "BLAKE2b384", "BLAKE2b512" ]
@@ -21,21 +29,25 @@ chrome.contextMenus.onClicked.addListener(function(info, tab) {
 	if (tab) {
 		if (info.menuItemId.startsWith("validate")) {
 			config.file = info.linkUrl;
-			config.algorithm = info.menuItemId.split(':')[1];
+			config.algorithm = [];
+			config.algorithm.push(info.menuItemId.split(':')[1]);
 			config.checksum = "Y";
 			console.log(config);
 			chrome.tabs.sendMessage(tab.id, {
 				"name" : "getsum",
-				"config" : config
+				"config" : config,
+				"ids" : tab.id
 			});
 		} else if (info.menuItemId.startsWith("calculate")) {
 			config.file = info.linkUrl;
-			config.algorithm = info.menuItemId.split(':')[1];
+			config.algorithm = [];
+			config.algorithm.push(info.menuItemId.split(':')[1]);
 			config.checksum = "";
 			console.log(config);
 			chrome.tabs.sendMessage(tab.id, {
 				"name" : "getsum",
-				"config" : config
+				"config" : config,
+				"ids" : tab.id
 			});
 		}
 	}
@@ -82,3 +94,115 @@ chrome.contextMenus.removeAll(function() {
 		}
 	}
 });
+
+function handleErrors(response) {
+    if (!response.ok) {
+        throw Error(response.statusText);
+    }
+    return response;
+}
+
+
+function postToServer(dataStr, id){
+	fetch("http://127.0.0.1:8088", {
+	    method: 'post',
+	    cache: 'no-cache',
+	    headers: {
+	        'Accept': 'application/json',
+	        'Content-Type': 'application/json'
+	    },
+	    body: dataStr,
+	}) .then(handleErrors)
+	    .then(result => {
+	        // Here body is not ready yet, throw promise
+	        if (!result.ok) throw result;
+	        
+	        result.json().then(function (json) {
+	        	console.log("Post Response:");
+	        	console.log(json);
+	        	if(json.type == 4){
+	        		processId = json.value;
+		        	json.value = "";
+		        	callBack(json, id);
+		        	listen(processId, id);
+	        	}else{
+	        		callBack(json, id);
+	        	}
+	        });
+	    }).catch(error => {
+	    	console.log("Get error:");
+        	console.log(error);
+	    	callBack({
+	    		type: 9,
+	    		value: error,
+	    		checksum: ""
+	    	}, id);
+	    });
+}
+
+function getFromServer(processId, id){
+	 return fetch("http://127.0.0.1:8088/" + processId, {
+	    method: 'get',
+	    cache: 'no-cache',
+	    headers: {
+	        'Accept': 'application/json'
+	    }
+	}) .then(handleErrors)
+	    .then(result => {
+	        // Here body is not ready yet, throw promise
+	        if (!result.ok) throw result;
+	        return result.json();
+	    }).catch(error => {
+	    	console.log("Get error:");
+        	console.log(error);
+	    	return {
+	    		type: 9,
+	    		value: error,
+	    		checksum: ""
+	    	};
+	    });
+}
+
+function listen(processId, id){
+	setTimeout(function () {  
+		getFromServer(processId, id).then(result => {
+			console.log("Get feedback");
+			console.log(result);
+			if(result){
+				callBack(result, id);
+				if(result.type < 7){
+					listen(processId, id);
+				}
+			}
+		});
+	   }, 1000)
+	
+}
+
+function callBack(result, id){
+	console.log('sending response');
+	console.log(result);
+	console.log(id);
+	chrome.tabs.sendMessage(id, {
+		name : 'status',
+		dataStr : result,
+		id : id
+	});
+}
+
+
+
+chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+	if(message.requestType == 'start'){
+		console.log("Request received with id: " + message.ids);
+		postToServer(message.dataStr,message.ids);
+		
+	}else if(message.requestType == 'status'){
+		
+	}else if(message.requestType == 'terminate'){
+		
+	}
+});
+
+
+
