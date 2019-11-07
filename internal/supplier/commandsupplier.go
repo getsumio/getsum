@@ -135,6 +135,8 @@ func (s *CommandSupplier) Run() {
 			//we got error
 			s.status.Type = status.ERROR
 			s.status.Value = val
+			s.Terminate()
+			s.Delete()
 			return
 		default:
 			//still running update time

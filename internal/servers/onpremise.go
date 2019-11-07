@@ -32,7 +32,9 @@ const uuidPattern = "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[8|9|aA|bB][
 
 var regex *regexp.Regexp = regexp.MustCompile(uuidPattern)
 
-const default_capacity = 250
+//when we have 50 concurrent request or i.e. 15 concurrent + 35 failed in the past
+//timedout suppliers will be terminated
+const default_capacity = 50
 
 //start server in given config listen address and port or tls details
 func (s *OnPremiseServer) Start(config *config.Config) error {
@@ -210,6 +212,9 @@ func (s *OnPremiseServer) ensureCapacity() {
 		for k := range s.suppliers {
 			supplier := s.suppliers[k]
 			if int(now.Sub(supplier.Data().StartTime).Seconds()) > (supplier.Data().TimeOut * 2) {
+				logger.Info("Removing orphaned process: %v", supplier.Status())
+				supplier.Terminate()
+				supplier.Delete()
 				delete(s.suppliers, k)
 			}
 		}

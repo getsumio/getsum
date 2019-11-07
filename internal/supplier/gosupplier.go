@@ -96,6 +96,8 @@ func (s *GoSupplier) Run() {
 		case val := <-errChan:
 			s.status.Type = status.ERROR
 			s.status.Value = val
+			s.Terminate()
+			s.Delete()
 			return
 		default:
 			//still running update time

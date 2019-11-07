@@ -40,6 +40,7 @@ type File struct {
 	StoragePath string
 	SkipVerify  bool
 	response    *http.Response
+	client      *http.Client
 }
 
 //file location on local host
@@ -60,6 +61,9 @@ func (f *File) Delete() {
 func (f *File) Terminate() {
 	if f.response != nil && f.response.Body != nil {
 		f.response.Body.Close()
+	}
+	if f.client != nil {
+		f.client.CloseIdleConnections()
 	}
 }
 
@@ -133,6 +137,7 @@ var fetchedSize int64 = -1
 //fetches file remotely
 //unless not timedout sets details and path
 func fetchRemote(f *File, timeout int, concurrent bool) error {
+	defer f.Terminate()
 
 	if concurrent {
 		concurrentLock.Lock()
@@ -158,20 +163,19 @@ func fetchRemote(f *File, timeout int, concurrent bool) error {
 		return err
 	}
 
+	f.path = filename
+
 	out, err := os.Create(filename)
 	if err != nil {
 		return err
 	}
 	defer out.Close()
 
-	client := getHttpClient(f, timeout)
+	f.client = getHttpClient(f, timeout)
 
 	f.path = filename
 
-	quit := make(chan bool)
-	defer close(quit)
-
-	resp, err := client.Get(f.Url)
+	resp, err := f.client.Get(f.Url)
 	if err != nil {
 		return err
 	}
@@ -190,16 +194,15 @@ func fetchRemote(f *File, timeout int, concurrent bool) error {
 	}
 
 	f.Size = int64(size)
+	quit := make(chan bool)
+	defer close(quit)
 
 	go downloadFile(quit, f)
 
 	_, err = io.Copy(out, resp.Body)
 	if err != nil {
-		quit <- true
 		return err
 	}
-
-	quit <- true
 
 	f.Status.Type = status.FETCHED
 	fetchedSize = f.Size
