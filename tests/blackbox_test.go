@@ -264,12 +264,14 @@ func TestTLSConcurrent(t *testing.T) {
 	wg := &sync.WaitGroup{}
 	for k, v := range goAlgos {
 		t.Logf("Running algo: %s with verification: %s", k, v)
-		go func() {
-			wg.Add(1)
-			defer wg.Done()
-			commandStr := "-a " + k + " -sc tlsservers.yml -skipVerify " + geturl + " " + v
-			execCommand(commandStr, fileName, true, t, true, "VALIDATED")
-		}()
+		for i := 0; i < 2; i++ {
+			go func() {
+				wg.Add(1)
+				defer wg.Done()
+				commandStr := "-a " + k + " -sc tlsservers.yml -skipVerify " + geturl + " " + v
+				execCommand(commandStr, fileName, true, t, true, "VALIDATED")
+			}()
+		}
 
 	}
 
