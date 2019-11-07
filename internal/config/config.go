@@ -9,7 +9,7 @@ type Config struct {
 	Cheksum            *string  `json:"cheksum"`
 	RemoteOnly         *bool
 	LogLevel           *string
-	Timeout            *int    `json:"timeout"`
+	Timeout            *int    `json:"timeout,string"`
 	All                *bool   `json:"all"`
 	Key                *string `json:"key"`
 	Supplier           *string `json:"supplier"`
