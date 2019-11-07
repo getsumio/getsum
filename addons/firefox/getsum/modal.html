@@ -1,0 +1,85 @@
+<style>
+#getsumModalDialog {
+	z-index: 99999 !important;
+	position: fixed !important;
+	right: 5px !important;
+	bottom: 0 !important;
+	display: none;
+	height: 60px !important;
+}
+
+#getSumContainer {
+	font-weight: bold !important;
+	display: inline-flex !important;
+	flex-direction: row !important;
+	height: 40px !important;
+	background: linear-gradient(to left, #a6feff, #ffffff) !important;
+	padding: 5px !important;
+	padding-left: 100px opacity: 0.95 !important;
+	filter: alpha(opacity = 50) !important;
+	-webkit-transition: opacity 400ms ease-in !important;
+	-moz-transition: opacity 400ms ease-in !important;
+	transition: opacity 400ms ease-in !important;
+	border-radius: 12px !important;
+	-moz-box-shadow: 1px 1px 2px #000 !important;
+	-webkit-box-shadow: 1px 1px 2px #000 !important;
+	box-shadow: 1px 1px 2px #000 !important;
+}
+
+#getsumLabel {
+	margin-right: 20px !important;
+	margin-left: 20px !important;
+	margin-top: auto !important;
+	margin-bottom: auto !important;
+	font-family: serif !important;
+	font-weight: bold !important;
+	font-size: 10px !important;
+	color: #569494 !important;
+}
+
+#getsumValue {
+	margin-top: auto !important;
+	margin-bottom: auto !important;
+	margin-right: 20px !important;
+	font-family: serif !important;
+	font-weight: bold !important;
+	color: #126b6b !important;
+	font-size: 12px !important;
+}
+
+#getsumChecksum {
+	margin-top: auto !important;
+	margin-bottom: auto !important;
+	margin-right: 20px !important;
+	font-family: serif !important;
+	font-weight: bold !important;
+	color: #126b6b !important;
+	font-size: 12px !important;
+}
+
+.closeGetsum {
+	padding: 1px !important;
+	right: 0 !important;
+	display: block !important;
+	position: absolute !important;
+	top: 0 !important;
+	padding-right: 5px !important;
+	cursor: pointer !important;
+	color: #119990 !important;
+}
+</style>
+<div id="getsumModalDialog">
+	<div id="getSumContainer">
+		<div id="closeGetsum" class="closeGetsum">x</div>
+
+		<div id="getsumLabel">
+		</div>
+		<div id="getsumValue">
+		</div>
+		<div id="getsumChecksum">
+		</div>
+	</div>
+
+
+
+</div>

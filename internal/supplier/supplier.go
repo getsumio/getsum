@@ -19,10 +19,11 @@ type Supplier interface {
 
 //embedded struct for suppliers
 type BaseSupplier struct {
-	Algorithm Algorithm
-	status    *status.Status
-	File      *file.File
-	TimeOut   int
-	Key       string
-	StartTime time.Time
+	Algorithm    Algorithm
+	status       *status.Status
+	File         *file.File
+	TimeOut      int
+	Key          string
+	StartTime    time.Time
+	IsConcurrent bool
 }

@@ -3,6 +3,7 @@ package file
 import (
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -21,10 +22,11 @@ import (
 type IFile interface {
 	Path() string
 	Data() ([]byte, error)
-	Fetch(timeout int) error
+	Fetch(timeout int, concurrent bool) error
 	IsRemote() bool
 	Delete()
 	Reset()
+	Terminate()
 }
 
 //file struct
@@ -37,6 +39,7 @@ type File struct {
 	Proxy       string
 	StoragePath string
 	SkipVerify  bool
+	response    *http.Response
 }
 
 //file location on local host
@@ -51,6 +54,12 @@ func (f *File) Path() string {
 func (f *File) Delete() {
 	if f.path != "" {
 		os.Remove(f.path)
+	}
+}
+
+func (f *File) Terminate() {
+	if f.response != nil && f.response.Body != nil {
+		f.response.Body.Close()
 	}
 }
 
@@ -71,6 +80,10 @@ func (f *File) Reset() {
 	f.StoragePath = ""
 	f.Status = nil
 	fetchedSize = -1
+	if hasLock {
+		concurrentLock.Unlock()
+		hasLock = false
+	}
 }
 
 //read the file data in bytes
@@ -90,7 +103,7 @@ func (f *File) Data() ([]byte, error) {
 //validates file
 //if remote fetches file
 //sets path location forthe stored file
-func (f *File) Fetch(timeout int) error {
+func (f *File) Fetch(timeout int, concurrent bool) error {
 	err := validateUrl(f)
 	if err != nil {
 		return err
@@ -99,14 +112,15 @@ func (f *File) Fetch(timeout int) error {
 	if !isRemote {
 		return fetchLocal(f)
 	} else {
-		return fetchRemote(f, timeout)
+		return fetchRemote(f, timeout, concurrent)
 	}
 
 	return nil
 }
 
-//TODO: sync.ONCE maybe better?
-var mux sync.Mutex
+var concurrentLock sync.Mutex
+var hasLock bool
+var moveLock sync.Mutex
 
 //in case of user runs multiple checksum calculations
 //on same machine there is no point to
@@ -118,19 +132,26 @@ var fetchedSize int64 = -1
 
 //fetches file remotely
 //unless not timedout sets details and path
-func fetchRemote(f *File, timeout int) error {
+func fetchRemote(f *File, timeout int, concurrent bool) error {
 
-	mux.Lock()
-	defer mux.Unlock()
+	if concurrent {
+		concurrentLock.Lock()
+		defer concurrentLock.Unlock()
+	}
+
 	filename := path.Base(f.Url)
 	if f.StoragePath != "" {
 		filename = strings.Join([]string{f.StoragePath, filename}, string(os.PathSeparator))
 	}
-	if fetchedSize > 0 { //another process already fetched
-		f.Size = fetchedSize
-		f.path = filename
-		f.Status.Type = status.FETCHED
-		return nil
+	original := filename
+	filename = fmt.Sprintf("%s.download.%d", filename, time.Now().Nanosecond())
+	if concurrent {
+		if fetchedSize > 0 { //another process already fetched
+			f.Size = fetchedSize
+			f.path = original
+			f.Status.Type = status.FETCHED
+			return nil
+		}
 	}
 	err := validateRemote(f)
 	if err != nil {
@@ -145,25 +166,13 @@ func fetchRemote(f *File, timeout int) error {
 
 	client := getHttpClient(f, timeout)
 
-	header, err := client.Head(f.Url)
-	if err != nil {
-		return err
-	}
-	defer header.Body.Close()
-	size, err := strconv.Atoi(header.Header.Get("Content-Length"))
-	if err != nil {
-		return errors.New("Can not get content length, is this a binary?")
-	}
-	f.Size = int64(size)
 	f.path = filename
 
 	quit := make(chan bool)
 	defer close(quit)
-	go downloadFile(quit, f)
 
 	resp, err := client.Get(f.Url)
 	if err != nil {
-		quit <- true
 		return err
 	}
 	defer resp.Body.Close()
@@ -171,13 +180,39 @@ func fetchRemote(f *File, timeout int) error {
 	resp.Header.Set("Connection", "Keep-Alive")
 	resp.Header.Set("Accept-Language", "en-US")
 	resp.Header.Set("User-Agent", "Mozilla/5.0")
+	contentLength := resp.Header.Get("Content-Length")
+	if contentLength == "" {
+		return errors.New("Can not get content length, is this a binary file?")
+	}
+	size, err := strconv.Atoi(resp.Header.Get("Content-Length"))
+	if err != nil {
+		return errors.New("Can not parse content-length, is this binary? " + err.Error())
+	}
+
+	f.Size = int64(size)
+
+	go downloadFile(quit, f)
 
 	_, err = io.Copy(out, resp.Body)
+	if err != nil {
+		quit <- true
+		return err
+	}
+
 	quit <- true
 
 	f.Status.Type = status.FETCHED
 	fetchedSize = f.Size
-	return err
+	hasLock = false
+
+	moveLock.Lock()
+	defer moveLock.Unlock()
+	err = os.Rename(filename, original)
+	if err != nil {
+		return err
+	}
+	f.path = original
+	return nil
 }
 
 //only validates file since its already hosted

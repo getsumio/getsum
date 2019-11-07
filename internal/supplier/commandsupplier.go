@@ -91,7 +91,7 @@ var cmd *exec.Cmd
 //start calculation
 func (s *CommandSupplier) Run() {
 	//fetch the file
-	err := s.File.Fetch(s.TimeOut)
+	err := s.File.Fetch(s.TimeOut, s.IsConcurrent)
 	if err != nil {
 		s.status.Value = err.Error()
 		s.status.Type = status.ERROR
@@ -161,6 +161,7 @@ func (s *CommandSupplier) Terminate() error {
 	if s.status.Type == status.RUNNING {
 		s.status.Type = status.TERMINATED
 	}
+	s.File.Terminate()
 	return err
 }
 

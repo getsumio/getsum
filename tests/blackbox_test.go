@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"sync"
 	"testing"
 )
 
@@ -52,60 +53,81 @@ const (
 	SHAKE128   = "9aac296a041c51b517223be2c31283d6"
 )
 
+var goAlgos map[string]string = map[string]string{
+	"MD4":        MD4,
+	"MD5":        MD5,
+	"SHA1":       SHA1,
+	"SHA224":     SHA224,
+	"SHA256":     SHA256,
+	"SHA384":     SHA384,
+	"SHA512":     SHA512,
+	"RMD160":     RMD160,
+	"SHA3-224":   SHA3224,
+	"SHA3-256":   SHA3256,
+	"SHA3-384":   SHA3384,
+	"SHA3-512":   SHA3512,
+	"SHA512-224": SHA512224,
+	"SHA512-256": SHA512256,
+	"BLAKE2S256": BLAKE2s256,
+	"BLAKE2B256": BLAKE2b256,
+	"BLAKE2B384": BLAKE2b384,
+	"BLAKE2B512": BLAKE2b512,
+}
+
 func TestGet(t *testing.T) {
 
-	execCommand(localOnly+geturl, fileName, true, t, SHA512)
+	execCommand(localOnly+geturl, fileName, true, t, false, SHA512)
 }
 
 func TestLibOpenSSL(t *testing.T) {
 
 	commandStr := localOnly + validLibOpenssl + geturl
-	execCommand(commandStr, fileName, true, t, MD5)
+	execCommand(commandStr, fileName, true, t, false, MD5)
 
 }
 
 func TestLibOS(t *testing.T) {
 
 	commandStr := localOnly + validLibOs + geturl
-	execCommand(commandStr, fileName, true, t, MD5)
+	execCommand(commandStr, fileName, true, t, false, MD5)
 
 }
 
 func TestLibGO(t *testing.T) {
 
 	commandStr := localOnly + validLibGo + geturl
-	execCommand(commandStr, fileName, true, t, MD5)
+	execCommand(commandStr, fileName, true, t, false, MD5)
 
 }
 
 func TestAllAlgosGoLib(t *testing.T) {
 
 	commandStr := all + localOnly + geturl
-	execCommand(commandStr, fileName, true, t, MD4, MD5, SHA1, SHA224, SHA384, SHA256, SHA512, SHA3224, SHA3384, SHA3256, SHA3512, SHA512224, SHA512256, RMD160, BLAKE2s256, BLAKE2b256, BLAKE2b384, BLAKE2b512)
+	execCommand(commandStr, fileName, true, t, false, MD4, MD5, SHA1, SHA224, SHA384, SHA256, SHA512, SHA3224, SHA3384, SHA3256, SHA3512, SHA512224, SHA512256, RMD160, BLAKE2s256, BLAKE2b256, BLAKE2b384, BLAKE2b512)
 
 }
 func TestAllAlgosOpenSSLLib(t *testing.T) {
 
 	commandStr := all + localOnly + validLibOpenssl + geturl
-	execCommand(commandStr, fileName, true, t, MD4, MD5, SHA1, SHA224, SHA384, SHA256, SHA512, SHA3224, SHA3384, SHA3256, SHA3512, SHA512224, SHA512256, RMD160, BLAKE2s256, BLAKE2b512, SHAKE128, SHAKE256, SM3)
+	execCommand(commandStr, fileName, true, t, false, MD4, MD5, SHA1, SHA224, SHA384, SHA256, SHA512, SHA3224, SHA3384, SHA3256, SHA3512, SHA512224, SHA512256, RMD160, BLAKE2s256, BLAKE2b512, SHAKE128, SHAKE256, SM3)
 
 }
 func TestAllAlgosOSLib(t *testing.T) {
 
 	commandStr := all + localOnly + validLibOs + geturl
-	execCommand(commandStr, fileName, true, t, MD5, SHA1, SHA224, SHA384, SHA256, SHA512)
+	execCommand(commandStr, fileName, true, t, false, MD5, SHA1, SHA224, SHA384, SHA256, SHA512)
 
 }
 func TestMultipleAlgos(t *testing.T) {
 
 	commandStr := multipleAlgs + localOnly + geturl
-	execCommand(commandStr, fileName, true, t, MD5, SHA1, SHA512)
+	execCommand(commandStr, fileName, true, t, false, MD5, SHA1, SHA512)
 
 }
 func TestValidDir(t *testing.T) {
 
 	commandStr := localOnly + validDir + geturl
-	execCommand(commandStr, "/tmp/"+fileName, true, t, SHA512)
+	execCommand(commandStr, "/tmp/"+fileName, true, t, false, SHA512)
 
 }
 
@@ -145,7 +167,7 @@ func TestValidationFail(t *testing.T) {
 func TestValidation(t *testing.T) {
 
 	commandStr := localOnly + geturl + " " + SHA512
-	execCommand(commandStr, fileName, true, t, SHA512)
+	execCommand(commandStr, fileName, true, t, false, SHA512)
 
 }
 
@@ -164,7 +186,7 @@ func TestRemoteOnly(t *testing.T) {
 		t.Errorf("Can not start server instance! %s", err.Error())
 	}
 	commandStr = "-remoteOnly -a MD5 -sc servers.yml " + geturl
-	execCommand(commandStr, fileName, false, t, MD5, "server1")
+	execCommand(commandStr, fileName, false, t, false, MD5, "server1")
 
 }
 
@@ -177,7 +199,7 @@ func TestServeLocalRemote(t *testing.T) {
 		t.Errorf("Can not start server instance! %s", err.Error())
 	}
 	commandStr = "-a MD5 -sc servers.yml " + geturl
-	execCommand(commandStr, fileName, true, t, MD5, "server1", "local")
+	execCommand(commandStr, fileName, true, t, false, MD5, "server1", "local")
 
 }
 
@@ -190,7 +212,7 @@ func TestServeRemoteValidation(t *testing.T) {
 		t.Errorf("Can not start server instance! %s", err.Error())
 	}
 	commandStr = "-a MD5 -sc servers.yml " + geturl + " " + MD5
-	execCommand(commandStr, fileName, true, t, MD5, "server1", "local")
+	execCommand(commandStr, fileName, true, t, false, MD5, "server1", "local")
 }
 
 func TestServeRemoteValidationFail(t *testing.T) {
@@ -227,7 +249,32 @@ func TestTLS(t *testing.T) {
 		t.Errorf("Can not start server instance! %s", err.Error())
 	}
 	commandStr = "-a MD5 -sc tlsservers.yml -skipVerify " + geturl + " " + MD5
-	execCommand(commandStr, fileName, true, t, "VALIDATED")
+	execCommand(commandStr, fileName, true, t, false, "VALIDATED")
+}
+
+func TestTLSConcurrent(t *testing.T) {
+	commandStr := serve + tlsServe
+	cmd := getCommand(commandStr)
+	err := cmd.Start()
+	defer killServer(cmd, t)
+	if err != nil {
+		t.Errorf("Can not start server instance! %s", err.Error())
+	}
+
+	wg := &sync.WaitGroup{}
+	for k, v := range goAlgos {
+		t.Logf("Running algo: %s with verification: %s", k, v)
+		go func() {
+			wg.Add(1)
+			defer wg.Done()
+			commandStr := "-a " + k + " -sc tlsservers.yml -skipVerify " + geturl + " " + v
+			execCommand(commandStr, fileName, true, t, true, "VALIDATED")
+		}()
+
+	}
+
+	wg.Wait()
+
 }
 
 func killServer(cmd *exec.Cmd, t *testing.T) {
@@ -239,7 +286,7 @@ func killServer(cmd *exec.Cmd, t *testing.T) {
 	}
 }
 
-func execCommand(commandStr string, filename string, keep bool, t *testing.T, contains ...string) {
+func execCommand(commandStr string, filename string, keep bool, t *testing.T, ignoreFile bool, contains ...string) {
 	cmd := getCommand(commandStr)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
@@ -255,12 +302,14 @@ func execCommand(commandStr string, filename string, keep bool, t *testing.T, co
 
 		}
 
-		if keep && !fileExist(filename) {
-			t.Errorf("Command successfull but file %s not present!", filename)
-		} else if !keep && fileExist(filename) {
-			t.Errorf("-keep is false but file is still present!")
+		if !ignoreFile {
+			if keep && !fileExist(filename) {
+				t.Errorf("Command successfull but file %s not present!", filename)
+			} else if !keep && fileExist(filename) {
+				t.Errorf("-keep is false but file is still present!")
+			}
+			defer deleteFile(filename)
 		}
-		defer deleteFile(filename)
 	}
 }
 func execForError(commandStr string, filename string, keep bool, t *testing.T, contains ...string) {

@@ -55,7 +55,7 @@ func (s *GoSupplier) Supports() []Algorithm {
 //start calculation
 func (s *GoSupplier) Run() {
 	//fetch file
-	err := s.File.Fetch(s.TimeOut)
+	err := s.File.Fetch(s.TimeOut, s.IsConcurrent)
 	if err != nil {
 		s.status.Value = err.Error()
 		s.status.Type = status.ERROR
@@ -121,8 +121,9 @@ func (s *GoSupplier) Terminate() error {
 	if s.status.Type == status.RUNNING {
 		s.status.Type = status.TERMINATED
 	}
-	return nil
+	s.File.Terminate()
 
+	return nil
 }
 
 func (s *GoSupplier) Data() *BaseSupplier {
