@@ -20,14 +20,15 @@ var config = {
 var processId = "";
 const algs = [ "MD4", "MD5", "SHA1", "SHA224", "SHA256", "SHA384", "SHA512",
 		"RMD160", "SHA3-224", "SHA3-256", "SHA3-384", "SHA3-512", "SHA512-224",
-		"SHA512-256", "BLAKE2s256", "BLAKE2b256", "BLAKE2b384", "BLAKE2b512" ]
+		"SHA512-256", "BLAKE2S256", "BLAKE2B256", "BLAKE2B384", "BLAKE2B512" ]
 
 var ids = []
 
-options = localStorage.config;
+var options = JSON.parse(localStorage.config);
 config.supplier = options.lib;
 config.timeout = options.timeout;
 config.proxy = options.proxy
+console.log(options);
 chrome.contextMenus.onClicked.addListener(function(info, tab) {
 
 	if (tab) {
@@ -35,7 +36,7 @@ chrome.contextMenus.onClicked.addListener(function(info, tab) {
 			config.file = info.linkUrl;
 			config.algorithm = [];
 			config.algorithm.push(info.menuItemId.split(':')[1]);
-			config.checksum = "Y";
+			config.checksum = "";
 			console.log(config);
 			chrome.tabs.sendMessage(tab.id, {
 				"name" : "getsum",
@@ -58,43 +59,15 @@ chrome.contextMenus.onClicked.addListener(function(info, tab) {
 
 });
 chrome.contextMenus.removeAll(function() {
-	if (!ids.includes('calculate')) {
-		chrome.contextMenus.create({
-			id : 'calculate',
-			title : chrome.i18n.getMessage('openContextMenuCalculate'),
-			contexts : [ 'link' ],
-		});
-		ids.push('calculate');
-	}
-	if (!ids.includes('validate')) {
-		chrome.contextMenus.create({
-			id : 'validate',
-			title : chrome.i18n.getMessage('openContextMenuValidate'),
-			contexts : [ 'link' ],
-		});
-		ids.push('validate');
-	}
-
 	for (let i = 0; i < algs.length; i++) {
 		valId = 'validate:' + algs[i];
-		calId = 'calculate:' + algs[i];
 		if (!ids.includes(valId)) {
 			chrome.contextMenus.create({
 				id : valId,
 				title : algs[i],
-				contexts : [ 'link' ],
-				parentId : 'validate'
+				contexts : [ 'link' ]
 			});
 			ids.push(valId);
-		}
-		if (!ids.includes(calId)) {
-			chrome.contextMenus.create({
-				id : calId,
-				title : algs[i],
-				contexts : [ 'link' ],
-				parentId : 'calculate'
-			});
-			ids.push(calId);
 		}
 	}
 });
@@ -109,7 +82,8 @@ function handleErrors(response) {
 
 function postToServer(dataStr, id){
 	processId = "";
-	fetch(options.hostname, {
+	console.log(options);
+	fetch(this.options.hostname, {
 	    method: 'post',
 	    cache: 'no-cache',
 	    headers: {
@@ -140,7 +114,7 @@ function postToServer(dataStr, id){
 			    errorStr = String(error);
 		       	console.log(errorStr);
 		       	if(errorStr.includes("Failed to fetch")){
-		       		errorStr = "Can not reach server, is it running?";
+		       		errorStr = "Can not reach server @ " + options.hostname ;
 		       	}
 		       	callBack( {
 			    		type: 9,
@@ -172,7 +146,7 @@ function getFromServer(id){
 			    errorStr = String(error);
 		       	console.log(errorStr);
 		       	if(errorStr.includes("Failed to fetch")){
-		       		errorStr = "Can not reach server, is it running?";
+		       		errorStr = "Can not reach server @ " + options.hostname ;
 		       	}
 		       	callBack( {
 			    		type: 9,
@@ -210,7 +184,7 @@ function terminate(id){
 		    processId = "";
 	       	console.log(errorStr);
 	       	if(errorStr.includes("Failed to fetch")){
-	       		errorStr = "Can not reach server, is it running?";
+	       		errorStr = "Can not reach server @ " + options.hostname ;
 	       	}
 	       	callBack( {
 		    		type: 9,

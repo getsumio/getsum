@@ -12,11 +12,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 	console.log(request);
 	if (request.name == "getsum") {
 		config = request.config;
-		if (config.checksum == "Y") {
-			config.checksum = getSelection();
-		} else {
-			config.checksum = "";
-		}
+		config.checksum = getSelectedText();
 		validationChecksum = config.checksum;
 		var cfg = JSON.stringify(config);
 		reset();
@@ -32,7 +28,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 	}
 });
 
-function getSelection(){
+function getSelectedText(){
 	selection = window.getSelection().toString();
 	selection = selection.trim();
 	if(selection.includes(" ") || !isBase64(selection)){
