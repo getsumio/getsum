@@ -137,7 +137,8 @@ A quick 3 server 1 client example:
 [![Watch the full record](docs/server.gif)](https://asciinema.org/a/KA4sT6xTNN9iTzKHJhdgnybrB)
 
 **Browser Addons**
-I will also write browser addons next week (4.November+) so you can set your servers on browser extension and validate during download.
+Browser addons are signed and waiting for review. If you want you can use source folder from project.
+https://www.youtube.com/watch?v=7f2hMyI38Lo .
 
 **Docker image**
 ```
