@@ -13,7 +13,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 	if (request.name == "getsum") {
 		config = request.config;
 		if (config.checksum == "Y") {
-			config.checksum = window.getSelection().toString();
+			config.checksum = getSelection();
 		} else {
 			config.checksum = "";
 		}
@@ -32,6 +32,25 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 	}
 });
 
+function getSelection(){
+	selection = window.getSelection().toString();
+	selection = selection.trim();
+	if(selection.includes(" ") || !isBase64(selection)){
+		return "";
+	}
+	return selection;
+}
+
+//https://stackoverflow.com/questions/7860392/determine-if-string-is-in-base64-using-javascript
+function isBase64(str) {
+    if (str ==='' || str.trim() ===''){ return false; }
+    try {
+        return btoa(atob(str)) == str;
+    } catch (err) {
+        return false;
+    }
+}
+
 function validate(request) {
 	if (request.dataStr.type >= 7) {
 		switch (request.dataStr.type) {
@@ -40,7 +59,7 @@ function validate(request) {
 		case 12:
 			return validateStatus(request);
 		default:
-			return "\u24e7" + statuses[request.dataStr.type];
+			return "\u24e7  " + statuses[request.dataStr.type];
 		}
 	}
 	return statuses[request.dataStr.type];
@@ -49,12 +68,12 @@ function validate(request) {
 function validateStatus(request) {
 	if (validationChecksum != "") {
 		if (request.dataStr.checksum != validationChecksum) {
-			return '\u24e7 MISMATCH';
+			return '\u24e7  MISMATCH';
 		} else {
-			return '\u2713 VALIDATED';
+			return '\u2713  VALIDATED';
 		}
 	} else {
-		return '\u2713' + statuses[request.dataStr.type];
+		return '\u2713  ' + statuses[request.dataStr.type];
 	}
 }
 

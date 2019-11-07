@@ -24,6 +24,10 @@ const algs = [ "MD4", "MD5", "SHA1", "SHA224", "SHA256", "SHA384", "SHA512",
 
 var ids = []
 
+options = localStorage.config;
+config.supplier = options.lib;
+config.timeout = options.timeout;
+config.proxy = options.proxy
 chrome.contextMenus.onClicked.addListener(function(info, tab) {
 
 	if (tab) {
@@ -105,7 +109,7 @@ function handleErrors(response) {
 
 function postToServer(dataStr, id){
 	processId = "";
-	fetch("http://127.0.0.1:8088", {
+	fetch(options.hostname, {
 	    method: 'post',
 	    cache: 'no-cache',
 	    headers: {
@@ -150,7 +154,7 @@ function getFromServer(id){
 	if(processId == null || processId == ""){
 		return;
 	}
-	 return fetch("http://127.0.0.1:8088/" + processId, {
+	 return fetch(options.hostname + "/" + processId, {
 	    method: 'get',
 	    cache: 'no-cache',
 	    headers: {
@@ -182,7 +186,7 @@ function terminate(id){
 	if(processId == null || processId == ""){
 		return;
 	}
-	 return fetch("http://127.0.0.1:8088/" + processId, {
+	 return fetch(options.hostname + "/"+ processId, {
 	    method: 'delete',
 	    cache: 'no-cache',
 	    headers: {
@@ -203,6 +207,7 @@ function terminate(id){
 	    }).catch(error => {
 		    console.log("Get error:");
 		    errorStr = String(error);
+		    processId = "";
 	       	console.log(errorStr);
 	       	if(errorStr.includes("Failed to fetch")){
 	       		errorStr = "Can not reach server, is it running?";
@@ -249,8 +254,20 @@ function callBack(result, id){
 
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+	if(options.hostname == ""){
+		callBack( {
+    		type: 9,
+    		value: "Please setup hostname from extension options",
+    		checksum: ""
+    	},id);
+		return;
+	}
 	if(message.requestType == 'start'){
 		console.log("Request received with id: " + message.ids);
+		if(processId != ""){
+			terminate(message.ids);
+			processId = "";
+		}
 		postToServer(message.dataStr,message.ids);
 		
 	}else if(message.requestType == 'terminate'){
