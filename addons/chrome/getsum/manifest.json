@@ -28,6 +28,6 @@
 		"contextMenus",
 		"downloads",
 		"downloads.open",
-		"<all_urls>"
+		"activeTab"
 	]
 }

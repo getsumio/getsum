@@ -16,15 +16,23 @@ var config = {
 	proxy: "",
 	insecureskipverify: true
 };
-
+var ops = {
+		hostname : "",
+		proxy : "",
+		lib : "",
+		timeout: 180
+	}
 var processId = "";
 const algs = [ "MD4", "MD5", "SHA1", "SHA224", "SHA256", "SHA384", "SHA512",
 		"RMD160", "SHA3-224", "SHA3-256", "SHA3-384", "SHA3-512", "SHA512-224",
 		"SHA512-256", "BLAKE2S256", "BLAKE2B256", "BLAKE2B384", "BLAKE2B512" ]
 
 var ids = []
+var options = ops;
+if(localStorage.config && localStorage.config != null && localStorage.config != ""){
+	options = JSON.parse(localStorage.config);
+}
 
-var options = JSON.parse(localStorage.config);
 config.supplier = options.lib;
 config.timeout = options.timeout;
 config.proxy = options.proxy

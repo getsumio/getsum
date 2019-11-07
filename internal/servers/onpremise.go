@@ -120,14 +120,22 @@ func handlePost(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
 	}
 	w.Write(jsonStat)
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST,GET,DELETE")
-	w.Header().Set("Access-Control-Allow-Headers", "application/json")
+	w.Header().Set("Access-Control-Allow-Methods", "OPTIONS,POST,GET,DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "content-type,accept,origin")
 
 	supplier.Data().StartTime = time.Now()
 	go supplier.Run()
 	s.suppliers[processId] = supplier
 	logger.Info("Process started")
 	s.ensureCapacity()
+}
+
+func handleOptions(s *OnPremiseServer, w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "OPTIONS,POST,GET,DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "content-type,accept,origin")
+	w.Header().Set("Allow", "OPTIONS,GET,POST,DELETE")
+
 }
 
 //terminates running calculation
@@ -144,8 +152,8 @@ func handleDelete(s *OnPremiseServer, w http.ResponseWriter, r *http.Request, id
 	supplier.Delete()
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST,GET,DELETE")
-	w.Header().Set("Access-Control-Allow-Headers", "application/json")
+	w.Header().Set("Access-Control-Allow-Methods", "OPTIONS,POST,GET,DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "content-type,accept,origin")
 
 	delete(s.suppliers, id)
 	logger.Info("Process terminated")
@@ -165,6 +173,8 @@ func (s *OnPremiseServer) handle(w http.ResponseWriter, r *http.Request) {
 		handleGet(s, w, r, requestId)
 	case "POST":
 		handlePost(s, w, r)
+	case "OPTIONS":
+		handleOptions(s, w, r)
 	case "DELETE":
 		requestId := path.Base(html.EscapeString(r.URL.Path))
 		if !regex.MatchString(requestId) {
