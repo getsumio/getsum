@@ -72,6 +72,7 @@ func (s *GoSupplier) Run() {
 	if err != nil {
 		s.status.Value = err.Error()
 		s.status.Type = status.ERROR
+		return
 	}
 
 	//start calculation
