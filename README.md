@@ -136,9 +136,6 @@ A quick 3 server 1 client example:
 
 [![Watch the full record](docs/server.gif)](https://asciinema.org/a/KA4sT6xTNN9iTzKHJhdgnybrB)
 
-**Browser Addons**
-Browser addons are signed and waiting for review. If you want you can use source folder from project.
-https://www.youtube.com/watch?v=7f2hMyI38Lo .
 
 **Docker image**
 ```
@@ -167,6 +164,22 @@ getsum -skipVerify -a MD5  -lib openssl https://download.microsoft.com/download/
 
 ```
 
+**Browser Addons**
+
+Browser addons are signed and waiting for review. If you want you can use source folder from project.
+
+https://www.youtube.com/watch?v=7f2hMyI38Lo .
+
+ Extensions also allows you to use 127.0.0.1 / localhost ports.
+
+  After your server is running visit extension options page first, set your hostname value i.e. http://127.0.0.1/8088 and other preferences and save.
+
+  Then on any page  right click on a download link and select GetSum then select desired algorithm.
+
+  If you want to validate checksum of download file then first select text on the page and right click on download link and select Getsum->algorithm so extension will check if any selected text exist and if it is valid it will use it for comparation.
+  
+  Addons just validates checksum so they are informative, even it is valid still you need to download file.
+  
 **Serverless support**
  I really wanted to add native lambda, cloud functions support for different providers but each provider has their own limits i.e. 200mb storage space or 2GB memory, so its currently postponed.
  
