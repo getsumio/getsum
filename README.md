@@ -1,6 +1,6 @@
 # getsum : Tool for validating and calculating checksums
 
-***getsum*** calculates and validates checksum of files remotely or locally. According to user choice, local downloads can be prevented if their checksum mismatch. You can also run application in listen mode, so you can remotely deploy on your server or cloud provider. Then you can use another getsum as client on host pc (Please see also below docker image section). I get the idea from https://blog.linuxmint.com/?p=2994 so I thought it would be great fit for people who host binaries as well as users to validate their checksum. In validation mode if remote servers are present, then application first calculates checksum on remote servers and if there is a match it will download the file and run another calculation locally.
+***getsum*** calculates and validates checksum of files remotely or locally. According to user choice, if their checksum mismatch local downloads can be prevented . You can also run application in listen mode, so you can remotely deploy on your server or cloud provider. Then you can use another getsum as client on host pc (Please see also below docker image section) or browser addon. I get the idea from https://blog.linuxmint.com/?p=2994 so I thought it would be great fit for people who host binaries as well as users to validate their checksum. In validation mode if remote servers are present, then application first calculates checksum on remote servers and if there is a match it will download the file and run another calculation locally.
 
  [![Watch the full record](docs/main.gif)](https://asciinema.org/a/ovpGNqNS56qlrKevUllOks1qT)
  
@@ -41,6 +41,7 @@ getsum -remoteOnly https://some.server.address/binary cf1a31c3acf3a1c3f2a13cfa13
 * Local/Remote only calculations
 * Proxy support
 * TLS support on listen mode or reaching files behind untrusted certificate
+* Browser addons
 
 **Selecting library/applications**
 
