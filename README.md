@@ -181,11 +181,13 @@ on Firefox: about:addons -> then click extenstions -> select getsum and click pr
 
 on Chrome: On right top click Getsum icon -> select options
 
-set hostname: http://127.0.0.1:8088
+i.e.:
 
-i.e. select library: openssl
-
-and save and restart browser
+* hostname: http://127.0.0.1:8088
+* library: openssl
+* keep proxy empty (proxy for telling server to use it for reaching file)
+* set timeout (server will use timeout to download and calculate)
+* and save and restart browser
 
 Then on any page  right click on a download link and select GetSum then select desired algorithm.
 
