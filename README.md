@@ -195,7 +195,7 @@ Here is a quick video:
 
 https://www.youtube.com/watch?v=7f2hMyI38Lo .
 
- Addons just validates checksum so they are informative, even it is valid still you need to download file.
+ Addons just validates checksum so they are informative, even it is valid still you need to download file. If you use self signed/untrusted certificate on server still you need to convince browser to allow this certificate
 
   
   
