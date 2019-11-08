@@ -167,6 +167,7 @@ getsum -skipVerify -a MD5  -lib openssl https://download.microsoft.com/download/
 **Browser Addons**
 
 Chrome: https://chrome.google.com/webstore/detail/getsum/mbkjjcfdhbhpjmhpkkligkaifjmkakge
+
 Firefox: https://addons.mozilla.org/en-US/firefox/addon/getsum/?src=search
 
 Then start your server, extensions also allows you to use 127.0.0.1 / localhost ports. i.e. 
@@ -177,10 +178,13 @@ docker run -p127.0.0.1:8088:8088 getsum/getsum
 ```
  
 on Firefox: about:addons -> then click extenstions -> select getsum and click preferences tab
+
 on Chrome: On right top click Getsum icon -> select options
 
 set hostname: http://127.0.0.1:8088
+
 i.e. select library: openssl
+
 and save and restart browser
 
 Then on any page  right click on a download link and select GetSum then select desired algorithm.
