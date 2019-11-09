@@ -32,3 +32,4 @@ tree -h builds
 
 
 find builds/ -name '*tar.gz' -exec getsum -q {} \;
+find builds/ -name '*zip' -exec getsum -q {} \;
