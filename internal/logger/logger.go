@@ -130,7 +130,7 @@ func Logsum(providers *Providers) {
 	}
 	for i, s := range providers.Statuses {
 		if Level == LevelQuite {
-			fmt.Println("%s\t%s", s.Checksum, providers.Filename)
+			fmt.Printf("\n%s\n%s\n", s.Checksum, *providers.Filename)
 			return
 		}
 		var c color.Value
