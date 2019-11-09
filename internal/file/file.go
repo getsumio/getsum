@@ -177,6 +177,7 @@ func fetchRemote(f *File, timeout int, concurrent bool) error {
 
 	resp, err := f.client.Get(f.Url)
 	if err != nil {
+		f.Delete()
 		return err
 	}
 	defer resp.Body.Close()
@@ -186,6 +187,7 @@ func fetchRemote(f *File, timeout int, concurrent bool) error {
 	resp.Header.Set("User-Agent", "Mozilla/5.0")
 	contentLength := resp.Header.Get("Content-Length")
 	if contentLength == "" {
+		f.Delete()
 		return errors.New("Can not get content length, is this a binary file?")
 	}
 	size, err := strconv.Atoi(contentLength)
