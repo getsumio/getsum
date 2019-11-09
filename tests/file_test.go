@@ -49,8 +49,9 @@ func TestContentLength(t *testing.T) {
 	f := &file.File{Url: "https://www.github.com", Status: &status.Status{}}
 	err := f.Fetch(60, false)
 	if err == nil {
-		panic("If content length not provided there should be an error")
+		t.Errorf("If content length not provided there should be an error")
 	}
+	t.Logf("An expected error received %s", err.Error())
 
 }
 
