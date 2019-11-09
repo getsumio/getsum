@@ -264,7 +264,7 @@ function getErrorString(error){
 	}
 	
 	errorStr = String(error);
-   	if(errorStr.includes("Failed to fetch")){
+   	if(errorStr.includes("Failed to fetch") || errorStr.includes("fetch resource") ||){
    		errorStr = "Can not reach server @ " + options.hostname ;
    	}
    	DEBUG.log(errorStr);
