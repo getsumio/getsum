@@ -29,3 +29,6 @@ find -L . -exec zip ../../$ADDONS_PATH/firefox-v$VERSION.zip {} \;
 popd
 
 tree -h builds
+
+
+find builds/ -name '*tar.gz' -exec getsum -q {} \;
