@@ -14,4 +14,16 @@ for GOOS in darwin linux windows openbsd freebsd ; do
     done
 done
 
+ADDONS_PATH="builds/addons"
+mkdir -p $ADDONS_PATH
+
+pushd addons/chrome
+sed -i 's/\"version\".*/\"version\": \"'"$VERSION"'\",/g' manifest.json
+find . -exec zip ../../$ADDONS_PATH/chrome-$VERSION.zip
+popd
+pushd addons/firefox
+sed -i 's/\"version\".*/\"version\": \"'"$VERSION"'\",/g' manifest.json
+find . -exec zip ../../$ADDONS_PATH/firefox-$VERSION.zip
+popd
+
 tree -h builds
