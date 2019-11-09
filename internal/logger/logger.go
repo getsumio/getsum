@@ -125,7 +125,7 @@ func Info(msg string, params ...interface{}) {
 //prints checksums or error values
 //for each runners
 func Logsum(providers *Providers) {
-	if Level == LevelQuite {
+	if Level != LevelQuite {
 		fmt.Println("\n\n")
 	}
 	for i, s := range providers.Statuses {
