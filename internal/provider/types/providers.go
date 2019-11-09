@@ -18,6 +18,7 @@ type Providers struct {
 	HasLocal      bool
 	HasValidation bool
 	mux           sync.Mutex
+	Filename      *string
 }
 
 func (providers *Providers) RunRemotes() {

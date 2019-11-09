@@ -60,6 +60,7 @@ func (p *ProviderFactory) GetProviders(config *Config) (*Providers, error) {
 		Statuses:  make([]*status.Status, lengthTotal),
 	}
 	providers.HasValidation = *config.Cheksum != ""
+	providers.Filename = config.File
 	return providers, nil
 }
 

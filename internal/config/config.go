@@ -23,6 +23,7 @@ type Config struct {
 	ServerConfig       *string
 	Keep               *bool
 	InsecureSkipVerify *bool
+	Quite              *bool
 }
 
 //this is for collecting server info from yaml files
