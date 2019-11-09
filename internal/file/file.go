@@ -177,6 +177,7 @@ func fetchRemote(f *File, timeout int, concurrent bool) error {
 
 	resp, err := f.client.Get(f.Url)
 	if err != nil {
+		f.Delete()
 		return err
 	}
 	defer resp.Body.Close()
@@ -186,10 +187,12 @@ func fetchRemote(f *File, timeout int, concurrent bool) error {
 	resp.Header.Set("User-Agent", "Mozilla/5.0")
 	contentLength := resp.Header.Get("Content-Length")
 	if contentLength == "" {
+		f.Delete()
 		return errors.New("Can not get content length, is this a binary file?")
 	}
-	size, err := strconv.Atoi(resp.Header.Get("Content-Length"))
+	size, err := strconv.Atoi(contentLength)
 	if err != nil {
+		f.Delete()
 		return errors.New("Can not parse content-length, is this binary? " + err.Error())
 	}
 
@@ -201,6 +204,7 @@ func fetchRemote(f *File, timeout int, concurrent bool) error {
 
 	_, err = io.Copy(out, resp.Body)
 	if err != nil {
+		f.Delete()
 		return err
 	}
 
@@ -212,6 +216,7 @@ func fetchRemote(f *File, timeout int, concurrent bool) error {
 	defer moveLock.Unlock()
 	err = os.Rename(filename, original)
 	if err != nil {
+		f.Delete()
 		return err
 	}
 	f.path = original

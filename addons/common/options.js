@@ -37,7 +37,7 @@ function storeRules() {
 		Config.timeout = 180;
 	}
 	localStorage.config = JSON.stringify(Config);
-	alert("Changes stored!");
+	alert("Changes stored! Please restart your browser");
 }
 
 window.onload = function() {

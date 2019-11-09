@@ -1,6 +1,6 @@
 {
 	"name": "__MSG_extName__",
-	"version": "0.1",
+	"version": "2.0.6",
 	"manifest_version": 2,
 	"description": "__MSG_extDesc__",
 	"icons": {
@@ -8,33 +8,26 @@
 		"128": "icon_128.png"
 	},
 	"content_scripts": [
-		{
-			"matches": [
-				"<all_urls>"
-			],
-			"js": [
-				"jquery-3.4.1.min.js",
-				"content.js"
-			]
-		}
-	],
+      {
+        "matches": ["<all_urls>"],
+        "js": ["jquery-3.4.1.min.js","content.js"]
+      }
+    ],
 	"background": {
+		"persistent": false,
 		"scripts": [
 			"background.js"
 		]
 	},
 	"web_accessible_resources": [
-		"modal.html"
-	],
+    "modal.html"
+  ],
 	"default_locale": "en",
-	"options_ui": {
-		"page": "options.html",
-		"browser_style": true
-	},
+	"options_page": "options.html",
 	"permissions": [
 		"contextMenus",
 		"downloads",
 		"downloads.open",
-		"<all_urls>"
+		"activeTab"
 	]
 }

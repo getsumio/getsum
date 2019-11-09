@@ -125,10 +125,12 @@ func Info(msg string, params ...interface{}) {
 //prints checksums or error values
 //for each runners
 func Logsum(providers *Providers) {
-	fmt.Println("\n\n")
+	if Level != LevelQuite {
+		fmt.Println("\n\n")
+	}
 	for i, s := range providers.Statuses {
 		if Level == LevelQuite {
-			fmt.Println(s.Checksum)
+			fmt.Printf("\n%s\n%s\n", s.Checksum, *providers.Filename)
 			return
 		}
 		var c color.Value
@@ -149,6 +151,8 @@ func Logsum(providers *Providers) {
 
 		fmt.Printf("\t%s %s %s\n", c, color.Bold(color.Blue((*providers.All[i]).Data().Name)), val)
 	}
+
+	Info("Calculated file: %s", providers.Filename)
 }
 
 var currentColumn int
