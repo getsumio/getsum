@@ -45,7 +45,7 @@ const algs = [ "MD4", "MD5", "SHA1", "SHA224", "SHA256", "SHA384", "SHA512",
 		"SHA512-256", "BLAKE2S256", "BLAKE2B256", "BLAKE2B384", "BLAKE2B512" ]
 // tab id used by extension
 var ids = [];
-var options;
+var options = ops;
 setDefaults();
 DEBUG.log("Options parsed: ", options);
 /*
@@ -57,7 +57,6 @@ function setDefaults(){
 			options = JSON.parse(localStorage.config);
 		}catch (e) {
 			DEBUG.log("Can not parse options!",e);
-			options = ops;
 		}
 	}
 
@@ -125,7 +124,7 @@ function handleErrors(response) {
 /*
  * Validates if hostname is set otherwise callbacks with error code
  */
-function checkOptions(){
+function checkOptions(id){
 	if(!options || options.hostname == ""){
 		DEBUG.log('invalid option settings')
 		callBack( {
@@ -144,7 +143,7 @@ function postToServer(dataStr, id){
 	processId = "";
 	
 	// validate options
-	if(!checkOptions()){
+	if(!checkOptions(id)){
 		return;
 	}
 	
@@ -188,7 +187,7 @@ function postToServer(dataStr, id){
  */
 function getFromServer(id){
 	// check options
-	if(!checkOptions() || processId == null || processId == ""){
+	if(!checkOptions(id) || processId == null || processId == ""){
 		return;
 	}
 	// get
@@ -210,7 +209,7 @@ function getFromServer(id){
 
 function terminate(id){
 	// check options
-	if(!checkOptions() || processId == null || processId == ""){
+	if(!checkOptions(id) || processId == null || processId == ""){
 		return;
 	}
 	// call delete
