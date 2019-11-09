@@ -92,7 +92,7 @@ func ParseConfig() (*Config, error) {
 	flag.StringVar(c.TLSCert, "tc", "", "shorthand for -tlscert")
 	c.LocalOnly = flag.Bool("localOnly", defaultLocalOnly, "Only calculate checksum locally \nif remote servers present in config app will ignore those servers")
 	flag.BoolVar(c.LocalOnly, "local", defaultLocalOnly, "shorthand of -localOnly")
-	flag.BoolVar(c.Quite, "q", false, "Quite mode dont print progress, only sum and file name will be printed")
+	c.Quite = flag.Bool("q", false, "Quite mode dont print progress, only sum and file name will be printed")
 	algo = flag.String("algorithm", defaultAlgo, fmt.Sprintf("Checksum algorithm, you can choose multiple by using MD5,SHA512... \nsupported algos: %s", supportedAlgs))
 	flag.StringVar(algo, "a", defaultAlgo, "shorthand of -algorithm")
 	c.LogLevel = flag.String("logLevel", "WARNING", "log level, supported: {TRACE,DEBUG,INFO,WARNING,ERROR}")
